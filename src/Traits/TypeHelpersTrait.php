@@ -1,0 +1,431 @@
+<?php
+
+namespace YandexCloud\Ydb\Traits;
+
+use Ydb\Type;
+use Ydb\OptionalType;
+use Ydb\Table\ColumnMeta;
+use Ydb\Table\TableIndex;
+use Ydb\Table\GlobalIndex;
+
+use YandexCloud\Ydb\Types\IntType;
+use YandexCloud\Ydb\Types\BoolType;
+use YandexCloud\Ydb\Types\DateType;
+use YandexCloud\Ydb\Types\JsonType;
+use YandexCloud\Ydb\Types\ListType;
+use YandexCloud\Ydb\Types\UintType;
+use YandexCloud\Ydb\Types\Utf8Type;
+use YandexCloud\Ydb\Types\Int64Type;
+use YandexCloud\Ydb\Types\FloatType;
+use YandexCloud\Ydb\Types\DoubleType;
+use YandexCloud\Ydb\Types\Uint64Type;
+use YandexCloud\Ydb\Types\StringType;
+use YandexCloud\Ydb\Types\DecimalType;
+use YandexCloud\Ydb\Types\AbstractType;
+use YandexCloud\Ydb\Types\DatetimeType;
+use YandexCloud\Ydb\Types\TimestampType;
+use YandexCloud\Ydb\Contracts\TypeContract;
+
+trait TypeHelpersTrait
+{
+    use TypeValueHelpersTrait;
+
+    /**
+     * @param string $name
+     * @param string $type
+     * @param array $options
+     * @return ColumnMeta
+     */
+    public function column($name, $type, $options = [])
+    {
+        return new ColumnMeta([
+            'name' => $name,
+            'type' => new Type([
+                'type_id' => $this->convertType($type),
+                'optional_type' => new OptionalType([
+                    'item' => new Type([
+                        'type_id' => $this->convertType($type),
+                    ]),
+                ]),
+            ]),
+        ]);
+    }
+
+    /**
+     * @param string $name
+     * @return ColumnMeta
+     */
+    public function intColumn($name)
+    {
+        return $this->column($name, 'INT32');
+    }
+
+    /**
+     * @param string $name
+     * @return ColumnMeta
+     */
+    public function uintColumn($name)
+    {
+        return $this->column($name, 'UINT32');
+    }
+
+    /**
+     * @param string $name
+     * @return ColumnMeta
+     */
+    public function unsignedIntColumn($name)
+    {
+        return $this->column($name, 'UINT32');
+    }
+
+    /**
+     * @param string $name
+     * @return ColumnMeta
+     */
+    public function int64Column($name)
+    {
+        return $this->column($name, 'INT64');
+    }
+
+    /**
+     * @param string $name
+     * @return ColumnMeta
+     */
+    public function uint64Column($name)
+    {
+        return $this->column($name, 'UINT64');
+    }
+
+    /**
+     * @param string $name
+     * @return ColumnMeta
+     */
+    public function bigIntColumn($name)
+    {
+        return $this->column($name, 'INT64');
+    }
+
+    /**
+     * @param string $name
+     * @return ColumnMeta
+     */
+    public function bigUintColumn($name)
+    {
+        return $this->column($name, 'UINT64');
+    }
+
+    /**
+     * @param string $name
+     * @return ColumnMeta
+     */
+    public function unsignedBigIntColumn($name)
+    {
+        return $this->column($name, 'UINT64');
+    }
+
+    /**
+     * @param string $name
+     * @return ColumnMeta
+     */
+    public function textColumn($name)
+    {
+        return $this->column($name, 'UTF8');
+    }
+
+    /**
+     * @param string $name
+     * @return ColumnMeta
+     */
+    public function utf8Column($name)
+    {
+        return $this->column($name, 'UTF8');
+    }
+
+    /**
+     * @param string $name
+     * @return ColumnMeta
+     */
+    public function blobColumn($name)
+    {
+        return $this->column($name, 'STRING');
+    }
+
+    /**
+     * @param string $name
+     * @return ColumnMeta
+     */
+    public function stringColumn($name)
+    {
+        return $this->column($name, 'STRING');
+    }
+
+    /**
+     * @param string $name
+     * @return ColumnMeta
+     */
+    public function dateColumn($name)
+    {
+        return $this->column($name, 'DATE');
+    }
+
+    /**
+     * @param string $name
+     * @return ColumnMeta
+     */
+    public function datetimeColumn($name)
+    {
+        return $this->column($name, 'DATETIME');
+    }
+
+    /**
+     * @param string $name
+     * @return ColumnMeta
+     */
+    public function timestampColumn($name)
+    {
+        return $this->column($name, 'TIMESTAMP');
+    }
+
+    /**
+     * @param string $name
+     * @return ColumnMeta
+     */
+    public function boolColumn($name)
+    {
+        return $this->column($name, 'BOOL');
+    }
+
+    /**
+     * @param string $name
+     * @return ColumnMeta
+     */
+    public function jsonColumn($name)
+    {
+        return $this->column($name, 'JSON');
+    }
+
+    /**
+     * @param string $name
+     * @return ColumnMeta
+     */
+    public function floatColumn($name)
+    {
+        return $this->column($name, 'FLOAT');
+    }
+
+    /**
+     * @param string $name
+     * @return ColumnMeta
+     */
+    public function doubleColumn($name)
+    {
+        return $this->column($name, 'DOUBLE');
+    }
+
+    /**
+     * @param string $name
+     * @param array $columns
+     * @param false $globalIndex
+     * @return TableIndex
+     */
+    public function tableIndex($name, array $columns, $globalIndex = false)
+    {
+        $data = [
+            'name' => $name,
+            'index_columns' => (array)$columns,
+        ];
+        if ($globalIndex)
+        {
+            $data['global_index'] = new GlobalIndex();
+        }
+        return new TableIndex($data);
+    }
+
+    /**
+     * @param int $value
+     * @param bool $unsigned
+     * @param int $bits
+     * @return TypeContract
+     */
+    public function int($value = null, $unsigned = false, $bits = 32)
+    {
+        return (new IntType($value))
+            ->unsigned($unsigned)
+            ->bits($bits);
+    }
+
+    /**
+     * @param int $value
+     * @param int $bits
+     * @return TypeContract
+     */
+    public function uint($value = null, $bits = 32)
+    {
+        return (new UintType($value))
+            ->bits($bits);
+    }
+
+    /**
+     * @param int $value
+     * @param bool $unsigned
+     * @return TypeContract
+     */
+    public function bigint($value = null, $unsigned = false)
+    {
+        return (new Int64Type($value))
+            ->unsigned($unsigned);
+    }
+
+    /**
+     * @param int $value
+     * @return TypeContract
+     */
+    public function biguint($value = null)
+    {
+        return new Uint64Type($value);
+    }
+
+    /**
+     * @param int $value
+     * @param bool $unsigned
+     * @return TypeContract
+     */
+    public function int64($value = null, $unsigned = false)
+    {
+        return (new Int64Type($value))
+            ->unsigned($unsigned);
+    }
+
+    /**
+     * @param int $value
+     * @return TypeContract
+     */
+    public function uint64($value = null)
+    {
+        return new Uint64Type($value);
+    }
+
+    /**
+     * @param bool $value
+     * @return TypeContract
+     */
+    public function bool($value = null)
+    {
+        return new BoolType($value);
+    }
+
+    /**
+     * @param string $value
+     * @return TypeContract
+     */
+    public function string($value = null)
+    {
+        return new StringType($value);
+    }
+
+    /**
+     * @param string $value
+     * @return TypeContract
+     */
+    public function blob($value = null)
+    {
+        return new StringType($value);
+    }
+
+    /**
+     * @param string $value
+     * @return TypeContract
+     */
+    public function utf8($value = null)
+    {
+        return new Utf8Type($value);
+    }
+
+    /**
+     * @param string $value
+     * @return TypeContract
+     */
+    public function text($value = null)
+    {
+        return new Utf8Type($value);
+    }
+
+    /**
+     * @param mixed $value
+     * @return TypeContract
+     */
+    public function timestamp($value = null)
+    {
+        return new TimestampType($value);
+    }
+
+    /**
+     * @param mixed $value
+     * @return TypeContract
+     */
+    public function datetime($value = null)
+    {
+        return new DatetimeType($value);
+    }
+
+    /**
+     * @param mixed $value
+     * @return TypeContract
+     */
+    public function date($value = null)
+    {
+        return new DateType($value);
+    }
+
+    /**
+     * @param mixed $value
+     * @return TypeContract
+     */
+    public function json($value = null)
+    {
+        return new JsonType($value);
+    }
+
+    /**
+     * @param float $value
+     * @return TypeContract
+     */
+    public function float($value = null)
+    {
+        return new FloatType($value);
+    }
+
+    /**
+     * @param float $value
+     * @return TypeContract
+     */
+    public function double($value = null)
+    {
+        return new DoubleType($value);
+    }
+
+    /**
+     * @param float $value
+     * @param int $digits
+     * @param int $scale
+     * @return TypeContract
+     */
+    public function decimal($value = null, $digits = 10, $scale = 2)
+    {
+        return (new DecimalType($value))
+            ->digits($digits)
+            ->scale($scale);
+    }
+
+    /**
+     * @param mixed $type
+     * @param mixed $value
+     * @return TypeContract
+     */
+    public function list($type, $value = null)
+    {
+        return (new ListType($value))
+            ->itemType($type);
+    }
+
+}

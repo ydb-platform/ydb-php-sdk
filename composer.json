@@ -1,0 +1,29 @@
+{
+    "name": "yandex-cloud/ydb-php-sdk",
+    "description": "Yandex Database SDK (PHP)",
+    "license": "Apache-2.0",
+    "authors": [
+        {
+            "name": "Alexei Shabalin",
+            "email": "mail@alshabalin.com"
+        }
+    ],
+    "require": {
+        "php": ">=7.0.0",
+        "ext-grpc": "*",
+        "ext-bcmath": "*",
+        "ext-curl": "*",
+        "google/protobuf": "^3.14",
+        "grpc/grpc": "^1.35",
+        "lcobucci/jwt": "^3.4",
+        "phpseclib/phpseclib": "^3.0",
+        "psr/log": "^1.1.3"
+    },
+    "autoload": {
+        "psr-4": {
+            "Ydb\\": "protos/Ydb/",
+            "GPBMetadata\\": "protos/GPBMetadata/",
+            "YandexCloud\\Ydb\\": "src/"
+        }
+    }
+}
