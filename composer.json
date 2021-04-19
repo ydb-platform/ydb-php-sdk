@@ -10,9 +10,10 @@
     ],
     "require": {
         "php": ">=7.0.0",
-        "ext-grpc": "*",
         "ext-bcmath": "*",
         "ext-curl": "*",
+        "ext-grpc": "*",
+        "ext-json": "*",
         "google/protobuf": "^3.14",
         "grpc/grpc": "^1.35",
         "lcobucci/jwt": "^3.4",
