@@ -1,4 +1,4 @@
-YDB PHP SDK provides an access to Yandex Database cloud services from PHP code.
+YDB PHP SDK provides access to Yandex Database cloud services from PHP code.
 
 Yandex Database is a distributed fault-tolerant DBMS with high availability and scalability, strict consistency and ACID. An SQL dialect – YQL – is used for queries.
 
