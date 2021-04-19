@@ -3,7 +3,6 @@
 namespace YandexCloud\Ydb;
 
 use DateTime;
-use Exception;
 use Lcobucci\JWT;
 use DateTimeImmutable;
 use Grpc\ChannelCredentials;
@@ -48,9 +47,9 @@ class Iam implements IamTokenContract
             $this->config = $config;
         }
 
-        $this->initConfig();
-
         $this->logger = $logger;
+
+        $this->initConfig();
     }
 
     /**
@@ -164,6 +163,7 @@ class Iam implements IamTokenContract
 
     /**
      * @return void
+     * @throws Exception
      */
     protected function initConfig()
     {
@@ -172,17 +172,53 @@ class Iam implements IamTokenContract
             $this->config['temp_dir'] = sys_get_temp_dir();
         }
 
-        if (!empty($this->config['service_file']) && is_file($this->config['service_file']))
+        if (!empty($this->config['service_file']))
         {
-            $service = json_decode(file_get_contents($this->config['service_file']));
+            if (is_file($this->config['service_file']))
+            {
+                $this->logger()->info('YDB: Authentication method: SA JSON file');
 
-            $this->config['key_id'] = $service->id ?? null;
-            $this->config['private_key'] = $service->private_key ?? null;
-            $this->config['service_account_id'] = $service->service_account_id ?? null;
+                $service = json_decode(file_get_contents($this->config['service_file']));
+
+                if (is_object($service)
+                    && isset($service->id)
+                    && isset($service->private_key)
+                    && isset($service->service_account_id))
+                {
+                    $this->config['key_id'] = $service->id;
+                    $this->config['private_key'] = $service->private_key;
+                    $this->config['service_account_id'] = $service->service_account_id;
+                }
+                else
+                {
+                    throw new Exception('Service file [' . $this->config['service_file'] . '] is broken.');
+                }
+            }
+            else
+            {
+                throw new Exception('Service file [' . $this->config['service_file'] . '] is missing.');
+            }
         }
-        else if (!empty($this->config['private_key_file']) && is_file($this->config['private_key_file']))
+        else if (!empty($this->config['private_key_file']))
         {
-            $this->config['private_key'] = file_get_contents($this->config['private_key_file']);
+            $this->logger()->info('YDB: Authentication method: Private key');
+
+            if (is_file($this->config['private_key_file']))
+            {
+                $this->config['private_key'] = file_get_contents($this->config['private_key_file']);
+            }
+            else
+            {
+                throw new Exception('Private key [' . $this->config['private_key_file'] . '] is missing.');
+            }
+        }
+        else if (!empty($this->config['oauth_token']))
+        {
+            $this->logger()->info('YDB: Authentication method: OAuth token');
+        }
+        else
+        {
+            throw new Exception('No authentication method is used.');
         }
     }
 
