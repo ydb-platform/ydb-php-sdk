@@ -143,6 +143,6 @@ abstract class AbstractType implements TypeContract
      */
     protected function quoteString($value)
     {
-        return '"' . $value . '"';
+        return '"' . str_replace(['\\', '"'], ['\\\\', '\"'], $value) . '"';
     }
 }
