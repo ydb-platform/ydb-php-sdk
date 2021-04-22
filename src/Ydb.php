@@ -110,7 +110,7 @@ class Ydb
         return [
             'x-ydb-auth-ticket' => [$this->iam()->token()],
             'x-ydb-database' => [$this->database],
-            'x-ydb-sdk-build-info' => 'php-sdk/' . static::VERSION,
+            'x-ydb-sdk-build-info' => ['php-sdk/' . static::VERSION],
         ];
     }
 
