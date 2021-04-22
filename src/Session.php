@@ -194,7 +194,10 @@ class Session
         }
         catch (Exception $e)
         {
-            $this->rollbackTransaction();
+            try {
+                $this->rollbackTransaction();
+            } catch (Exception $e2) {
+            }
             throw $e;
         }
     }
