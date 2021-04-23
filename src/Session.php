@@ -161,7 +161,7 @@ class Session
 
         $result = $this->request('CreateSession');
         $session_id = $result->getSessionId();
-        $this->logger()->info('YDB: New session created [' . $session_id . '].');
+        $this->logger()->info('YDB: New session created [...' . substr($session_id, -6) . '].');
 
         $this->session_id = $session_id;
 
