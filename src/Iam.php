@@ -123,7 +123,7 @@ class Iam implements IamTokenContract
 
             if (isset($token->iamToken))
             {
-                $this->logger()->info('YDB: Obtained new IAM token [' . $token->iamToken . '].');
+                $this->logger()->info('YDB: Obtained new IAM token [...' . substr($token->iamToken, -6) . '].');
                 $this->saveToken($token);
                 return $token->iamToken;
             }
@@ -315,7 +315,7 @@ class Iam implements IamTokenContract
             {
                 $this->iam_token = $token->iamToken;
                 $this->expires_at = $token->expiresAt;
-                $this->logger()->info('YDB: Reused IAM token [' . $this->iam_token . '].');
+                $this->logger()->info('YDB: Reused IAM token [...' . substr($this->iam_token, -6) . '].');
                 return $token->iamToken;
             }
         }
