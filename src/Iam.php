@@ -16,6 +16,8 @@ class Iam implements IamTokenContract
 
     const IAM_TOKEN_API_URL = 'https://iam.api.cloud.yandex.net/iam/v1/tokens';
 
+    const DEFAULT_TOKEN_EXPIRES_AT = 2; // hours
+
     /**
      * @var string
      */
@@ -332,12 +334,27 @@ class Iam implements IamTokenContract
         $tokenFile = $this->getTokenTempFile();
 
         $this->iam_token = $token->iamToken;
-        $this->expires_at = (new DateTime($token->expiresAt))->format('U');
+        $this->expires_at = $this->convertExpiresAt($token->expiresAt);
 
         file_put_contents($tokenFile, json_encode([
             'iamToken' => $this->iam_token,
             'expiresAt' => $this->expires_at,
         ]));
+    }
+
+    /**
+     * @param string $expiresAt
+     * @return int
+     */
+    protected function convertExpiresAt($expiresAt)
+    {
+        $time = time() + 60 * 60 * static::DEFAULT_TOKEN_EXPIRES_AT;
+        if (preg_match('/^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2})(?:\.\d+)?(.*)$/', $expiresAt, $matches))
+        {
+            $time = new DateTime($matches[1] . $matches[2]);
+            $time = (int)$time->format('U');
+        }
+        return $time;
     }
 
 }
