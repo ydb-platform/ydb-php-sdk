@@ -172,6 +172,11 @@ class QueryResult
                 $values = array_values($item);
                 $value = $values[0];
                 $column = $this->columns[$i];
+                if ($value === null)
+                {
+                    $_row[$column['name']] = null;
+                    continue;
+                }
                 switch ($column['type'])
                 {
                     case 'STRING':
