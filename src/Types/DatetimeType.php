@@ -3,6 +3,7 @@
 namespace YandexCloud\Ydb\Types;
 
 use DateTime;
+use DateTimeZone;
 use Exception;
 
 class DatetimeType extends AbstractType
@@ -30,16 +31,17 @@ class DatetimeType extends AbstractType
     {
         if (is_a($value, DateTime::class))
         {
-            $value = $value->format(static::$datetime_format);
+            $value = $this->convertToUtc($value);
         }
         else if (is_int($value))
         {
-            $value = date(static::$datetime_format, $value);
+            $value = (new DateTime)->setTimestamp(time());
+            $value = $this->convertToUtc($value);
         }
         else if (is_string($value))
         {
             $value = new DateTime($value);
-            $value = $value->format(static::$datetime_format);
+            $value = $this->convertToUtc($value);
         }
         else
         {
@@ -64,5 +66,16 @@ class DatetimeType extends AbstractType
     {
         $value = new DateTime($this->value);
         return $value->getTimestamp();
+    }
+
+    /**
+     * @param DateTime $date
+     * @return string
+     */
+    protected function convertToUtc($date)
+    {
+        return (clone $date)
+            ->setTimezone(new DateTimeZone('UTC'))
+            ->format(static::$datetime_format);
     }
 }
