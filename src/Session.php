@@ -507,16 +507,19 @@ class Session
     /**
      * @param string $table
      * @param array $columns
+     * @param array $indexes
      * @return bool|mixed|void|null
      * @throws Exception
      */
-    public function alterTable($table, $columns = [])
+    public function alterTable($table, $columns = [], $indexes = [])
     {
         return $this->request('AlterTable', [
             'path' => $this->pathPrefix($table),
             'add_columns' => $this->convertColumns($columns['add'] ?? []),
             'drop_columns' => $columns['drop'] ?? [],
             'alter_columns' => $this->convertColumns($columns['alter'] ?? []),
+            'add_indexes' => $this->convertIndexes($indexes['add'] ?? []),
+            'drop_indexes' => $indexes['drop'] ?? [],
             'session_id' => $this->session_id,
         ]);
     }

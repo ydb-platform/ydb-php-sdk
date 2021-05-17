@@ -324,12 +324,13 @@ class Table
      *
      * @param string $table
      * @param array $columns
+     * @param array $indexes
      * @return bool|mixed|void|null
      * @throws Exception
      */
-    public function alterTable($table, $columns = [])
+    public function alterTable($table, $columns = [], $indexes = [])
     {
-        return $this->session()->alterTable($table, $columns);
+        return $this->session()->alterTable($table, $columns, $indexes);
     }
 
     /**

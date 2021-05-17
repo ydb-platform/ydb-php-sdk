@@ -186,6 +186,10 @@ trait RequestTrait
 
         switch ($statusCode)
         {
+            case StatusCode::STATUS_CODE_UNSPECIFIED:
+                return true;
+                break;
+
             case StatusCode::SUCCESS:
                 $result = $response->getResult();
 
