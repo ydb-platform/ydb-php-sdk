@@ -27,7 +27,7 @@ class ListType extends AbstractType
      */
     public function itemType($type)
     {
-        $this->itemType = strtoupper($type);
+        $this->itemType = $type;
         return $this;
     }
 
@@ -53,13 +53,27 @@ class ListType extends AbstractType
      */
     public function getYdbType()
     {
-        return new Type([
-            'list_type' => new YdbListType([
-                'item' => new Type([
-                    'type_id' => $this->convertType($this->itemType),
+        $type_id = $this->convertType($this->itemType);
+
+        if ($type_id)
+        {
+            return new Type([
+                'list_type' => new YdbListType([
+                    'item' => new Type([
+                        'type_id' => $type_id,
+                    ]),
                 ]),
-            ]),
-        ]);
+            ]);
+        }
+        else
+        {
+            $value = $this->typeValue('', $this->itemType);
+            return new Type([
+                'list_type' => new YdbListType([
+                    'item' => $value->getYdbType(),
+                ]),
+            ]);
+        }
     }
 
     /**

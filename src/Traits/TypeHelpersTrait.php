@@ -20,6 +20,7 @@ use YandexCloud\Ydb\Types\FloatType;
 use YandexCloud\Ydb\Types\DoubleType;
 use YandexCloud\Ydb\Types\Uint64Type;
 use YandexCloud\Ydb\Types\StringType;
+use YandexCloud\Ydb\Types\StructType;
 use YandexCloud\Ydb\Types\DecimalType;
 use YandexCloud\Ydb\Types\AbstractType;
 use YandexCloud\Ydb\Types\DatetimeType;
@@ -426,6 +427,17 @@ trait TypeHelpersTrait
     {
         return (new ListType($value))
             ->itemType($type);
+    }
+
+    /**
+     * @param mixed $types
+     * @param mixed $value
+     * @return TypeContract
+     */
+    public function struct($types, $value = null)
+    {
+        return (new StructType($value))
+            ->itemTypes($types);
     }
 
 }

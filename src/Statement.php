@@ -145,7 +145,7 @@ class Statement
      */
     protected function detectParams()
     {
-        if (preg_match_all('/declare\s+(\$\w+)\s+as\s+(.+?);/i', $this->yql, $matches))
+        if (preg_match_all('/declare\s+(\$\w+)\s+as\s+(.+?);/is', $this->yql, $matches))
         {
             foreach ($matches[1] as $i => $param)
             {

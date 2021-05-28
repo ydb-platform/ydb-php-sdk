@@ -186,11 +186,12 @@ class Table
 
     /**
      * @param Closure $closure
+     * @return mixed
      * @throws Exception
      */
     public function transaction(Closure $closure)
     {
-        $this->session()->transaction($closure);
+        return $this->session()->transaction($closure);
     }
 
     /**

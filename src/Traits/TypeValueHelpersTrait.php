@@ -9,7 +9,7 @@ use Ydb\Type;
 use Ydb\Value;
 use Ydb\ListType as YdbListType;
 use Ydb\TypedValue;
-use Ydb\StructType;
+use Ydb\StructType as YdbStructType;
 use Ydb\StructMember;
 use Ydb\Type\PrimitiveTypeId;
 
@@ -25,6 +25,7 @@ use YandexCloud\Ydb\Types\FloatType;
 use YandexCloud\Ydb\Types\DoubleType;
 use YandexCloud\Ydb\Types\Uint64Type;
 use YandexCloud\Ydb\Types\StringType;
+use YandexCloud\Ydb\Types\StructType;
 use YandexCloud\Ydb\Types\DecimalType;
 use YandexCloud\Ydb\Types\DatetimeType;
 use YandexCloud\Ydb\Types\TimestampType;
@@ -99,8 +100,8 @@ trait TypeValueHelpersTrait
      */
     public function valueOfType($value, $type)
     {
-        $type = strtoupper($type);
-        switch ($type)
+        $_type = strtoupper($type);
+        switch ($_type)
         {
             case 'BOOL': return new BoolType($value);
             case 'TINYINT':
@@ -137,9 +138,14 @@ trait TypeValueHelpersTrait
             case 'UUID': return new StringType($value);
         }
 
-        if (substr($type, 0, 4) === 'LIST')
+        if (substr($_type, 0, 4) === 'LIST')
         {
             return (new ListType($value))->itemType(trim(substr($type, 5, -1)));
+        }
+
+        else if (substr($_type, 0, 6) === 'STRUCT')
+        {
+            return (new StructType($value))->itemTypes(trim(substr($type, 7, -1)));
         }
 
         throw new Exception('YDB: Unknown [' . $type . '] type.');
@@ -201,7 +207,7 @@ trait TypeValueHelpersTrait
             {
                 if (isset($row[$column]))
                 {
-                    $value = $this->typeValue($row[$column]);
+                    $value = $this->typeValue($row[$column], $columns_types[$column] ?? null);
                     $item[] = $value->toYdbValue();
                 }
                 else
@@ -218,7 +224,7 @@ trait TypeValueHelpersTrait
             'type' => new Type([
                 'list_type' => new YdbListType([
                     'item' => new Type([
-                        'struct_type' => new StructType([
+                        'struct_type' => new YdbStructType([
                             'members' => array_values($struct_members),
                         ]),
                     ])
@@ -275,8 +281,10 @@ trait TypeValueHelpersTrait
                 case 'DYNUMBER': return PrimitiveTypeId::DYNUMBER;
 
                 case 'PRIMITIVE_TYPE_ID_UNSPECIFIED':
-                default:
                     return PrimitiveTypeId::PRIMITIVE_TYPE_ID_UNSPECIFIED;
+
+                default:
+                    return null;
             }
         }
 

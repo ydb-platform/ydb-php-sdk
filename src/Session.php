@@ -182,6 +182,7 @@ class Session
 
     /**
      * @param Closure $closure
+     * @return mixed
      * @throws Exception
      */
     public function transaction(Closure $closure)
@@ -189,8 +190,9 @@ class Session
         $this->beginTransaction();
         try
         {
-            $closure($this);
+            $result = $closure($this);
             $this->commitTransaction();
+            return $result;
         }
         catch (Exception $e)
         {

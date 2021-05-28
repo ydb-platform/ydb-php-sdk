@@ -51,20 +51,22 @@ class IntType extends AbstractType
     {
         if ($this->bits === 8)
         {
-            return $this->unsigned ? 'UINT8' : 'INT8';
+            $this->ydb_type = $this->unsigned ? 'UINT8' : 'INT8';
         }
         else if ($this->bits === 16)
         {
-            return $this->unsigned ? 'UINT16' : 'INT16';
+            $this->ydb_type = $this->unsigned ? 'UINT16' : 'INT16';
         }
         else if ($this->bits === 32)
         {
-            return $this->unsigned ? 'UINT32' : 'INT32';
+            $this->ydb_type = $this->unsigned ? 'UINT32' : 'INT32';
         }
         else if ($this->bits === 64)
         {
-            return $this->unsigned ? 'UINT64' : 'INT64';
+            $this->ydb_type = $this->unsigned ? 'UINT64' : 'INT64';
         }
+
+        return parent::getYdbType();
     }
 
     /**
