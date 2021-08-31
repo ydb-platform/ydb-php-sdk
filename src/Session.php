@@ -223,11 +223,16 @@ class Session
             'tx_settings' => $transaction_settings,
         ]);
 
-        $tx_id = $result->getTxMeta()->getId();
+        if ($result && method_exists($result, 'getTxMeta'))
+        {
+            $this->tx_id = $result->getTxMeta()->getId();
 
-        $this->tx_id = $tx_id;
-
-        return $tx_id;
+            return $this->tx_id;
+        }
+        else
+        {
+            throw new Exception('YDB failed to begin transaction');
+        }
     }
 
     /**
