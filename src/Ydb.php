@@ -8,7 +8,7 @@ class Ydb
 {
     use Traits\LoggerTrait;
 
-    const VERSION = '1.0';
+    const VERSION = '1.0.9';
 
     /**
      * @var string
@@ -110,7 +110,7 @@ class Ydb
         return [
             'x-ydb-auth-ticket' => [$this->iam()->token()],
             'x-ydb-database' => [$this->database],
-            'x-ydb-sdk-build-info' => ['php-sdk/' . static::VERSION],
+            'x-ydb-sdk-build-info' => ['ydb-php-sdk/' . static::VERSION],
         ];
     }
 
