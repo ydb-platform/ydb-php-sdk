@@ -135,7 +135,7 @@ class Iam implements IamTokenContract
                     'status' => $status,
                     'result' => $token,
                 ]);
-                throw new Exception('Failed to obtain new iamToken');
+                throw new Exception('Failed to obtain new iamToken', Exception::ERROR_MALFORMED_RESPONSE);
             }
         }
         else
@@ -144,7 +144,7 @@ class Iam implements IamTokenContract
                 'status' => $status,
                 'result' => $result,
             ]);
-            throw new Exception('Failed to obtain new iamToken');
+            throw new Exception('Failed to obtain new iamToken', Exception::ERROR_NON_200_STATUS_CODE);
         }
     }
 
