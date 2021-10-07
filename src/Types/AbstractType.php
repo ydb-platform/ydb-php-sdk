@@ -5,6 +5,9 @@ namespace YandexCloud\Ydb\Types;
 use Ydb\Type;
 use Ydb\Value;
 use Ydb\TypedValue;
+
+use Google\Protobuf\NullValue;
+
 use YandexCloud\Ydb\Contracts\TypeContract;
 use YandexCloud\Ydb\Traits\TypeValueHelpersTrait;
 
@@ -70,7 +73,7 @@ abstract class AbstractType implements TypeContract
     {
         if ($this->value === null)
         {
-            return new Value(['null_flag_value' => true]);
+            return new Value(['null_flag_value' => NullValue::NULL_VALUE]);
         }
         return new Value([$this->getYdbKeyName() => $this->getYdbValue()]);
     }

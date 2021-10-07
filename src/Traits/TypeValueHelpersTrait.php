@@ -13,6 +13,8 @@ use Ydb\StructType as YdbStructType;
 use Ydb\StructMember;
 use Ydb\Type\PrimitiveTypeId;
 
+use Google\Protobuf\NullValue;
+
 use YandexCloud\Ydb\Types\IntType;
 use YandexCloud\Ydb\Types\BoolType;
 use YandexCloud\Ydb\Types\DateType;
@@ -212,7 +214,7 @@ trait TypeValueHelpersTrait
                 }
                 else
                 {
-                    $item[] = new Value(['null_flag_value' => null]);
+                    $item[] = new Value(['null_flag_value' => NullValue::NULL_VALUE]);
                 }
             }
             $data[] = new Value([
