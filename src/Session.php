@@ -66,6 +66,11 @@ class Session
     protected $is_alive = false;
 
     /**
+     * @var bool
+     */
+    protected $keep_query_in_cache = false;
+
+    /**
      * @param Table $table
      * @param string $session_id
      */
@@ -296,6 +301,17 @@ class Session
     }
 
     /**
+     * Set whether to keep query in cache.
+     *
+     * @return $this
+     */
+    public function keepInCache($value = true)
+    {
+        $this->keep_query_in_cache = (bool)$value;
+        return $this;
+    }
+
+    /**
      * @param string $yql
      * @param array|null $parameters
      * @return bool|QueryResult
@@ -326,7 +342,9 @@ class Session
             // 'commit_tx' => true,
         ]);
 
-        $query_cache_policy = new QueryCachePolicy;
+        $query_cache_policy = new QueryCachePolicy([
+            'keep_in_cache' => $this->keep_query_in_cache,
+        ]);
 
         $data = [
             'session_id' => $this->session_id,
