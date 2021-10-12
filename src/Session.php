@@ -450,12 +450,12 @@ class Session
     /**
      * @param string $table
      * @param mixed $columns
-     * @param string $primary_key
+     * @param array $primary_key
      * @param array $indexes
      * @return bool|mixed|void|null
      * @throws Exception
      */
-    public function createTable($table, $columns, $primary_key = 'id', $indexes = [])
+    public function createTable($table, $columns, $primary_key = ['id'], $indexes = [])
     {
         $data = [
             'path' => $this->pathPrefix($table),
