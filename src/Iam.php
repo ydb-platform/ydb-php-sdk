@@ -231,16 +231,7 @@ class Iam implements IamTokenContract
     {
         $now = new DateTimeImmutable;
 
-        $key = '';
-
-        if ($this->config('private_key'))
-        {
-            $key = JWT\Signer\Key\InMemory::plainText($this->config('private_key'));
-        }
-        else if ($this->config('private_key_file'))
-        {
-            $key = JWT\Signer\Key\LocalFileReference::file($this->config('private_key_file'));
-        }
+        $key = JWT\Signer\Key\InMemory::plainText($this->config('private_key'));
 
         $config = JWT\Configuration::forSymmetricSigner(
             new Sha256,
