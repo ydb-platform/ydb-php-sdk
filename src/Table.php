@@ -274,7 +274,7 @@ class Table
      *
      * @param string $table
      * @param mixed $columns
-     * @param string $primary_key
+     * @param string|array $primary_key
      * @param array $indexes
      * @return bool|mixed|void|null
      * @throws Exception
