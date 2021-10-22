@@ -261,11 +261,12 @@ class Table
      *
      * @param string $path
      * @param array $columns
+     * @param array $options
      * @return \Generator
      */
-    public function readTable($path, $columns = [])
+    public function readTable($path, $columns = [], $options = [])
     {
-        return $this->session()->readTable($path, $columns);
+        return $this->session()->readTable($path, $columns, $options);
     }
 
     /**

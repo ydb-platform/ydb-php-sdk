@@ -436,15 +436,28 @@ class Session
     /**
      * @param string $path
      * @param array $columns
+     * @param array $options
      * @return \Generator
      */
-    public function readTable($path, $columns = [])
+    public function readTable($path, $columns = [], $options = [])
     {
-        return $this->streamRequest('StreamReadTable', [
+        $params = [
             'session_id' => $this->session_id,
             'path' => $this->pathPrefix($path),
             'columns' => $columns,
-        ]);
+        ];
+
+        if (isset($options['row_limit']))
+        {
+            $params['row_limit'] = (int)$options['row_limit'];
+        }
+
+        if (isset($options['ordered']))
+        {
+            $params['ordered'] = (bool)$options['ordered'];
+        }
+
+        return $this->streamRequest('StreamReadTable', $params);
     }
 
     /**
