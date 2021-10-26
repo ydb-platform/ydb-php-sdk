@@ -30,6 +30,7 @@ Yandex Database supports the following authentication methods:
 - OAuth token
 - JWT + private key
 - JWT + JSON file
+- Metadata URL
 
 ## OAuth token
 
@@ -121,6 +122,37 @@ $config = [
 
         // Service account JSON file authentication
         'service_file'   => './sa_name.json',
+    ],
+];
+
+$ydb = new Ydb($config);
+
+```
+
+## Metadata URL
+
+When you deploy a project to VM or function at Yandex.Cloud, you are able to connect to the database using [Metadata URL](https://cloud.yandex.ru/docs/compute/operations/vm-connect/auth-inside-vm). Before you start, you should link your service account to an existing or new VM or function.
+
+```php
+<?php
+
+use YandexCloud\Ydb\Ydb;
+
+$config = [
+
+    // Database path
+    'database'    => '/ru-central1/b1glxxxxxxxxxxxxxxxx/etn0xxxxxxxxxxxxxxxx',
+
+    // Database endpoint
+    'endpoint'    => 'ydb.serverless.yandexcloud.net:2135',
+
+    // Auto discovery (dedicated server only)
+    'discovery'   => false,
+
+    // IAM config
+    'iam_config'  => [
+        'temp_dir'     => './tmp', // Temp directory
+        'use_metadata' => true,
     ],
 ];
 
