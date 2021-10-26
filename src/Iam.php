@@ -16,6 +16,8 @@ class Iam implements IamTokenContract
 
     const IAM_TOKEN_API_URL = 'https://iam.api.cloud.yandex.net/iam/v1/tokens';
 
+    const METADATA_URL = 'http://169.254.169.254/computeMetadata/v1/instance/service-accounts/default/token';
+
     const DEFAULT_TOKEN_EXPIRES_AT = 2; // hours
 
     /**
@@ -86,7 +88,11 @@ class Iam implements IamTokenContract
     {
         $this->logger()->info('YDB: Obtaining new IAM token...');
 
-        if ($this->config('private_key'))
+        if ($this->config('use_metadata'))
+        {
+            return $this->requestTokenFromMetadata();
+        }
+        else if ($this->config('private_key'))
         {
             $token = $this->getJwtToken();
 
@@ -174,7 +180,11 @@ class Iam implements IamTokenContract
             $this->config['temp_dir'] = sys_get_temp_dir();
         }
 
-        if (!empty($this->config['service_file']))
+        if (!empty($this->config['use_metadata']))
+        {
+            $this->logger()->info('YDB: Authentication method: Metadata URL');
+        }
+        else if (!empty($this->config['service_file']))
         {
             if (is_file($this->config['service_file']))
             {
@@ -248,6 +258,67 @@ class Iam implements IamTokenContract
             ->getToken($config->signer(), $config->signingKey());
 
         return $token;
+    }
+
+    /**
+     * @return string|null
+     * @throws Exception
+     */
+    protected function requestTokenFromMetadata()
+    {
+        $curl = curl_init(static::METADATA_URL);
+
+        curl_setopt_array($curl, [
+            CURLOPT_RETURNTRANSFER => 1,
+            CURLOPT_SSL_VERIFYPEER => 0,
+            CURLOPT_SSL_VERIFYHOST => 0,
+            CURLOPT_HEADER => 0,
+            CURLOPT_HTTPHEADER => [
+                'Accept: application/json',
+                'Metadata-Flavor:Google',
+            ],
+        ]);
+
+        $result = curl_exec($curl);
+
+        $status = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+
+        if ($status === 200)
+        {
+            $rawToken = json_decode($result);
+
+            if (isset($rawToken->access_token))
+            {
+                $token = (object)[
+                    'iamToken' => $rawToken->access_token,
+                ];
+                if (isset($rawToken->expires_in))
+                {
+                    $token->expiresAt = time() + $rawToken->expires_in;
+                }
+                $this->logger()->info('YDB: Obtained new IAM token from Metadata [...' . substr($token->iamToken, -6) . '].');
+                $this->saveToken($token);
+                return $token->iamToken;
+            }
+            else
+            {
+                $this->logger()->error('YDB: Failed to obtain new IAM token from Metadata', [
+                    'status' => $status,
+                    'result' => $result,
+                ]);
+                throw new Exception('Failed to obtain new iamToken from Metadata: no token was received.');
+            }
+        }
+        else
+        {
+            $this->logger()->error('YDB: Failed to obtain new IAM token from Metadata', [
+                'status' => $status,
+                'result' => $result,
+            ]);
+            throw new Exception('Failed to obtain new iamToken from Metadata: response status is ' . $status);
+        }
+
+
     }
 
     /**
@@ -325,7 +396,7 @@ class Iam implements IamTokenContract
         $tokenFile = $this->getTokenTempFile();
 
         $this->iam_token = $token->iamToken;
-        $this->expires_at = $this->convertExpiresAt($token->expiresAt);
+        $this->expires_at = $this->convertExpiresAt($token->expiresAt ?? '');
 
         file_put_contents($tokenFile, json_encode([
             'iamToken' => $this->iam_token,
@@ -339,6 +410,11 @@ class Iam implements IamTokenContract
      */
     protected function convertExpiresAt($expiresAt)
     {
+        if (is_int($expiresAt))
+        {
+            return $expiresAt;
+        }
+
         $time = time() + 60 * 60 * static::DEFAULT_TOKEN_EXPIRES_AT;
         if (preg_match('/^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2})(?:\.\d+)?(.*)$/', $expiresAt, $matches))
         {
