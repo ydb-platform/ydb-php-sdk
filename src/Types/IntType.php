@@ -74,14 +74,11 @@ class IntType extends AbstractType
      */
     protected function getYdbKeyName()
     {
-        if ($this->bits === 32)
-        {
-            return $this->unsigned ? 'uint32_value' : 'int32_value';
-        }
-        else if ($this->bits === 64)
+        if ($this->bits === 64)
         {
             return $this->unsigned ? 'uint64_value' : 'int64_value';
         }
+        return $this->unsigned ? 'uint32_value' : 'int32_value';
     }
 
     /**
