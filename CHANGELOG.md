@@ -1,6 +1,17 @@
 # CHANGELOG
 
 
+## 1.1.1 (2021-11-01)
+
+### Features
+
+- implemented readTable option: key_range
+
+### Bugs
+
+- YdbType conversion fix for integers
+
+
 ## 1.1.0 (2021-10-26)
 
 ### Features
