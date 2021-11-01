@@ -17,6 +17,7 @@ use YandexCloud\Ydb\Types\UintType;
 use YandexCloud\Ydb\Types\Utf8Type;
 use YandexCloud\Ydb\Types\Int64Type;
 use YandexCloud\Ydb\Types\FloatType;
+use YandexCloud\Ydb\Types\TupleType;
 use YandexCloud\Ydb\Types\DoubleType;
 use YandexCloud\Ydb\Types\Uint64Type;
 use YandexCloud\Ydb\Types\StringType;
@@ -437,6 +438,17 @@ trait TypeHelpersTrait
     public function struct($types, $value = null)
     {
         return (new StructType($value))
+            ->itemTypes($types);
+    }
+
+    /**
+     * @param mixed $types
+     * @param array $value
+     * @return TypeContract
+     */
+    public function tuple($types, $value = [])
+    {
+        return (new TupleType($value))
             ->itemTypes($types);
     }
 

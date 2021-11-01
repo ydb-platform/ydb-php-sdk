@@ -457,6 +457,14 @@ class Session
             $params['ordered'] = (bool)$options['ordered'];
         }
 
+        if (isset($options['key_range']))
+        {
+            if ($key_range = $this->convertKeyRange($options['key_range']))
+            {
+                $params['key_range'] = $key_range;
+            }
+        }
+
         return $this->streamRequest('StreamReadTable', $params);
     }
 

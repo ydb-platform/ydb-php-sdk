@@ -11,6 +11,7 @@ use Ydb\ListType as YdbListType;
 use Ydb\TypedValue;
 use Ydb\StructType as YdbStructType;
 use Ydb\StructMember;
+use Ydb\Table\KeyRange;
 use Ydb\Type\PrimitiveTypeId;
 
 use Google\Protobuf\NullValue;
@@ -24,6 +25,7 @@ use YandexCloud\Ydb\Types\UintType;
 use YandexCloud\Ydb\Types\Utf8Type;
 use YandexCloud\Ydb\Types\Int64Type;
 use YandexCloud\Ydb\Types\FloatType;
+use YandexCloud\Ydb\Types\TupleType;
 use YandexCloud\Ydb\Types\DoubleType;
 use YandexCloud\Ydb\Types\Uint64Type;
 use YandexCloud\Ydb\Types\StringType;
@@ -148,6 +150,11 @@ trait TypeValueHelpersTrait
         else if (substr($_type, 0, 6) === 'STRUCT')
         {
             return (new StructType($value))->itemTypes(trim(substr($type, 7, -1)));
+        }
+
+        else if (substr($_type, 0, 5) === 'TUPLE')
+        {
+            return (new TupleType($value))->itemTypes(trim(substr($type, 6, -1)));
         }
 
         throw new Exception('YDB: Unknown [' . $type . '] type.');
@@ -293,4 +300,60 @@ trait TypeValueHelpersTrait
         return $type;
     }
 
+    protected function convertKeyRange(array $ranges = [])
+    {
+        if (!is_a($ranges, KeyRange::class))
+        {
+            $key_range = [];
+            foreach ($ranges as $key => $value)
+            {
+                if (!is_a($value, TypedValue::class))
+                {
+                    if (!is_a($value, TupleType::class))
+                    {
+                        throw new Exception('YDB: KeyRange must be instance of [' . TupleType::class . ']');
+                    }
+                    else if (is_a($value, TypeContract::class))
+                    {
+                        $value = $value->toTypedValue();
+                    }
+                    else
+                    {
+                        $value = $this->typeValue($value)->toTypedValue();
+                    }
+                }
+                switch ($key)
+                {
+                    case '>':
+                    case 'gt':
+                    case 'greater':
+                        $key_range['greater'] = $value;
+                        break;
+
+                    case '>=':
+                    case 'gte':
+                    case 'greater_or_equal':
+                        $key_range['greater_or_equal'] = $value;
+                        break;
+
+                    case '<':
+                    case 'lt':
+                    case 'less':
+                        $key_range['less'] = $value;
+                        break;
+
+                    case '<=':
+                    case 'lte':
+                    case 'less_or_equal':
+                        $key_range['less_or_equal'] = $value;
+                        break;
+                }
+            }
+            if ($key_range)
+            {
+                return new KeyRange($key_range);
+            }
+        }
+        return $ranges;
+    }
 }
