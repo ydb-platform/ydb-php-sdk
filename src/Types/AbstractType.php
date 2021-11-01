@@ -79,6 +79,14 @@ abstract class AbstractType implements TypeContract
     }
 
     /**
+     * @return string
+     */
+    public function getType()
+    {
+        return $this->ydb_type;
+    }
+
+    /**
      * @return int|mixed
      */
     public function getYdbType()
