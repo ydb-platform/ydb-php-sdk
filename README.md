@@ -151,7 +151,7 @@ $config = [
 
     // IAM config
     'iam_config'  => [
-        'temp_dir'     => './tmp', // Temp directory
+        'temp_dir'     => '/tmp', // Temp directory
         'use_metadata' => true,
     ],
 ];
