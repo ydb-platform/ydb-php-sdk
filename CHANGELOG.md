@@ -1,6 +1,14 @@
 # CHANGELOG
 
 
+## 1.2.0 (2022-02-09)
+
+### Features
+
+- added PHP 8 support
+- updated lcobucci/jwt to 4 version
+
+
 ## 1.1.1 (2021-11-01)
 
 ### Features
