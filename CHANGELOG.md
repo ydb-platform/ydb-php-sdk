@@ -1,6 +1,13 @@
 # CHANGELOG
 
 
+## 1.3.1 (2022-02-25)
+
+### Features
+
+- improved display of issue messages
+
+
 ## 1.3.0 (2022-02-25)
 
 ### Features
