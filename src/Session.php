@@ -312,7 +312,32 @@ class Session
     }
 
     /**
-     * @param string $yql
+     * @param string|\Ydb\Table\Query $yql
+     * @return YdbQuery
+     * @throws \YandexCloud\Ydb\Exception
+     */
+    public function newQuery($yql)
+    {
+        return new YdbQuery($this, $yql);
+    }
+
+    /**
+     * @param YdbQuery $query
+     * @return bool|QueryResult
+     * @throws \YandexCloud\Ydb\Exception
+     */
+    public function executeQuery(YdbQuery $query)
+    {
+        $data = $query->getRequestData();
+        $data['session_id'] = $this->session_id;
+
+        $result = $this->request('ExecuteDataQuery', $data);
+
+        return $result ? new QueryResult($result) : true;
+    }
+
+    /**
+     * @param string|\Ydb\Table\Query $yql
      * @param array|null $parameters
      * @return bool|QueryResult
      * @throws \YandexCloud\Ydb\Exception
@@ -326,48 +351,22 @@ class Session
             $tx_id = $this->beginTransaction();
         }
 
-        if (is_a($yql, Query::class))
-        {
-            $q = $yql;
-        }
-        else
-        {
-            $q = new Query([
-                'yql_text' => $yql,
-            ]);
-        }
-
-        $transaction_control = new TransactionControl([
+        $tx_control = new TransactionControl([
             'tx_id' => $tx_id,
-            // 'commit_tx' => true,
         ]);
 
-        $query_cache_policy = new QueryCachePolicy([
-            'keep_in_cache' => $this->keep_query_in_cache,
-        ]);
+        $query = $this->newQuery($yql)
+            ->parameters($parameters)
+            ->txControl($tx_control)
+            ->keepInCache($this->keep_query_in_cache);
 
-        $data = [
-            'session_id' => $this->session_id,
-            'query' => $q,
-            'tx_control' => $transaction_control,
-            'query_cache_policy' => $query_cache_policy,
-            'collect_stats' => 1,
-        ];
-
-        if ($parameters !== null)
-        {
-            $data['parameters'] = $parameters;
-        }
-
-        $result = $this->request('ExecuteDataQuery', $data);
-
-        return $result ? new QueryResult($result) : true;
+        return $this->executeQuery($query);
     }
 
     /**
      * An alias to query with no result.
      *
-     * @param string $yql
+     * @param string|\Ydb\Table\Query $yql
      * @param array|null $parameters
      * @return bool
      * @throws \YandexCloud\Ydb\Exception

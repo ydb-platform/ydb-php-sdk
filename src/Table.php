@@ -197,7 +197,7 @@ class Table
     /**
      * Proxy to Session::query.
      *
-     * @param string $yql
+     * @param string|\Ydb\Table\Query $yql
      * @return bool|QueryResult
      * @throws \YandexCloud\Ydb\Exception
      */
@@ -209,7 +209,7 @@ class Table
     /**
      * Proxy to Session::exec.
      *
-     * @param string $yql
+     * @param string|\Ydb\Table\Query $yql
      * @return bool
      * @throws \YandexCloud\Ydb\Exception
      */

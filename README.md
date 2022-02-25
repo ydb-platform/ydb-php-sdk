@@ -205,3 +205,39 @@ $result = $table->query('select * from `users` limit 10;');
 ```
 
 As soon as your script is finished, the session will be destroyed.
+
+## Customizing queries
+
+Normally, a regular query through the `query()` method is sufficient, but in exceptional cases, you may need to fine-tune the query settings. You could do it using the query builder:
+
+```php
+<?php
+
+$session = $table->session();
+
+// creating a new query builder instance
+$query = $session->newQuery('select * from `users` limit 10;');
+
+// a setting to keep in cache
+$query->keepInCache();
+
+// a setting to begin a transaction with the given mode
+$query->beginTx('stale');
+
+$result = $query->execute();
+```
+
+Methods of the query builder:
+
+- `keepInCache(bool $value)` - keep in cache (default: `true`)
+- `collectStats(int $value)` - collect stats (default: 1)
+- `parameters(array $parameters)` - parameters
+- `operationParams(\Ydb\Operations\OperationParams $operation_params)` - operation params
+- `beginTx(string $mode)` - begin a transaction with the given [mode](https://cloud.yandex.ru/docs/ydb/concepts/transactions):
+    - stale
+    - online
+    - online_inconsistent
+    - serializable
+- `txControl(\Ydb\Table\TransactionControl $tx_control)` - transaction control with custom settings
+
+You can chain these methods for convenience.
