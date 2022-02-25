@@ -1,6 +1,13 @@
 # CHANGELOG
 
 
+## 1.3.0 (2022-02-25)
+
+### Features
+
+- introduced the query builder to customize the query settings
+
+
 ## 1.2.0 (2022-02-09)
 
 ### Features
