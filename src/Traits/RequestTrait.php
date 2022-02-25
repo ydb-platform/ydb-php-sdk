@@ -3,6 +3,8 @@
 namespace YandexCloud\Ydb\Traits;
 
 use Ydb\StatusIds\StatusCode;
+
+use YandexCloud\Ydb\Issue;
 use YandexCloud\Ydb\Exception;
 use YandexCloud\Ydb\QueryResult;
 
@@ -252,7 +254,14 @@ trait RequestTrait
             // case StatusCode::TRANSPORT_UNAVAILABLE:
             case StatusCode::TIMEOUT: // ?
                 $statusName = StatusCode::name($statusCode);
-                $message = $response->getIssues()->getIterator()->current()->getMessage();
+
+                $issues = [];
+                foreach ($response->getIssues() as $issue)
+                {
+                    $issues[] = (new Issue($issue))->toString();
+                }
+
+                $message = implode("\n", $issues);
 
                 $this->logger()->warning('YDB: Service [' . $service . '] method [' . $method . '] Failed to receive a valid response.', [
                     'status' => $statusCode . ' (' . $statusName . ')',
@@ -270,7 +279,14 @@ trait RequestTrait
 
             default:
                 $statusName = StatusCode::name($statusCode);
-                $message = $response->getIssues()->getIterator()->current()->getMessage();
+
+                $issues = [];
+                foreach ($response->getIssues() as $issue)
+                {
+                    $issues[] = (new Issue($issue))->toString();
+                }
+
+                $message = implode("\n", $issues);
 
                 $this->logger()->error(
                     'YDB: Service [' . $service . '] method [' . $method . '] Failed to receive a valid response.',
