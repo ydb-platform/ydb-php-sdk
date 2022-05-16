@@ -1,14 +1,14 @@
 <?php
 
-namespace YandexCloud\Ydb;
+namespace YdbPlatform\Ydb;
 
 use DateTime;
 use Lcobucci\JWT;
 use DateTimeImmutable;
 use Grpc\ChannelCredentials;
 use Psr\Log\LoggerInterface;
-use YandexCloud\Ydb\Jwt\Signer\Sha256;
-use YandexCloud\Ydb\Contracts\IamTokenContract;
+use YdbPlatform\Ydb\Jwt\Signer\Sha256;
+use YdbPlatform\Ydb\Contracts\IamTokenContract;
 
 class Iam implements IamTokenContract
 {

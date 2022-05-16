@@ -1,6 +1,6 @@
 <?php
 
-namespace YandexCloud\Ydb;
+namespace YdbPlatform\Ydb;
 
 use Exception;
 
@@ -62,7 +62,7 @@ class Statement
     /**
      * @param array $parameters
      * @return bool|QueryResult
-     * @throws \YandexCloud\Ydb\Exception
+     * @throws \YdbPlatform\Ydb\Exception
      */
     public function execute(array $parameters = [])
     {

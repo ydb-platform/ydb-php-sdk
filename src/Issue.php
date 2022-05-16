@@ -1,6 +1,6 @@
 <?php
 
-namespace YandexCloud\Ydb;
+namespace YdbPlatform\Ydb;
 
 use Ydb\Issue\IssueMessage;
 

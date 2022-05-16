@@ -1,6 +1,6 @@
 <?php
 
-namespace YandexCloud\Ydb;
+namespace YdbPlatform\Ydb;
 
 use Psr\Log\LoggerInterface;
 use Ydb\Scripting\V1\ScriptingServiceClient as ServiceClient;
@@ -44,7 +44,7 @@ class Scripting
     /**
      * @param string $script
      * @return bool|QueryResult
-     * @throws \YandexCloud\Ydb\Exception
+     * @throws \YdbPlatform\Ydb\Exception
      */
     public function exec($script)
     {
@@ -72,7 +72,7 @@ class Scripting
      * @param string $method
      * @param array $data
      * @return bool|mixed|void|null
-     * @throws \YandexCloud\Ydb\Exception
+     * @throws \YdbPlatform\Ydb\Exception
      */
     protected function request($method, array $data = [])
     {

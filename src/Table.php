@@ -1,13 +1,13 @@
 <?php
 
-namespace YandexCloud\Ydb;
+namespace YdbPlatform\Ydb;
 
 use Closure;
 use Exception;
 use Ydb\Table\Query;
 use Psr\Log\LoggerInterface;
 use Ydb\Table\V1\TableServiceClient as ServiceClient;
-use YandexCloud\Ydb\Contracts\SessionPoolContract;
+use YdbPlatform\Ydb\Contracts\SessionPoolContract;
 
 class Table
 {
@@ -199,7 +199,7 @@ class Table
      *
      * @param string|\Ydb\Table\Query $yql
      * @return bool|QueryResult
-     * @throws \YandexCloud\Ydb\Exception
+     * @throws \YdbPlatform\Ydb\Exception
      */
     public function query($yql)
     {
@@ -211,7 +211,7 @@ class Table
      *
      * @param string|\Ydb\Table\Query $yql
      * @return bool
-     * @throws \YandexCloud\Ydb\Exception
+     * @throws \YdbPlatform\Ydb\Exception
      */
     public function exec($yql)
     {
@@ -389,7 +389,7 @@ class Table
      * @param string $method
      * @param array $data
      * @return bool|mixed|void|null
-     * @throws \YandexCloud\Ydb\Exception
+     * @throws \YdbPlatform\Ydb\Exception
      */
     protected function request($method, array $data = [])
     {
@@ -400,7 +400,7 @@ class Table
      * @param string $method
      * @param array $data
      * @return \Generator
-     * @throws \YandexCloud\Ydb\Exception
+     * @throws \YdbPlatform\Ydb\Exception
      */
     protected function streamRequest($method, array $data = [])
     {

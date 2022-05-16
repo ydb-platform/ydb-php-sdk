@@ -1,6 +1,6 @@
 <?php
 
-namespace YandexCloud\Ydb;
+namespace YdbPlatform\Ydb;
 
 use Closure;
 use Exception;
@@ -314,7 +314,7 @@ class Session
     /**
      * @param string|\Ydb\Table\Query $yql
      * @return YdbQuery
-     * @throws \YandexCloud\Ydb\Exception
+     * @throws \YdbPlatform\Ydb\Exception
      */
     public function newQuery($yql)
     {
@@ -324,7 +324,7 @@ class Session
     /**
      * @param YdbQuery $query
      * @return bool|QueryResult
-     * @throws \YandexCloud\Ydb\Exception
+     * @throws \YdbPlatform\Ydb\Exception
      */
     public function executeQuery(YdbQuery $query)
     {
@@ -340,7 +340,7 @@ class Session
      * @param string|\Ydb\Table\Query $yql
      * @param array|null $parameters
      * @return bool|QueryResult
-     * @throws \YandexCloud\Ydb\Exception
+     * @throws \YdbPlatform\Ydb\Exception
      */
     public function query($yql, array $parameters = null)
     {
@@ -369,7 +369,7 @@ class Session
      * @param string|\Ydb\Table\Query $yql
      * @param array|null $parameters
      * @return bool
-     * @throws \YandexCloud\Ydb\Exception
+     * @throws \YdbPlatform\Ydb\Exception
      */
     public function exec($yql, array $parameters = null)
     {
@@ -589,7 +589,7 @@ class Session
      * @param string $method
      * @param array $data
      * @return bool|mixed|void|null
-     * @throws \YandexCloud\Ydb\Exception
+     * @throws \YdbPlatform\Ydb\Exception
      */
     protected function request($method, array $data = [])
     {
@@ -614,7 +614,7 @@ class Session
      * @param string $method
      * @param array $data
      * @return \Generator
-     * @throws \YandexCloud\Ydb\Exception
+     * @throws \YdbPlatform\Ydb\Exception
      */
     protected function streamRequest($method, array $data = [])
     {

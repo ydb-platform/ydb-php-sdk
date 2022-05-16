@@ -1,6 +1,6 @@
 <?php
 
-namespace YandexCloud\Ydb;
+namespace YdbPlatform\Ydb;
 
 use Psr\Log\LoggerInterface;
 use Ydb\Operations\V1\OperationServiceClient as ServiceClient;
