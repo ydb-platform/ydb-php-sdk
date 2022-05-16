@@ -1,6 +1,6 @@
 <?php
 
-namespace YandexCloud\Ydb\Traits;
+namespace YdbPlatform\Ydb\Traits;
 
 use Ydb\Table\ColumnMeta;
 use Ydb\Table\TableIndex;

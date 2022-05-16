@@ -1,6 +1,6 @@
 <?php
 
-namespace YandexCloud\Ydb;
+namespace YdbPlatform\Ydb;
 
 use Ydb\Table\Query;
 use Ydb\Table\QueryCachePolicy;
@@ -209,7 +209,7 @@ class YdbQuery
 
     /**
      * @return bool|QueryResult
-     * @throws \YandexCloud\Ydb\Exception
+     * @throws \YdbPlatform\Ydb\Exception
      */
     public function execute()
     {

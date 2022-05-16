@@ -1,6 +1,6 @@
 <?php
 
-namespace YandexCloud\Ydb\Types;
+namespace YdbPlatform\Ydb\Types;
 
 class Uint16Type extends Int16Type
 {

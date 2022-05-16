@@ -1,8 +1,8 @@
 <?php
 
-namespace YandexCloud\Ydb\Contracts;
+namespace YdbPlatform\Ydb\Contracts;
 
-use YandexCloud\Ydb\Session;
+use YdbPlatform\Ydb\Session;
 
 interface SessionPoolContract
 {

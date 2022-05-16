@@ -1,12 +1,12 @@
 <?php
 
-namespace YandexCloud\Ydb\Traits;
+namespace YdbPlatform\Ydb\Traits;
 
 use Ydb\StatusIds\StatusCode;
 
-use YandexCloud\Ydb\Issue;
-use YandexCloud\Ydb\Exception;
-use YandexCloud\Ydb\QueryResult;
+use YdbPlatform\Ydb\Issue;
+use YdbPlatform\Ydb\Exception;
+use YdbPlatform\Ydb\QueryResult;
 
 trait RequestTrait
 {

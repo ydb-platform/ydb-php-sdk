@@ -1,6 +1,6 @@
 <?php
 
-namespace YandexCloud\Ydb\Jwt\Signer;
+namespace YdbPlatform\Ydb\Jwt\Signer;
 
 use Lcobucci\JWT\Signer\Key as SignerKey;
 use Lcobucci\JWT\Signer\OpenSSL;

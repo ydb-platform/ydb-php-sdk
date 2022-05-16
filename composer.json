@@ -1,5 +1,5 @@
 {
-    "name": "yandex-cloud/ydb-php-sdk",
+    "name": "ydb-platform/ydb-php-sdk",
     "description": "Yandex Database SDK (PHP)",
     "license": "Apache-2.0",
     "authors": [
@@ -24,7 +24,7 @@
         "psr-4": {
             "Ydb\\": "protos/Ydb/",
             "GPBMetadata\\": "protos/GPBMetadata/",
-            "YandexCloud\\Ydb\\": "src/"
+            "YdbPlatform\\Ydb\\": "src/"
         }
     }
 }

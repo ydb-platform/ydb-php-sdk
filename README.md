@@ -41,7 +41,7 @@ Use your OAuth token:
 ```php
 <?php
 
-use YandexCloud\Ydb\Ydb;
+use YdbPlatform\Ydb\Ydb;
 
 $config = [
 
@@ -77,7 +77,7 @@ Connect to your database:
 ```php
 <?php
 
-use YandexCloud\Ydb\Ydb;
+use YdbPlatform\Ydb\Ydb;
 
 $config = [
     'database'    => '/ru-central1/b1glxxxxxxxxxxxxxxxx/etn0xxxxxxxxxxxxxxxx',
@@ -110,7 +110,7 @@ Connect to your database:
 ```php
 <?php
 
-use YandexCloud\Ydb\Ydb;
+use YdbPlatform\Ydb\Ydb;
 
 $config = [
     'database'    => '/ru-central1/b1glxxxxxxxxxxxxxxxx/etn0xxxxxxxxxxxxxxxx',
@@ -136,7 +136,7 @@ When you deploy a project to VM or function at Yandex.Cloud, you are able to con
 ```php
 <?php
 
-use YandexCloud\Ydb\Ydb;
+use YdbPlatform\Ydb\Ydb;
 
 $config = [
 
@@ -168,7 +168,7 @@ You should initialize a session from the Table service to start querying.
 ```php
 <?php
 
-use YandexCloud\Ydb\Ydb;
+use YdbPlatform\Ydb\Ydb;
 
 $config = [
     // ...

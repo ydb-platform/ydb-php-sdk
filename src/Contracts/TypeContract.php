@@ -1,6 +1,6 @@
 <?php
 
-namespace YandexCloud\Ydb\Contracts;
+namespace YdbPlatform\Ydb\Contracts;
 
 use Ydb\Type;
 use Ydb\Value;

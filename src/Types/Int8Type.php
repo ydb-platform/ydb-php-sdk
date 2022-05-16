@@ -1,6 +1,6 @@
 <?php
 
-namespace YandexCloud\Ydb\Types;
+namespace YdbPlatform\Ydb\Types;
 
 class Int8Type extends IntType
 {

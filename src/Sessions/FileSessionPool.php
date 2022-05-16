@@ -1,9 +1,9 @@
 <?php
 
-namespace YandexCloud\Ydb\Sessions;
+namespace YdbPlatform\Ydb\Sessions;
 
-use YandexCloud\Ydb\Session;
-use YandexCloud\Ydb\Contracts\SessionPoolContract;
+use YdbPlatform\Ydb\Session;
+use YdbPlatform\Ydb\Contracts\SessionPoolContract;
 
 class FileSessionPool implements SessionPoolContract
 {

@@ -1,6 +1,6 @@
 <?php
 
-namespace YandexCloud\Ydb\Types;
+namespace YdbPlatform\Ydb\Types;
 
 use Ydb\Type;
 use Ydb\Value;
@@ -8,8 +8,8 @@ use Ydb\TypedValue;
 
 use Google\Protobuf\NullValue;
 
-use YandexCloud\Ydb\Contracts\TypeContract;
-use YandexCloud\Ydb\Traits\TypeValueHelpersTrait;
+use YdbPlatform\Ydb\Contracts\TypeContract;
+use YdbPlatform\Ydb\Traits\TypeValueHelpersTrait;
 
 abstract class AbstractType implements TypeContract
 {

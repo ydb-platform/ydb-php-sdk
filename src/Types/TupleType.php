@@ -1,12 +1,12 @@
 <?php
 
-namespace YandexCloud\Ydb\Types;
+namespace YdbPlatform\Ydb\Types;
 
 use Ydb\Type;
 use Ydb\Value;
 use Ydb\TupleType as YdbTupleType;
 use Ydb\OptionalType;
-use YandexCloud\Ydb\Contracts\TypeContract;
+use YdbPlatform\Ydb\Contracts\TypeContract;
 
 class TupleType extends AbstractType
 {

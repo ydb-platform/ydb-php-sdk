@@ -1,6 +1,6 @@
 <?php
 
-namespace YandexCloud\Ydb\Logger;
+namespace YdbPlatform\Ydb\Logger;
 
 use Psr\Log\LoggerTrait;
 use Psr\Log\NullLogger as BaseNullLogger;

@@ -1,8 +1,8 @@
 <?php
 
-namespace YandexCloud\Ydb\Traits;
+namespace YdbPlatform\Ydb\Traits;
 
-use  YandexCloud\Ydb\Logger\NullLogger;
+use  YdbPlatform\Ydb\Logger\NullLogger;
 
 trait LoggerTrait
 {

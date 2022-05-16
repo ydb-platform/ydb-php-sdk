@@ -1,6 +1,6 @@
 <?php
 
-namespace YandexCloud\Ydb\Traits;
+namespace YdbPlatform\Ydb\Traits;
 
 use DateTime;
 use Exception;
@@ -16,24 +16,24 @@ use Ydb\Type\PrimitiveTypeId;
 
 use Google\Protobuf\NullValue;
 
-use YandexCloud\Ydb\Types\IntType;
-use YandexCloud\Ydb\Types\BoolType;
-use YandexCloud\Ydb\Types\DateType;
-use YandexCloud\Ydb\Types\JsonType;
-use YandexCloud\Ydb\Types\ListType;
-use YandexCloud\Ydb\Types\UintType;
-use YandexCloud\Ydb\Types\Utf8Type;
-use YandexCloud\Ydb\Types\Int64Type;
-use YandexCloud\Ydb\Types\FloatType;
-use YandexCloud\Ydb\Types\TupleType;
-use YandexCloud\Ydb\Types\DoubleType;
-use YandexCloud\Ydb\Types\Uint64Type;
-use YandexCloud\Ydb\Types\StringType;
-use YandexCloud\Ydb\Types\StructType;
-use YandexCloud\Ydb\Types\DecimalType;
-use YandexCloud\Ydb\Types\DatetimeType;
-use YandexCloud\Ydb\Types\TimestampType;
-use YandexCloud\Ydb\Contracts\TypeContract;
+use YdbPlatform\Ydb\Types\IntType;
+use YdbPlatform\Ydb\Types\BoolType;
+use YdbPlatform\Ydb\Types\DateType;
+use YdbPlatform\Ydb\Types\JsonType;
+use YdbPlatform\Ydb\Types\ListType;
+use YdbPlatform\Ydb\Types\UintType;
+use YdbPlatform\Ydb\Types\Utf8Type;
+use YdbPlatform\Ydb\Types\Int64Type;
+use YdbPlatform\Ydb\Types\FloatType;
+use YdbPlatform\Ydb\Types\TupleType;
+use YdbPlatform\Ydb\Types\DoubleType;
+use YdbPlatform\Ydb\Types\Uint64Type;
+use YdbPlatform\Ydb\Types\StringType;
+use YdbPlatform\Ydb\Types\StructType;
+use YdbPlatform\Ydb\Types\DecimalType;
+use YdbPlatform\Ydb\Types\DatetimeType;
+use YdbPlatform\Ydb\Types\TimestampType;
+use YdbPlatform\Ydb\Contracts\TypeContract;
 
 trait TypeValueHelpersTrait
 {
