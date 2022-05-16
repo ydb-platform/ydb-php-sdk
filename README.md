@@ -18,7 +18,7 @@ The recommended method of installing is Composer.
 Run the following:
 
 ```bash
-composer require yandex-cloud/ydb-php-sdk
+composer require ydb-platform/ydb-php-sdk
 ```
 
 # Connection
