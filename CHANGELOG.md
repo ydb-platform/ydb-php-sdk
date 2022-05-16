@@ -1,6 +1,13 @@
 # CHANGELOG
 
 
+## 1.4.0 (2022-05-16)
+
+### Features
+
+- updated namespace
+
+
 ## 1.3.1 (2022-02-25)
 
 ### Features
