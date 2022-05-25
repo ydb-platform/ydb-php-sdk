@@ -10,6 +10,8 @@ use Psr\Log\LoggerInterface;
 use YandexCloud\Ydb\Jwt\Signer\Sha256;
 use YandexCloud\Ydb\Contracts\IamTokenContract;
 
+use function filter_var;
+
 class Iam implements IamTokenContract
 {
     use Traits\LoggerTrait;
@@ -95,7 +97,6 @@ class Iam implements IamTokenContract
         else if ($this->config('private_key'))
         {
             $token = $this->getJwtToken();
-
             $request_data = [
                 'jwt' => $token->toString(),
             ];
@@ -159,6 +160,10 @@ class Iam implements IamTokenContract
      */
     public function getCredentials()
     {
+        if ($this->config('insecure')) {
+            return ChannelCredentials::createInsecure();
+        }
+
         $root_pem_file = $this->config('root_cert_file');
 
         if ($root_pem_file && is_file($root_pem_file))
@@ -180,7 +185,14 @@ class Iam implements IamTokenContract
             $this->config['temp_dir'] = sys_get_temp_dir();
         }
 
-        if (!empty($this->config['use_metadata']))
+        $this->config['insecure'] = (isset($this->config['insecure']) && filter_var($this->config['insecure'], \FILTER_VALIDATE_BOOLEAN));
+        $this->config['anonymous'] = (isset($this->config['anonymous']) && filter_var($this->config['anonymous'], \FILTER_VALIDATE_BOOLEAN));
+
+        if ($this->config['anonymous'])
+        {
+            $this->logger()->info('YDB: Authentication method: Anonymous');
+        }
+        else if (!empty($this->config['use_metadata']))
         {
             $this->logger()->info('YDB: Authentication method: Metadata URL');
         }

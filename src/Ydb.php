@@ -8,7 +8,7 @@ class Ydb
 {
     use Traits\LoggerTrait;
 
-    const VERSION = '1.3.1';
+    const VERSION = '1.4.0';
 
     /**
      * @var string
@@ -102,16 +102,18 @@ class Ydb
         return $this->database;
     }
 
-    /**
-     * @return array
-     */
-    public function meta()
+    public function meta(): array
     {
-        return [
-            'x-ydb-auth-ticket' => [$this->iam()->token()],
+        $meta = [
             'x-ydb-database' => [$this->database],
             'x-ydb-sdk-build-info' => ['ydb-php-sdk/' . static::VERSION],
         ];
+
+        if (!$this->iam()->config('anonymous', false)) {
+            $meta['x-ydb-auth-ticket'] = [$this->iam()->token()];
+        }
+
+        return $meta;
     }
 
     /**

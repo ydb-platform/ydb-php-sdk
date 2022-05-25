@@ -31,6 +31,7 @@ Yandex Database supports the following authentication methods:
 - JWT + private key
 - JWT + JSON file
 - Metadata URL
+- Anonymous
 
 ## OAuth token
 
@@ -160,6 +161,35 @@ $ydb = new Ydb($config);
 
 ```
 
+## Anonymous
+
+```php
+<?php
+
+use YandexCloud\Ydb\Ydb;
+
+$config = [
+
+    // Database path
+    'database'    => '/local',
+
+    // Database endpoint
+    'endpoint'    => 'localhost:2135',
+
+    // Auto discovery (dedicated server only)
+    'discovery'   => false,
+
+    // IAM config
+    'iam_config'  => [
+        'anonymous' => true,
+        // Allow insecure grpc connection, default false
+        'insecure' => false,
+    ],
+];
+
+$ydb = new Ydb($config);
+
+```
 
 # Usage
 

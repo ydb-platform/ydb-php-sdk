@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## 1.4.0 (???)
+
+### Features
+
+- Authentication method: Anonymous
+- Insecure grpc connection
 
 ## 1.3.1 (2022-02-25)
 
