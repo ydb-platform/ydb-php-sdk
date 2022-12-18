@@ -1,4 +1,4 @@
-YDB PHP SDK provides access to [https://ydb.tech/](YDB) from PHP code.
+YDB PHP SDK provides access to [YDB](https://ydb.tech/) from PHP code.
 
 YDB is a open-source distributed fault-tolerant DBMS with high availability and scalability, strict consistency and ACID. An SQL dialect – YQL – is used for queries.
 
