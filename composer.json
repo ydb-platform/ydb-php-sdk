@@ -1,6 +1,6 @@
 {
     "name": "ydb-platform/ydb-php-sdk",
-    "description": "Yandex Database SDK (PHP)",
+    "description": "YDB PHP SDK",
     "license": "Apache-2.0",
     "authors": [
         {

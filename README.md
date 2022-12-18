@@ -1,15 +1,16 @@
-YDB PHP SDK provides access to Yandex Database cloud services from PHP code.
+YDB PHP SDK provides access to [https://ydb.tech/](YDB) from PHP code.
 
-Yandex Database is a distributed fault-tolerant DBMS with high availability and scalability, strict consistency and ACID. An SQL dialect – YQL – is used for queries.
+YDB is a open-source distributed fault-tolerant DBMS with high availability and scalability, strict consistency and ACID. An SQL dialect – YQL – is used for queries.
 
-Yandex Database is available in two modes:
+YDB is available in several modes:
 
-- Serverless computing mode (only performed operations are paid);
-- Dedicated instance mode (dedicated computing resources are paid).
+- On-prem installation (is not supported by this SDK yet);
+- Serverless computing mode in YC (only performed operations are paid);
+- Dedicated instance mode in YC (dedicated computing resources are paid).
 
 # Documentation
 
-[https://cloud.yandex.ru/docs/ydb/](https://cloud.yandex.ru/docs/ydb/)
+[https://ydb.tech/docs/](https://ydb.tech/docs/)
 
 # Installation
 
@@ -23,9 +24,9 @@ composer require ydb-platform/ydb-php-sdk
 
 # Connection
 
-First, create a database using [Yandex Cloud Console](https://cloud.yandex.ru/docs/ydb/quickstart/create-db).
+First, create a database using [Yandex Cloud Console](https://cloud.yandex.com/docs/ydb/quickstart/create-db).
 
-Yandex Database supports the following authentication methods:
+YDB supports the following authentication methods:
 
 - OAuth token
 - JWT + private key
@@ -34,7 +35,7 @@ Yandex Database supports the following authentication methods:
 
 ## OAuth token
 
-You should obtain [a new OAuth token](https://cloud.yandex.ru/docs/iam/concepts/authorization/oauth-token).
+You should obtain [a new OAuth token](https://cloud.yandex.com/docs/iam/concepts/authorization/oauth-token).
 
 Use your OAuth token:
 
@@ -70,7 +71,7 @@ $ydb = new Ydb($config);
 
 ## JWT + private key
 
-Create [a service account](https://cloud.yandex.ru/docs/iam/operations/sa/create) with the `editor` role, then create a private key. Also you need a key ID and a service account ID.
+Create [a service account](https://cloud.yandex.com/docs/iam/operations/sa/create) with the `editor` role, then create a private key. Also you need a key ID and a service account ID.
 
 Connect to your database:
 
@@ -101,9 +102,9 @@ $ydb = new Ydb($config);
 
 ## JWT + JSON file
 
-Create [a service account](https://cloud.yandex.ru/docs/iam/operations/sa/create) with the `editor` role.
+Create [a service account](https://cloud.yandex.com/docs/iam/operations/sa/create) with the `editor` role.
 
-Create a service account [JSON file](https://cloud.yandex.ru/docs/iam/operations/iam-token/create-for-sa#via-cli), save it in your project as `sa_name.json`.
+Create a service account [JSON file](https://cloud.yandex.com/docs/iam/operations/iam-token/create-for-sa#via-cli), save it in your project as `sa_name.json`.
 
 Connect to your database:
 
@@ -131,7 +132,7 @@ $ydb = new Ydb($config);
 
 ## Metadata URL
 
-When you deploy a project to VM or function at Yandex.Cloud, you are able to connect to the database using [Metadata URL](https://cloud.yandex.ru/docs/compute/operations/vm-connect/auth-inside-vm). Before you start, you should link your service account to an existing or new VM or function.
+When you deploy a project to VM or function at Yandex.Cloud, you are able to connect to the database using [Metadata URL](https://cloud.yandex.com/docs/compute/operations/vm-connect/auth-inside-vm). Before you start, you should link your service account to an existing or new VM or function.
 
 ```php
 <?php
@@ -233,7 +234,7 @@ Methods of the query builder:
 - `collectStats(int $value)` - collect stats (default: 1)
 - `parameters(array $parameters)` - parameters
 - `operationParams(\Ydb\Operations\OperationParams $operation_params)` - operation params
-- `beginTx(string $mode)` - begin a transaction with the given [mode](https://cloud.yandex.ru/docs/ydb/concepts/transactions):
+- `beginTx(string $mode)` - begin a transaction with the given [mode](https://ydb.tech/en/docs/concepts/transactions):
     - stale
     - online
     - online_inconsistent
