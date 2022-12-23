@@ -21,24 +21,24 @@ permissions:
 jobs:
   publish:
     runs-on: ubuntu-latest
-#    env:
-#      VERSION_CHANGE: ${{ github.event.inputs.version-change }}
-#      RELEASE_CANDIDATE: ${{ github.event.inputs.release-candidate }}
-#      VERSION_FILE: internal/meta/version.go
-#      CHANGELOG_FILE: CHANGELOG.md
-#      GITHUB_TOKEN: ${{ secrets.YDB_PLATFORM_BOT_TOKEN_REPO }}
-#    steps:
-#      - uses: actions/checkout@v3
-#        with:
-#          token: ${{ secrets.YDB_PLATFORM_BOT_TOKEN_REPO }}
-#          fetch-depth: 0
-#      - run: |
-#          CHANGELOG=$(cat $CHANGELOG_FILE | sed -e '/^## v.*$/,$d')
-#          if [[ -z "$CHANGELOG" ]]
-#          then
-#            echo "CHANGELOG empty"
-#            exit 1;
-#          fi;
+    env:
+      VERSION_CHANGE: ${{ github.event.inputs.version-change }}
+      RELEASE_CANDIDATE: ${{ github.event.inputs.release-candidate }}
+#      VERSION_FILE: internal/meta/version.go # TODO(asmyasnikov)
+      CHANGELOG_FILE: CHANGELOG.md
+      GITHUB_TOKEN: ${{ secrets.YDB_PLATFORM_BOT_TOKEN_REPO }}
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.YDB_PLATFORM_BOT_TOKEN_REPO }}
+          fetch-depth: 0
+      - run: |
+          CHANGELOG=$(cat $CHANGELOG_FILE | sed -e '/^## v.*$/,$d')
+          if [[ -z "$CHANGELOG" ]]
+          then
+            echo "CHANGELOG empty"
+            exit 1;
+          fi;
 #          MAJOR=$(cat $VERSION_FILE | grep VersionMajor | sed -e 's/^.*\ \(=\ \)*\(\"\)*\([0-9]*\)\(\"\)*.*/\3/g');
 #          MINOR=$(cat $VERSION_FILE | grep VersionMinor | sed -e 's/^.*\ \(=\ \)*\(\"\)*\([0-9]*\)\(\"\)*.*/\3/g');
 #          PATCH=$(cat $VERSION_FILE | grep VersionPatch | sed -e 's/^.*\ \(=\ \)*\(\"\)*\([0-9]*\)\(\"\)*.*/\3/g');
@@ -80,4 +80,4 @@ jobs:
 #          else
 #            gh release create $TAG -t "$TAG" --notes "$CHANGELOG"
 #          fi;
-#
+        
