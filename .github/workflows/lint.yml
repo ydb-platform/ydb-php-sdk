@@ -1,9 +1,34 @@
-name: lint
+name: Lint
+
 on:
+  # Trigger the workflow on push or pull request,
+  # but only for the main branch
   push:
     branches:
-      - master
+      - main
+  # Replace pull_request with pull_request_target if you
+  # plan to use this action with forks, see the Limitations section
   pull_request:
-  workflow_dispatch:
+    branches:
+      - main
+
+# Down scope as necessary via https://docs.github.com/en/actions/security-guides/automatic-token-authentication#modifying-the-permissions-for-the-github_token
+permissions:
+  checks: write
+  contents: write
+
 jobs:
-  # TODO:
+  run-linters:
+    name: Run linters
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v2
+
+      # Install your linters here
+
+      - name: Run linters
+        uses: wearerequired/lint-action@v2
+        with:
+        # Enable your linters here
