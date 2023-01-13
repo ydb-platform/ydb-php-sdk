@@ -1,6 +1,13 @@
 # CHANGELOG
 
 
+## 1.4.2 (2022-01-13)
+
+### Bugs
+
+- fixed lcobucci/jwt to 4.1.5 version
+
+
 ## 1.4.1 (2022-11-08)
 
 ### Features
