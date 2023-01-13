@@ -127,7 +127,6 @@ $config = [
 ];
 
 $ydb = new Ydb($config);
-
 ```
 
 ## Metadata URL
