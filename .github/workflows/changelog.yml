@@ -1,0 +1,20 @@
+name: changelog
+on:
+  pull_request_target:
+jobs:
+  changelog:
+    name: changelog
+    concurrency:
+      group: changelog-${{ github.ref }}
+      cancel-in-progress: true
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v2
+
+      - name: Changelog updated
+        uses: Zomzog/changelog-checker@v1.2.0
+        with:
+          fileName: CHANGELOG.md
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
