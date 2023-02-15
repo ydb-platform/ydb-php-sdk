@@ -10,6 +10,8 @@ use Psr\Log\LoggerInterface;
 use YdbPlatform\Ydb\Jwt\Signer\Sha256;
 use YdbPlatform\Ydb\Contracts\IamTokenContract;
 
+use function filter_var;
+
 class Iam implements IamTokenContract
 {
     use Traits\LoggerTrait;
@@ -48,7 +50,7 @@ class Iam implements IamTokenContract
     {
         if ($config)
         {
-            $this->config = $config;
+            $this->config = $this->parseConfig($config);
         }
 
         $this->logger = $logger;
@@ -95,7 +97,6 @@ class Iam implements IamTokenContract
         else if ($this->config('private_key'))
         {
             $token = $this->getJwtToken();
-
             $request_data = [
                 'jwt' => $token->toString(),
             ];
@@ -159,6 +160,11 @@ class Iam implements IamTokenContract
      */
     public function getCredentials()
     {
+        if ($this->config('insecure'))
+        {
+            return ChannelCredentials::createInsecure();
+        }
+
         $root_pem_file = $this->config('root_cert_file');
 
         if ($root_pem_file && is_file($root_pem_file))
@@ -170,27 +176,71 @@ class Iam implements IamTokenContract
     }
 
     /**
+     * @param array $config
+     * @return array
+     */
+    protected function parseConfig(array $config)
+    {
+        $parsedConfig = [];
+
+        $stringParams = [
+            'temp_dir',
+            'root_cert_file',
+            'oauth_token',
+            'key_id',
+            'service_account_id',
+            'private_key_file',
+            'service_file',
+        ];
+
+        foreach ($stringParams as $param)
+        {
+            $parsedConfig[$param] = (string)($config[$param] ?? '');
+        }
+
+        $boolParams = [
+            'use_metadata',
+            'anonymous',
+            'insecure',
+        ];
+
+        foreach ($boolParams as $param)
+        {
+            $parsedConfig[$param] = (
+                isset($config[$param])
+                && filter_var($config[$param], \FILTER_VALIDATE_BOOLEAN)
+            );
+        }
+
+        return $parsedConfig;
+    }
+
+    /**
      * @return void
      * @throws Exception
      */
     protected function initConfig()
     {
-        if (empty($this->config['temp_dir']))
+        if (!$this->config('temp_dir'))
         {
             $this->config['temp_dir'] = sys_get_temp_dir();
         }
 
-        if (!empty($this->config['use_metadata']))
+        if ($this->config('anonymous'))
+        {
+            $this->logger()->info('YDB: Authentication method: Anonymous');
+        }
+        else if ($this->config('use_metadata'))
         {
             $this->logger()->info('YDB: Authentication method: Metadata URL');
         }
-        else if (!empty($this->config['service_file']))
+        else if ($serviceFile = $this->config('service_file'))
         {
-            if (is_file($this->config['service_file']))
+            if (is_file($serviceFile))
             {
                 $this->logger()->info('YDB: Authentication method: SA JSON file');
 
-                $service = json_decode(file_get_contents($this->config['service_file']));
+                $service = json_decode(file_get_contents($serviceFile));
 
                 if (is_object($service)
                     && isset($service->id)
@@ -203,28 +253,28 @@ class Iam implements IamTokenContract
                 }
                 else
                 {
-                    throw new Exception('Service file [' . $this->config['service_file'] . '] is broken.');
+                    throw new Exception('Service file [' . $serviceFile . '] is broken.');
                 }
             }
             else
             {
-                throw new Exception('Service file [' . $this->config['service_file'] . '] is missing.');
+                throw new Exception('Service file [' . $serviceFile . '] is missing.');
             }
         }
-        else if (!empty($this->config['private_key_file']))
+        else if ($privateKeyFile = $this->config('private_key_file'))
         {
             $this->logger()->info('YDB: Authentication method: Private key');
 
-            if (is_file($this->config['private_key_file']))
+            if (is_file($privateKeyFile))
             {
-                $this->config['private_key'] = file_get_contents($this->config['private_key_file']);
+                $this->config['private_key'] = file_get_contents($privateKeyFile);
             }
             else
             {
-                throw new Exception('Private key [' . $this->config['private_key_file'] . '] is missing.');
+                throw new Exception('Private key [' . $privateKeyFile . '] is missing.');
             }
         }
-        else if (!empty($this->config['oauth_token']))
+        else if ($this->config('oauth_token'))
         {
             $this->logger()->info('YDB: Authentication method: OAuth token');
         }

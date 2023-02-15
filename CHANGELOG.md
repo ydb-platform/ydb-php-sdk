@@ -1,7 +1,15 @@
 # CHANGELOG
 
 
-## 1.4.2 (2022-01-13)
+## 1.4.3 (2023-02-15)
+
+### Features
+
+- anonymous authentication method
+- insecure grpc connection
+
+
+## 1.4.2 (2023-01-13)
 
 ### Bugs
 

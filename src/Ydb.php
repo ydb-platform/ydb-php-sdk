@@ -102,16 +102,19 @@ class Ydb
         return $this->database;
     }
 
-    /**
-     * @return array
-     */
-    public function meta()
+    public function meta(): array
     {
-        return [
-            'x-ydb-auth-ticket' => [$this->iam()->token()],
+        $meta = [
             'x-ydb-database' => [$this->database],
             'x-ydb-sdk-build-info' => ['ydb-php-sdk/' . static::VERSION],
         ];
+
+        if (!$this->iam()->config('anonymous'))
+        {
+            $meta['x-ydb-auth-ticket'] = [$this->iam()->token()];
+        }
+
+        return $meta;
     }
 
     /**
