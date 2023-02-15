@@ -206,8 +206,15 @@ class QueryResult
                     case 'INT32':
                     case 'INT64':
                     case 'UINT32':
-                    case 'UINT64':
                         $_row[$column['name']] = (int)($value);
+                        break;
+
+                    case 'UINT64':
+                        $value_int = (int)$value;
+                        if ($value_int === PHP_INT_MAX && PHP_INT_SIZE === 8) {
+                            $value_int = (int)bcsub($value, '18446744073709551616', 0);
+                        }
+                        $_row[$column['name']] = $value_int;
                         break;
 
                     default:
