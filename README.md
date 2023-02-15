@@ -32,6 +32,7 @@ YDB supports the following authentication methods:
 - JWT + private key
 - JWT + JSON file
 - Metadata URL
+- Anonymous
 
 ## OAuth token
 
@@ -160,6 +161,34 @@ $ydb = new Ydb($config);
 
 ```
 
+## Anonymous
+
+```php
+<?php
+
+use YdbPlatform\Ydb\Ydb;
+
+$config = [
+
+    // Database path
+    'database'    => '/local',
+
+    // Database endpoint
+    'endpoint'    => 'localhost:2136',
+
+    // Auto discovery (dedicated server only)
+    'discovery'   => false,
+
+    // IAM config
+    'iam_config'  => [
+        'anonymous' => true,
+        'insecure' => true,
+    ],
+];
+
+$ydb = new Ydb($config);
+
+```
 
 # Usage
 
