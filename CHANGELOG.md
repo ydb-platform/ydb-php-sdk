@@ -1,6 +1,13 @@
 # CHANGELOG
 
 
+## 1.4.5 (2023-02-15)
+
+### Bugs
+
+- improved issue tree
+
+
 ## 1.4.4 (2023-02-15)
 
 ### Bugs
