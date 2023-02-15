@@ -21,24 +21,19 @@ class Issue
      */
     public function toString()
     {
-        $msgs = [];
         $msg = trim($this->issue->getMessage());
         if (count($this->issue->getIssues()))
         {
-            $msgs = [$msg . ':'];
-            foreach ($this->issue->getIssues() as $issue)
-            {
-                $issues = static::getSubIssues($issue);
-                if ($issues)
-                {
-                    array_push($msgs, ...$issues);
-                }
-            }
+            $msg .= ':';
         }
-        else
+
+        $msgs = [$msg];
+        $issues = static::getSubIssues($this->issue);
+        if ($issues)
         {
-            $msgs = [$msg];
+            array_push($msgs, ...$issues);
         }
+
         return implode("\n", $msgs);
     }
 
@@ -53,18 +48,11 @@ class Issue
         foreach ($issue->getIssues() as $sub_issue)
         {
             $msg = str_repeat('  ', $level) . '- ' . trim($sub_issue->getMessage());
-            if (count($sub_issue->getIssues()))
+            $msgs[] = $msg;
+            $issues = static::getSubIssues($sub_issue, $level + 1);
+            if ($issues)
             {
-                $msgs[] = $msg;
-                $issues = static::getSubIssues($sub_issue, $level + 1);
-                if ($issues)
-                {
-                    array_push($msgs, ...$issues);
-                }
-            }
-            else
-            {
-                $msgs[] = $msg;
+                array_push($msgs, ...$issues);
             }
         }
         return $msgs;
