@@ -1,6 +1,13 @@
 # CHANGELOG
 
 
+## 1.4.4 (2023-02-15)
+
+### Bugs
+
+- uint64 type casting
+
+
 ## 1.4.3 (2023-02-15)
 
 ### Features
