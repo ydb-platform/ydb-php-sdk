@@ -31,6 +31,21 @@ class ScriptingServiceClient extends \Grpc\BaseStub {
     }
 
     /**
+     * Executes yql request with streaming result.
+     * @param \Ydb\Scripting\ExecuteYqlRequest $argument input argument
+     * @param array $metadata metadata
+     * @param array $options call options
+     * @return \Grpc\ServerStreamingCall
+     */
+    public function StreamExecuteYql(\Ydb\Scripting\ExecuteYqlRequest $argument,
+      $metadata = [], $options = []) {
+        return $this->_serverStreamRequest('/Ydb.Scripting.V1.ScriptingService/StreamExecuteYql',
+        $argument,
+        ['\Ydb\Scripting\ExecuteYqlPartialResponse', 'decode'],
+        $metadata, $options);
+    }
+
+    /**
      * @param \Ydb\Scripting\ExplainYqlRequest $argument input argument
      * @param array $metadata metadata
      * @param array $options call options

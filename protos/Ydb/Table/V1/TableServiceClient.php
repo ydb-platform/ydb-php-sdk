@@ -143,6 +143,21 @@ class TableServiceClient extends \Grpc\BaseStub {
     }
 
     /**
+     * Creates consistent move of given tables.
+     * @param \Ydb\Table\RenameTablesRequest $argument input argument
+     * @param array $metadata metadata
+     * @param array $options call options
+     * @return \Grpc\UnaryCall
+     */
+    public function RenameTables(\Ydb\Table\RenameTablesRequest $argument,
+      $metadata = [], $options = []) {
+        return $this->_simpleRequest('/Ydb.Table.V1.TableService/RenameTables',
+        $argument,
+        ['\Ydb\Table\RenameTablesResponse', 'decode'],
+        $metadata, $options);
+    }
+
+    /**
      * Returns information about given table (metadata).
      * @param \Ydb\Table\DescribeTableRequest $argument input argument
      * @param array $metadata metadata
@@ -314,7 +329,7 @@ class TableServiceClient extends \Grpc\BaseStub {
     }
 
     /**
-     * Executes stream query.
+     * Executes scan query with streaming result.
      * @param \Ydb\Table\ExecuteScanQueryRequest $argument input argument
      * @param array $metadata metadata
      * @param array $options call options
