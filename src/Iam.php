@@ -3,11 +3,9 @@
 namespace YdbPlatform\Ydb;
 
 use DateTime;
-use Lcobucci\JWT;
 use DateTimeImmutable;
 use Grpc\ChannelCredentials;
 use Psr\Log\LoggerInterface;
-use YdbPlatform\Ydb\Jwt\Signer\Sha256;
 use YdbPlatform\Ydb\Contracts\IamTokenContract;
 
 use function filter_var;
@@ -98,7 +96,7 @@ class Iam implements IamTokenContract
         {
             $token = $this->getJwtToken();
             $request_data = [
-                'jwt' => $token->toString(),
+                'jwt' => $token,
             ];
         }
         else
@@ -285,27 +283,18 @@ class Iam implements IamTokenContract
     }
 
     /**
-     * @return JWT\Token
+     * @return string
      */
     protected function getJwtToken()
     {
         $now = new DateTimeImmutable;
 
-        $key = JWT\Signer\Key\InMemory::plainText($this->config('private_key'));
-
-        $config = JWT\Configuration::forSymmetricSigner(
-            new Sha256,
-            $key
-        );
-
-        $token = $config->builder()
+        $token = (new Jwt\Jwt($this->config('private_key'), $this->config('key_id')))
             ->issuedBy($this->config('service_account_id'))
             ->issuedAt($now)
             ->expiresAt($now->modify('+1 hour'))
             ->permittedFor(static::IAM_TOKEN_API_URL)
-            ->withHeader('typ', 'JWT')
-            ->withHeader('kid', $this->config('key_id'))
-            ->getToken($config->signer(), $config->signingKey());
+            ->getToken();
 
         return $token;
     }
