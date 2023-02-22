@@ -1,6 +1,15 @@
 # CHANGELOG
 
 
+## 1.5.0 (2023-02-22)
+
+### Features
+
+- make protobuf
+- updated protos
+- JWT replacement
+
+
 ## 1.4.5 (2023-02-15)
 
 ### Bugs
