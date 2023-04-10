@@ -73,7 +73,10 @@ class Iam implements IamTokenContract
      */
     public function token($force = false)
     {
-        if ($force || !($token = $this->loadToken()))
+        if ($token = $this->config('access_token')){
+            return $token;
+        }
+        else if ($force || !($token = $this->loadToken()))
         {
             $token = $this->newToken();
         }
@@ -184,6 +187,7 @@ class Iam implements IamTokenContract
         $stringParams = [
             'temp_dir',
             'root_cert_file',
+            'access_token',
             'oauth_token',
             'key_id',
             'service_account_id',
@@ -271,6 +275,9 @@ class Iam implements IamTokenContract
             {
                 throw new Exception('Private key [' . $privateKeyFile . '] is missing.');
             }
+        }
+        else if ($this->config('access_token')){
+            $this->logger()->info('YDB: Authentication method: Access token');
         }
         else if ($this->config('oauth_token'))
         {

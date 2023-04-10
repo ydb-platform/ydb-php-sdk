@@ -34,6 +34,38 @@ YDB supports the following authentication methods:
 - Metadata URL
 - Anonymous
 
+## Access token
+
+Use your access token:
+
+```php
+<?php
+
+use YdbPlatform\Ydb\Ydb;
+
+$config = [
+
+    // Database path
+    'database'    => '/ru-central1/b1glxxxxxxxxxxxxxxxx/etn0xxxxxxxxxxxxxxxx',
+
+    // Database endpoint
+    'endpoint'    => 'ydb.serverless.yandexcloud.net:2135',
+
+    // Auto discovery (dedicated server only)
+    'discovery'   => false,
+
+    // IAM config
+    'iam_config'  => [
+        'root_cert_file' => './CA.pem', // Root CA file (dedicated server only!)
+
+        // Access token authentication
+        'access_token'    => 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA',
+    ],
+];
+
+$ydb = new Ydb($config);
+```
+
 ## OAuth token
 
 You should obtain [a new OAuth token](https://cloud.yandex.com/docs/iam/concepts/authorization/oauth-token).
@@ -67,7 +99,6 @@ $config = [
 ];
 
 $ydb = new Ydb($config);
-
 ```
 
 ## JWT + private key
