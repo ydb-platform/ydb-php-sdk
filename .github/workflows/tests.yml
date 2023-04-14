@@ -60,4 +60,4 @@ jobs:
           --coverage-text \
           --whitelist src \
           --colors=never  \
-          test
+          tests
