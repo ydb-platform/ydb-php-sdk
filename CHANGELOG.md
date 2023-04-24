@@ -1,5 +1,6 @@
 * added access token authentication
 * added CI test
+* added credentials authentication
 
 ## 1.5.0 (2023-02-22)
 
