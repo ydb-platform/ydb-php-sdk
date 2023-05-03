@@ -71,6 +71,7 @@ or:
 <?php
 
 use YdbPlatform\Ydb\Ydb;
+use YdbPlatform\Ydb\Auth\AccessTokenAuthentication;
 
 $config = [
 
@@ -133,6 +134,7 @@ or
 <?php
 
 use YdbPlatform\Ydb\Ydb;
+use YdbPlatform\Ydb\Auth\OAuthTokenAuthentication;
 
 $config = [
 
@@ -190,6 +192,7 @@ or
 <?php
 
 use YdbPlatform\Ydb\Ydb;
+use YdbPlatform\Ydb\Auth\JwtWithPrivateKeyAuthentication;
 
 $config = [
     'database'    => '/ru-central1/b1glxxxxxxxxxxxxxxxx/etn0xxxxxxxxxxxxxxxx',
@@ -246,6 +249,7 @@ or:
 <?php
 
 use YdbPlatform\Ydb\Ydb;
+use YdbPlatform\Ydb\Auth\JwtWithJsonAuthentication;
 
 $config = [
     'database'    => '/ru-central1/b1glxxxxxxxxxxxxxxxx/etn0xxxxxxxxxxxxxxxx',
@@ -290,11 +294,12 @@ $config = [
 
 $ydb = new Ydb($config);
 ```
-
+or
 ```php
 <?php
 
 use YdbPlatform\Ydb\Ydb;
+use YdbPlatform\Ydb\Auth\AnonymousAuthentication;
 
 $config = [
 
@@ -311,6 +316,7 @@ $config = [
     'iam_config'  => [
         'temp_dir'     => './tmp', // Temp directory
     ],
+    'credentials' => new MetadataAuthentication()
 ];
 
 $ydb = new Ydb($config);
@@ -349,6 +355,7 @@ or:
 <?php
 
 use YdbPlatform\Ydb\Ydb;
+use YdbPlatform\Ydb\Auth\AnonymousAuthentication;
 
 $config = [
 
