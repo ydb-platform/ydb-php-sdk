@@ -19,11 +19,19 @@
         "phpseclib/phpseclib": "^2.0|^3.0",
         "psr/log": "^1|^2|^3"
     },
+    "require-dev": {
+        "phpunit/phpunit": "9.*"
+    },
     "autoload": {
         "psr-4": {
             "Ydb\\": "protos/Ydb/",
             "GPBMetadata\\": "protos/GPBMetadata/",
             "YdbPlatform\\Ydb\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "YdbPlatform\\Ydb\\Test\\": "tests"
         }
     }
 }
