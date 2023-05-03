@@ -1,3 +1,4 @@
+* added credentials authentication
 * added access token authentication
 
 ## 1.5.0 (2023-02-22)
