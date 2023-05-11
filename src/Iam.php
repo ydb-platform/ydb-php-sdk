@@ -6,6 +6,11 @@ use DateTime;
 use DateTimeImmutable;
 use Grpc\ChannelCredentials;
 use Psr\Log\LoggerInterface;
+use YdbPlatform\Ydb\Auth\Implement\AccessTokenAuthentication;
+use YdbPlatform\Ydb\Auth\Implement\AnonymousAuthentication;
+use YdbPlatform\Ydb\Auth\Implement\JwtWithJsonAuthentication;
+use YdbPlatform\Ydb\Auth\Implement\JwtWithPrivateKeyAuthentication;
+use YdbPlatform\Ydb\Auth\Implement\OAuthTokenAuthentication;
 use YdbPlatform\Ydb\Contracts\IamTokenContract;
 
 use function filter_var;
@@ -73,10 +78,7 @@ class Iam implements IamTokenContract
      */
     public function token($force = false)
     {
-        if ($token = $this->config('access_token')){
-            return $token;
-        }
-        else if ($force || !($token = $this->loadToken()))
+        if ($force || !($token = $this->loadToken()))
         {
             $token = $this->newToken();
         }
@@ -91,69 +93,14 @@ class Iam implements IamTokenContract
     {
         $this->logger()->info('YDB: Obtaining new IAM token...');
 
-        if ($this->config('use_metadata'))
-        {
-            return $this->requestTokenFromMetadata();
-        }
-        else if ($this->config('private_key'))
-        {
-            $token = $this->getJwtToken();
-            $request_data = [
-                'jwt' => $token,
-            ];
-        }
-        else
-        {
-            $request_data = [
-                'yandexPassportOauthToken' => $this->config('oauth_token'),
-            ];
-        }
-
-        $curl = curl_init(static::IAM_TOKEN_API_URL);
-
-        curl_setopt_array($curl, [
-            CURLOPT_RETURNTRANSFER => 1,
-            CURLOPT_SSL_VERIFYPEER => 0,
-            CURLOPT_SSL_VERIFYHOST => 0,
-            CURLOPT_HEADER => 0,
-            CURLOPT_POSTFIELDS => json_encode($request_data),
-            CURLOPT_HTTPHEADER => [
-                'Accept: application/json',
-                'Content-Type: application/json',
-            ],
+        $tokenInfo = $this->config('credentials')->getTokenInfo();
+        $this->iam_token = $tokenInfo->getToken();
+        $this->expires_at = $tokenInfo->getExpiresAt();
+        $this->saveToken((object)[
+            "iamToken" => $tokenInfo->getToken(),
+            "expiresAt" => $tokenInfo->getExpiresAt(),
         ]);
-
-        $result = curl_exec($curl);
-
-        $status = curl_getinfo($curl, CURLINFO_HTTP_CODE);
-
-        if ($status === 200)
-        {
-            $token = json_decode($result);
-
-            if (isset($token->iamToken))
-            {
-                $this->logger()->info('YDB: Obtained new IAM token [...' . substr($token->iamToken, -6) . '].');
-                $this->saveToken($token);
-                return $token->iamToken;
-            }
-            else
-            {
-                $this->logger()->error('YDB: Failed to obtain new IAM token', [
-                    'status' => $status,
-                    'result' => $token,
-                ]);
-                throw new Exception('Failed to obtain new iamToken: no token was received.');
-            }
-        }
-        else
-        {
-            $this->logger()->error('YDB: Failed to obtain new IAM token', [
-                'status' => $status,
-                'result' => $result,
-            ]);
-            throw new Exception('Failed to obtain new iamToken: response status is ' . $status);
-        }
+        return $tokenInfo->getToken();
     }
 
     /**
@@ -195,11 +142,14 @@ class Iam implements IamTokenContract
             'service_file',
         ];
 
+        if (isset($config["credentials"])){
+            $parsedConfig["credentials"] = $config["credentials"];
+        }
+
         foreach ($stringParams as $param)
         {
             $parsedConfig[$param] = (string)($config[$param] ?? '');
         }
-
         $boolParams = [
             'use_metadata',
             'anonymous',
@@ -228,9 +178,14 @@ class Iam implements IamTokenContract
             $this->config['temp_dir'] = sys_get_temp_dir();
         }
 
-        if ($this->config('anonymous'))
+        if ($this->config('credentials')){
+            $this->logger()->info('YDB: Authentication method: '. $this->config('credentials')->getName());
+        }
+        else if ($this->config('anonymous'))
         {
             $this->logger()->info('YDB: Authentication method: Anonymous');
+            $this->config['credentials'] = new AnonymousAuthentication();
+            $this->config['credentials']->setLogger($this->logger());
         }
         else if ($this->config('use_metadata'))
         {
@@ -238,25 +193,11 @@ class Iam implements IamTokenContract
         }
         else if ($serviceFile = $this->config('service_file'))
         {
+            $this->logger()->info('YDB: Authentication method: SA JSON file');
             if (is_file($serviceFile))
             {
-                $this->logger()->info('YDB: Authentication method: SA JSON file');
-
-                $service = json_decode(file_get_contents($serviceFile));
-
-                if (is_object($service)
-                    && isset($service->id)
-                    && isset($service->private_key)
-                    && isset($service->service_account_id))
-                {
-                    $this->config['key_id'] = $service->id;
-                    $this->config['private_key'] = $service->private_key;
-                    $this->config['service_account_id'] = $service->service_account_id;
-                }
-                else
-                {
-                    throw new Exception('Service file [' . $serviceFile . '] is broken.');
-                }
+                $this->config['credentials'] = new JwtWithJsonAuthentication($serviceFile);
+                $this->config['credentials']->setLogger($this->logger());
             }
             else
             {
@@ -269,19 +210,25 @@ class Iam implements IamTokenContract
 
             if (is_file($privateKeyFile))
             {
-                $this->config['private_key'] = file_get_contents($privateKeyFile);
+                $this->config['credentials'] = new JwtWithPrivateKeyAuthentication($this->config('key_id'),
+                    $this->config('service_account_id'), $privateKeyFile);
+                $this->config['credentials']->setLogger($this->logger());
             }
             else
             {
                 throw new Exception('Private key [' . $privateKeyFile . '] is missing.');
             }
         }
-        else if ($this->config('access_token')){
+        else if ($accessToken = $this->config('access_token')){
             $this->logger()->info('YDB: Authentication method: Access token');
+            $this->config['credentials'] = new AccessTokenAuthentication($accessToken);
+            $this->config['credentials']->setLogger($this->logger());
         }
-        else if ($this->config('oauth_token'))
+        else if ($oauthToken = $this->config('oauth_token'))
         {
             $this->logger()->info('YDB: Authentication method: OAuth token');
+            $this->config['credentials'] = new OAuthTokenAuthentication($oauthToken);
+            $this->config['credentials']->setLogger($this->logger());
         }
         else
         {

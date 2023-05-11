@@ -78,6 +78,11 @@ class Ydb
 
         $this->logger = $logger;
 
+        if(isset($config['credentials'])){
+            $this->iam_config['credentials'] = $config['credentials'];
+            $config['credentials']->setLogger($this->logger());
+        }
+
         if (!empty($config['discovery']))
         {
             $this->discover();

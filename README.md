@@ -28,6 +28,7 @@ First, create a database using [Yandex Cloud Console](https://cloud.yandex.com/d
 
 YDB supports the following authentication methods:
 
+- Access token
 - OAuth token
 - JWT + private key
 - JWT + JSON file
@@ -65,7 +66,34 @@ $config = [
 
 $ydb = new Ydb($config);
 ```
+or:
+```php
+<?php
 
+use YdbPlatform\Ydb\Ydb;
+use YdbPlatform\Ydb\Auth\AccessTokenAuthentication;
+
+$config = [
+
+    // Database path
+    'database'    => '/ru-central1/b1glxxxxxxxxxxxxxxxx/etn0xxxxxxxxxxxxxxxx',
+
+    // Database endpoint
+    'endpoint'    => 'ydb.serverless.yandexcloud.net:2135',
+
+    // Auto discovery (dedicated server only)
+    'discovery'   => false,
+
+    // IAM config
+    'iam_config'  => [
+        'root_cert_file' => './CA.pem', // Root CA file (dedicated server only!)
+    ],
+    
+    'credentials' => new AccessTokenAuthentication('AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA')
+];
+
+$ydb = new Ydb($config);
+```
 ## OAuth token
 
 You should obtain [a new OAuth token](https://cloud.yandex.com/docs/iam/concepts/authorization/oauth-token).
@@ -101,6 +129,35 @@ $config = [
 $ydb = new Ydb($config);
 ```
 
+or
+```php
+<?php
+
+use YdbPlatform\Ydb\Ydb;
+use YdbPlatform\Ydb\Auth\OAuthTokenAuthentication;
+
+$config = [
+
+    // Database path
+    'database'    => '/ru-central1/b1glxxxxxxxxxxxxxxxx/etn0xxxxxxxxxxxxxxxx',
+
+    // Database endpoint
+    'endpoint'    => 'ydb.serverless.yandexcloud.net:2135',
+
+    // Auto discovery (dedicated server only)
+    'discovery'   => false,
+
+    // IAM config
+    'iam_config'  => [
+        'temp_dir'       => './tmp', // Temp directory
+        'root_cert_file' => './CA.pem', // Root CA file (dedicated server only!)
+    ],
+    
+    'credentials' => new OAuthTokenAuthentication('AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA')
+];
+
+$ydb = new Ydb($config);
+```
 ## JWT + private key
 
 Create [a service account](https://cloud.yandex.com/docs/iam/operations/sa/create) with the `editor` role, then create a private key. Also you need a key ID and a service account ID.
@@ -128,10 +185,36 @@ $config = [
 ];
 
 $ydb = new Ydb($config);
-
 ```
 
+or
+```php
+<?php
 
+use YdbPlatform\Ydb\Ydb;
+use YdbPlatform\Ydb\Auth\JwtWithPrivateKeyAuthentication;
+
+$config = [
+    'database'    => '/ru-central1/b1glxxxxxxxxxxxxxxxx/etn0xxxxxxxxxxxxxxxx',
+    'endpoint'    => 'ydb.serverless.yandexcloud.net:2135',
+    'discovery'   => false,
+    'iam_config'  => [
+        'temp_dir'           => './tmp', // Temp directory
+        'root_cert_file'     => './CA.pem', // Root CA file (dedicated server only!)
+
+        // Private key authentication
+        'key_id'             => 'ajexxxxxxxxx',
+        'service_account_id' => 'ajeyyyyyyyyy',
+        'private_key_file'   => './private.key',
+    ],
+    
+    'credentials' => new JwtWithPrivateKeyAuthentication(
+        "ajexxxxxxxxx","ajeyyyyyyyyy",'./private.key')
+        
+];
+
+$ydb = new Ydb($config);
+```
 ## JWT + JSON file
 
 Create [a service account](https://cloud.yandex.com/docs/iam/operations/sa/create) with the `editor` role.
@@ -161,6 +244,27 @@ $config = [
 $ydb = new Ydb($config);
 ```
 
+or:
+```php
+<?php
+
+use YdbPlatform\Ydb\Ydb;
+use YdbPlatform\Ydb\Auth\JwtWithJsonAuthentication;
+
+$config = [
+    'database'    => '/ru-central1/b1glxxxxxxxxxxxxxxxx/etn0xxxxxxxxxxxxxxxx',
+    'endpoint'    => 'ydb.serverless.yandexcloud.net:2135',
+    'discovery'   => false,
+    'iam_config'  => [
+        'temp_dir'       => './tmp', // Temp directory
+        'root_cert_file' => './CA.pem', // Root CA file (dedicated server only!)
+    ],
+            
+    'credentials' => new JwtWithJsonAuthentication('./jwtjson.json')
+];
+
+$ydb = new Ydb($config);
+```
 ## Metadata URL
 
 When you deploy a project to VM or function at Yandex.Cloud, you are able to connect to the database using [Metadata URL](https://cloud.yandex.com/docs/compute/operations/vm-connect/auth-inside-vm). Before you start, you should link your service account to an existing or new VM or function.
@@ -189,7 +293,33 @@ $config = [
 ];
 
 $ydb = new Ydb($config);
+```
+or
+```php
+<?php
 
+use YdbPlatform\Ydb\Ydb;
+use YdbPlatform\Ydb\Auth\MetadataAuthentication;
+
+$config = [
+
+    // Database path
+    'database'    => '/ru-central1/b1glxxxxxxxxxxxxxxxx/etn0xxxxxxxxxxxxxxxx',
+
+    // Database endpoint
+    'endpoint'    => 'ydb.serverless.yandexcloud.net:2135',
+
+    // Auto discovery (dedicated server only)
+    'discovery'   => false,
+
+    // IAM config
+    'iam_config'  => [
+        'temp_dir'     => './tmp', // Temp directory
+    ],
+    'credentials' => new MetadataAuthentication()
+];
+
+$ydb = new Ydb($config);
 ```
 
 ## Anonymous
@@ -218,7 +348,35 @@ $config = [
 ];
 
 $ydb = new Ydb($config);
+```
 
+or:
+```php
+<?php
+
+use YdbPlatform\Ydb\Ydb;
+use YdbPlatform\Ydb\Auth\AnonymousAuthentication;
+
+$config = [
+
+    // Database path
+    'database'    => '/local',
+
+    // Database endpoint
+    'endpoint'    => 'localhost:2136',
+
+    // Auto discovery (dedicated server only)
+    'discovery'   => false,
+
+    // IAM config
+    'iam_config'  => [
+        'insecure' => true,
+    ],
+    
+    'credentials' => new AnonymousAuthentication()
+];
+
+$ydb = new Ydb($config);
 ```
 
 # Usage
