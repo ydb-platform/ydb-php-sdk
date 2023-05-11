@@ -299,7 +299,7 @@ or
 <?php
 
 use YdbPlatform\Ydb\Ydb;
-use YdbPlatform\Ydb\Auth\AnonymousAuthentication;
+use YdbPlatform\Ydb\Auth\MetadataAuthentication;
 
 $config = [
 
