@@ -222,6 +222,8 @@ trait RequestTrait
             case StatusCode::BAD_SESSION:
                 if (method_exists($this, 'refresh'))
                 {
+                    $data = $this->last_request_data;
+
                     $session = $this->refresh();
 
                     if (isset($this->last_request_data['session_id']))
@@ -229,7 +231,8 @@ trait RequestTrait
                         $this->last_request_data['session_id'] = $session->id();
                     }
 
-                    $this->saveLastRequest($service, $method, $this->last_request_data);
+                    $data['session_id'] = $session->id();
+                    $this->saveLastRequest($service, $method, $data);
 
                     // only 10 retries are allowed!
                     if ($this->last_request_try_count < 10)
@@ -315,7 +318,7 @@ trait RequestTrait
             $this->logger()->info('Going to retry the last request!');
 
             usleep(max($this->last_request_try_count, 1) * $sleep * 1000); // waiting 100 ms more
-            $this->doRequest($this->last_request_service, $this->last_request_method, $this->last_request_data);
+            return $this->doRequest($this->last_request_service, $this->last_request_method, $this->last_request_data);
         }
     }
 
