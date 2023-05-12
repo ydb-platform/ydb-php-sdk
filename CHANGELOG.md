@@ -1,3 +1,4 @@
+* fixed retry at BAD_REQUEST
 * added credentials authentication
 * added CI test
 

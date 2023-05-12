@@ -229,6 +229,8 @@ trait RequestTrait
                         $this->last_request_data['session_id'] = $session->id();
                     }
 
+                    $this->saveLastRequest($service, $method, $this->last_request_data);
+
                     // only 10 retries are allowed!
                     if ($this->last_request_try_count < 10)
                     {
