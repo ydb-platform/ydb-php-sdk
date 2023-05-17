@@ -1,9 +1,11 @@
 <?php
+
 namespace YdbPlatform\Ydb\Test;
 
 use PHPUnit\Framework\TestCase;
 use YdbPlatform\Ydb\Auth\Implement\AnonymousAuthentication;
 use YdbPlatform\Ydb\Ydb;
+
 class SessionManager extends \YdbPlatform\Ydb\Session{
     public static function setSessionId(\YdbPlatform\Ydb\Session $session, string $id){
         $session->session_id = $id;
@@ -13,6 +15,7 @@ class SessionManager extends \YdbPlatform\Ydb\Session{
         return $session->session_id;
     }
 }
+
 class RetryOnBadSessionTest extends TestCase
 {
     public function test(){
