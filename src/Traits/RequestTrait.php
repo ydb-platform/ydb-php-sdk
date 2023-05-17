@@ -41,6 +41,8 @@ trait RequestTrait
      */
     protected function doRequest($service, $method, array $data = [])
     {
+        $this->meta['x-ydb-auth-ticket'] = [$this->credentials->token()];
+
         $this->saveLastRequest($service, $method, $data);
 
         $requestClass = '\\Ydb\\' . $service . '\\' . $method . 'Request';

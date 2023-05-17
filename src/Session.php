@@ -82,6 +82,7 @@ class Session
 
         $this->client = $table->client();
         $this->meta = $table->meta();
+        $this->credentials = $table->credentials();
         $this->path = $table->path();
         $this->logger = $table->getLogger();
 

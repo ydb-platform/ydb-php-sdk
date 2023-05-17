@@ -44,7 +44,6 @@ class RetryOnBadSessionTest extends TestCase
         $session->delete();
         $session = $table->session();
         SessionManager::setSessionId($session,$oldSessionId);
-        print_r($session->query('select 1 as res'));
         self::assertEquals(
             1,
             $session->query('select 1 as res')->rows()[0]['res']

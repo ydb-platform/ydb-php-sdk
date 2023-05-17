@@ -25,6 +25,10 @@ class Operations
      * @var LoggerInterface
      */
     protected $logger;
+    /**
+     * @var Iam
+     */
+    protected $credentials;
 
     /**
      * @param Ydb $ydb
@@ -37,6 +41,8 @@ class Operations
         ]);
 
         $this->meta = $ydb->meta();
+
+        $this->credentials = $ydb->iam();
 
         $this->logger = $logger;
     }
