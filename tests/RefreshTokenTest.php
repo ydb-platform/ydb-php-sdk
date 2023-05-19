@@ -7,16 +7,30 @@ use YdbPlatform\Ydb\Auth\Auth;
 use YdbPlatform\Ydb\Auth\TokenInfo;
 use YdbPlatform\Ydb\Ydb;
 
-class TestCredentials extends Auth{
+class FakeCredentials extends Auth {
+
+    /**
+     * @var int
+     */
+    protected $counter;
+
+    public function __construct(&$counter)
+    {
+        $this->counter = &$counter;
+    }
 
     public function getTokenInfo(): TokenInfo
     {
-        return new TokenInfo(time()+1,time()+1);
+        $this->counter++;
+        if ($this->counter==2){
+            throw new \Exception("Some error");
+        }
+        return new TokenInfo(time()+3,time()+3);
     }
 
     public function getName(): string
     {
-        return "TestCredentials";
+        return "FakeCredentials";
     }
 }
 
@@ -30,7 +44,7 @@ class RefreshTokenTest extends TestCase
 {
     public function test(){
 
-        $i = 0;
+        $counter = 0;
 
         $config = [
 
@@ -47,17 +61,45 @@ class RefreshTokenTest extends TestCase
             'iam_config'  => [
                 'insecure' => true,
             ],
-            'credentials' => new TestCredentials()
+            'credentials' => new FakeCredentials($counter)
         ];
         $ydb = new Ydb($config);
         $table = $ydb->table();
         $session = $table->session();
-        $token = MetaGetter::getMeta($session)["x-ydb-auth-ticket"];
+        $token = MetaGetter::getMeta($session)["x-ydb-auth-ticket"][0];
+        self::assertEquals(
+            1,
+            $counter
+        );
+
+        $session->query('select 1 as res');
+        self::assertEquals(
+            $token,
+            MetaGetter::getMeta($session)["x-ydb-auth-ticket"][0]
+        );
+        self::assertEquals(
+            1,
+            $counter
+        );
+
         usleep(1e6);
         $session->query('select 1 as res');
+        self::assertEquals(
+            2,
+            $counter
+        );
+        self::assertEquals(
+            $token,
+            MetaGetter::getMeta($session)["x-ydb-auth-ticket"][0]
+        );
+        $session->query('select 1 as res');
+        self::assertEquals(
+            3,
+            $counter
+        );
         self::assertNotEquals(
             $token,
-            MetaGetter::getMeta($session)["x-ydb-auth-ticket"]
+            MetaGetter::getMeta($session)["x-ydb-auth-ticket"][0]
         );
     }
 }

@@ -13,10 +13,13 @@ class TokenInfo
      */
     protected $expiresAt;
 
+    private $refreshAt;
+
     public function __construct(string $token, int $expiresAt)
     {
         $this->token = $token;
         $this->expiresAt = $expiresAt;
+        $this->refreshAt = time() + 0.1*($this->expiresAt-time());
     }
 
     /**
@@ -33,5 +36,10 @@ class TokenInfo
     public function getToken(): string
     {
         return $this->token;
+    }
+
+    public function getRefreshAt(): int
+    {
+        return $this->refreshAt;
     }
 }
