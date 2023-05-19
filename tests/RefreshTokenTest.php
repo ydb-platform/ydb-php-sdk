@@ -25,7 +25,7 @@ class FakeCredentials extends Auth {
         if ($this->counter==2){
             throw new \Exception("Some error");
         }
-        return new TokenInfo(time()+3,time()+3);
+        return new TokenInfo(time()+10,time()+10);
     }
 
     public function getName(): string

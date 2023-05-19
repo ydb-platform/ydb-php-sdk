@@ -1,4 +1,4 @@
-name: CI test connection
+name: CI tests
 
 on:
   pull_request:
@@ -9,7 +9,7 @@ permissions:
   contents: read
 
 jobs:
-  build:
+  tests:
     services:
       ydb:
         image: cr.yandex/yc/yandex-docker-local-ydb:stable-22-5
@@ -23,7 +23,9 @@ jobs:
           YDB_USE_IN_MEMORY_PDISKS: true
         options: '-h localhost'
     runs-on: ubuntu-latest
-
+    strategy:
+      matrix:
+        php-versions: [ '7.0', '7.1', '7.2', '7.3', '7.4', '8.0', '8.1', '8.2' ]
     steps:
       - uses: actions/checkout@v3
         name: Checkout
@@ -38,7 +40,7 @@ jobs:
         id: php
         with:
           extensions: grpc
-          php-version: 7.4
+          php-version: ${{ matrix.php-versions }}
 
       - run: composer validate --strict
         name: Validate composer.json and composer.lock
