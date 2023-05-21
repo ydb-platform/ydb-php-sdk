@@ -82,7 +82,7 @@ class RefreshTokenTest extends TestCase
             $counter
         );
 
-        usleep(1.5e6);
+        usleep(2e6);
         $session->query('select 1 as res');
         self::assertEquals(
             2,
