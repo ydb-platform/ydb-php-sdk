@@ -354,7 +354,7 @@ class Iam implements IamTokenContract
     {
         if ($this->iam_token)
         {
-            if ($this->refresh_at < time()){
+            if ($this->refresh_at*1000000 < microtime()){
                 try {
                     return $this->newToken();
                 } catch (\Exception $e){
