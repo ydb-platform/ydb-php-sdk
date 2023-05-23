@@ -66,7 +66,7 @@ class RefreshTokenTest extends TestCase
             'iam_config'  => [
                 'insecure' => true,
             ],
-            'credentials' => new FakeCredentials($counter)
+            'credentials' => new FakeCredentials($counter, $TOKEN_LIVE_TIME)
         ];
         $ydb = new Ydb($config);
         $table = $ydb->table();
