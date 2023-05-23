@@ -45,6 +45,8 @@ class Scheme
 
         $this->meta = $ydb->meta();
 
+        $this->credentials = $ydb->iam();
+
         $this->database = $ydb->database();
 
         $this->logger = $logger;

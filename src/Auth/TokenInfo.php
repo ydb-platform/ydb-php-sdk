@@ -4,6 +4,7 @@ namespace YdbPlatform\Ydb\Auth;
 
 class TokenInfo
 {
+    const _PRIVATE_REFRESH_RATIO = 0.1;
     /**
      * @var string
      */
@@ -13,10 +14,13 @@ class TokenInfo
      */
     protected $expiresAt;
 
+    private $refreshAt;
+
     public function __construct(string $token, int $expiresAt)
     {
         $this->token = $token;
         $this->expiresAt = $expiresAt;
+        $this->refreshAt = time() + round(TokenInfo::_PRIVATE_REFRESH_RATIO*($this->expiresAt-time()),0);
     }
 
     /**
@@ -33,5 +37,10 @@ class TokenInfo
     public function getToken(): string
     {
         return $this->token;
+    }
+
+    public function getRefreshAt(): int
+    {
+        return $this->refreshAt;
     }
 }

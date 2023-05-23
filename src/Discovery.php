@@ -30,6 +30,10 @@ class Discovery
      * @var LoggerInterface
      */
     protected $logger;
+    /**
+     * @var Iam
+     */
+    protected $credentials;
 
     /**
      * @param Ydb $ydb
@@ -42,6 +46,8 @@ class Discovery
         ]);
 
         $this->meta = $ydb->meta();
+
+        $this->credentials = $ydb->iam();
 
         $this->database = $ydb->database();
 

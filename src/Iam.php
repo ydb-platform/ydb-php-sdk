@@ -46,6 +46,11 @@ class Iam implements IamTokenContract
     protected $logger;
 
     /**
+     * @var int
+     */
+    protected $refresh_at;
+
+    /**
      * @param array $config
      * @param LoggerInterface|null $logger
      */
@@ -96,9 +101,11 @@ class Iam implements IamTokenContract
         $tokenInfo = $this->config('credentials')->getTokenInfo();
         $this->iam_token = $tokenInfo->getToken();
         $this->expires_at = $tokenInfo->getExpiresAt();
+        $this->refresh_at = $tokenInfo->getRefreshAt();
         $this->saveToken((object)[
             "iamToken" => $tokenInfo->getToken(),
             "expiresAt" => $tokenInfo->getExpiresAt(),
+            "refreshAt" => $tokenInfo->getRefreshAt()
         ]);
         return $tokenInfo->getToken();
     }
@@ -347,11 +354,14 @@ class Iam implements IamTokenContract
     {
         if ($this->iam_token)
         {
-            if ($this->expires_at > time())
-            {
-                return $this->iam_token;
+            if ($this->refresh_at <= time()){
+                try {
+                    return $this->newToken();
+                } catch (\Exception $e){
+                    return $this->iam_token;
+                }
             }
-            return $this->newToken();
+            return $this->iam_token;
         }
 
         return $this->loadTokenFromFile();
@@ -372,6 +382,7 @@ class Iam implements IamTokenContract
             {
                 $this->iam_token = $token->iamToken;
                 $this->expires_at = $token->expiresAt;
+                $this->refresh_at = $token->refreshAt ?? time();
                 $this->logger()->info('YDB: Reused IAM token [...' . substr($this->iam_token, -6) . '].');
                 return $token->iamToken;
             }
@@ -390,10 +401,12 @@ class Iam implements IamTokenContract
 
         $this->iam_token = $token->iamToken;
         $this->expires_at = $this->convertExpiresAt($token->expiresAt ?? '');
+        $this->refresh_at = $token->refreshAt;
 
         file_put_contents($tokenFile, json_encode([
             'iamToken' => $this->iam_token,
             'expiresAt' => $this->expires_at,
+            'refreshAt' => $this->refresh_at
         ]));
     }
 

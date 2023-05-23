@@ -41,6 +41,10 @@ class Table
      * @var LoggerInterface
      */
     protected $logger;
+    /**
+     * @var Iam
+     */
+    protected $credentials;
 
     /**
      * @param Ydb $ydb
@@ -53,6 +57,8 @@ class Table
         ]);
 
         $this->meta = $ydb->meta();
+
+        $this->credentials = $ydb->iam();
 
         $this->path = $ydb->database();
 
@@ -282,6 +288,14 @@ class Table
     public function createTable($table, $columns, $primary_key = 'id', $indexes = [])
     {
         return $this->session()->createTable($table, $columns, $primary_key, $indexes);
+    }
+
+    /**
+     * @return Iam
+     */
+    public function credentials(): Iam
+    {
+        return $this->credentials;
     }
 
     /**
