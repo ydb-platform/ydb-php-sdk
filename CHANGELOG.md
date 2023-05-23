@@ -1,3 +1,7 @@
+* removed query id in prepare statement
+
+## 1.5.2
+
 * fixed refresh token when it expired
 * fixed retry at BAD_SESSION
 * added credentials authentication
