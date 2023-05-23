@@ -14,9 +14,12 @@ class FakeCredentials extends Auth {
      */
     protected $counter;
 
-    public function __construct(&$counter)
+    protected $tokenLiveTime;
+
+    public function __construct(&$counter, &$tokenLiveTime)
     {
         $this->counter = &$counter;
+        $this->tokenLiveTime = &$tokenLiveTime;
     }
 
     public function getTokenInfo(): TokenInfo
@@ -25,7 +28,7 @@ class FakeCredentials extends Auth {
         if ($this->counter==2){
             throw new \Exception("Some error");
         }
-        return new TokenInfo(time()+10,time()+10);
+        return new TokenInfo(time()+$this->tokenLiveTime,time()+$this->tokenLiveTime);
     }
 
     public function getName(): string
@@ -45,6 +48,8 @@ class RefreshTokenTest extends TestCase
     public function test(){
 
         $counter = 0;
+
+        $TOKEN_LIVE_TIME = 10;
 
         $config = [
 
@@ -82,9 +87,8 @@ class RefreshTokenTest extends TestCase
             $token,
             MetaGetter::getMeta($session)["x-ydb-auth-ticket"][0]
         );
-
         // Check that sdk used old token when failed refreshing
-        usleep(2*1000*1000); // waiting 2 seconds
+        usleep(TokenInfo::_PRIVATE_REFRESH_RATIO*$TOKEN_LIVE_TIME*1000*1000); // waiting 10% from token live time
         $session->query('select 1 as res');
         self::assertEquals(
             2,
