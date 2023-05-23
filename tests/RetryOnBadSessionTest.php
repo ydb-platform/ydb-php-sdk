@@ -4,6 +4,7 @@ namespace YdbPlatform\Ydb\Test;
 
 use PHPUnit\Framework\TestCase;
 use YdbPlatform\Ydb\Auth\Implement\AnonymousAuthentication;
+use YdbPlatform\Ydb\Table;
 use YdbPlatform\Ydb\Ydb;
 
 class SessionManager extends \YdbPlatform\Ydb\Session{
@@ -39,14 +40,15 @@ class RetryOnBadSessionTest extends TestCase
         ];
         $ydb = new Ydb($config);
         $table = $ydb->table();
-        $session = $table->session();
+        $session = $table->createSession();
         $oldSessionId = SessionManager::getSessionId($session);
         $session->delete();
-        $session = $table->session();
+        $session = $table->createSession();
         SessionManager::setSessionId($session,$oldSessionId);
+        $tres = $session->query('select 1 as res')->rows()[0]['res'];
         self::assertEquals(
             1,
-            $session->query('select 1 as res')->rows()[0]['res']
+            $tres
         );
     }
 }

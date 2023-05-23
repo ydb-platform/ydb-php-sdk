@@ -29,7 +29,7 @@ class PreparedQueryTest extends TestCase
         $ydb = new Ydb($config);
         $table = $ydb->table();
 
-        $session = $table->session();
+        $session = $table->createSession();
 
         $prepared_query = $ydb->table()->session()->prepare('
 declare $pk as Int64;

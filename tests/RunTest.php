@@ -38,7 +38,7 @@ class RunTest extends TestCase{
         $ydb = new Ydb($config);
         $table = $ydb->table();
 
-        $session = $table->session();
+        $session = $table->createSession();
 
         $session->createTable(
             'episodes',

@@ -70,7 +70,7 @@ class RefreshTokenTest extends TestCase
         ];
         $ydb = new Ydb($config);
         $table = $ydb->table();
-        $session = $table->session();
+        $session = $table->createSession();
         $token = MetaGetter::getMeta($session)["x-ydb-auth-ticket"][0];
         self::assertEquals(
             1,
