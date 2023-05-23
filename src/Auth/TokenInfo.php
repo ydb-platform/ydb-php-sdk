@@ -20,7 +20,7 @@ class TokenInfo
     {
         $this->token = $token;
         $this->expiresAt = $expiresAt;
-        $this->refreshAt = time() + round(0.1*($this->expiresAt-time()),0);
+        $this->refreshAt = time() + round(TokenInfo::_PRIVATE_REFRESH_RATIO*($this->expiresAt-time()),0);
     }
 
     /**
