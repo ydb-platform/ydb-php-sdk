@@ -4,6 +4,7 @@ namespace YdbPlatform\Ydb\Auth;
 
 class TokenInfo
 {
+    const _PRIVATE_REFRESH_RATIO = 0.1;
     /**
      * @var string
      */
