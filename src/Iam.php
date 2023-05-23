@@ -354,18 +354,14 @@ class Iam implements IamTokenContract
     {
         if ($this->iam_token)
         {
-            if ($this->refresh_at < microtime(true)){
+            if ($this->refresh_at < time()){
                 try {
                     return $this->newToken();
                 } catch (\Exception $e){
                     return $this->iam_token;
                 }
             }
-            else if ($this->expires_at > time())
-            {
-                return $this->iam_token;
-            }
-            return $this->newToken();
+            return $this->iam_token;
         }
 
         return $this->loadTokenFromFile();
@@ -386,7 +382,7 @@ class Iam implements IamTokenContract
             {
                 $this->iam_token = $token->iamToken;
                 $this->expires_at = $token->expiresAt;
-                $this->refresh_at = $token->refreshAt ?? $token->expiresAt;
+                $this->refresh_at = $token->refreshAt ?? time();
                 $this->logger()->info('YDB: Reused IAM token [...' . substr($this->iam_token, -6) . '].');
                 return $token->iamToken;
             }
