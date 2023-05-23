@@ -72,17 +72,19 @@ class RefreshTokenTest extends TestCase
             $counter
         );
 
+        // Check that the token will not be updated until a refresh time
         $session->query('select 1 as res');
-        self::assertEquals(
-            $token,
-            MetaGetter::getMeta($session)["x-ydb-auth-ticket"][0]
-        );
         self::assertEquals(
             1,
             $counter
         );
+        self::assertEquals(
+            $token,
+            MetaGetter::getMeta($session)["x-ydb-auth-ticket"][0]
+        );
 
-        usleep(2e6);
+        // Check that sdk used old token when failed refreshing
+        usleep(2*1000*1000); // waiting 2 seconds
         $session->query('select 1 as res');
         self::assertEquals(
             2,
@@ -92,6 +94,8 @@ class RefreshTokenTest extends TestCase
             $token,
             MetaGetter::getMeta($session)["x-ydb-auth-ticket"][0]
         );
+
+        // Check that token refreshed
         $session->query('select 1 as res');
         self::assertEquals(
             3,
