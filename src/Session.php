@@ -359,7 +359,7 @@ class Session
         $query = $this->newQuery($yql)
             ->parameters($parameters)
             ->txControl($tx_control)
-            ->keepInCache($this->keep_query_in_cache);
+            ->keepInCache($this->keep_query_in_cache || ($parameters&&count($parameters)>0));
 
         return $this->executeQuery($query);
     }
@@ -416,19 +416,10 @@ class Session
     {
         $statement = new Statement($this, $yql);
 
-        if ($statement->isCached())
-        {
-            return $statement;
-        }
-
         $result = $this->request('PrepareDataQuery', [
             'session_id' => $this->session_id,
             'yql_text' => $yql,
         ]);
-
-        $query_id = $result->getQueryId();
-
-        $statement->saveQueryId($query_id);
 
         return $statement;
     }
