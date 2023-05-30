@@ -416,10 +416,17 @@ class Session
     {
         $statement = new Statement($this, $yql);
 
+        if ($statement->isCached())
+        {
+            return $statement;
+        }
+
         $result = $this->request('PrepareDataQuery', [
             'session_id' => $this->session_id,
             'yql_text' => $yql,
         ]);
+
+        $statement->saveInCache();
 
         return $statement;
     }

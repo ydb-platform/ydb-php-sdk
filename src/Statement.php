@@ -22,9 +22,24 @@ class Statement
     protected $yql;
 
     /**
+     * @var string
+     */
+    protected $qhash;
+
+    /**
+     * @var bool
+     */
+    protected $cached = false;
+
+    /**
      * @var array
      */
     protected $params = [];
+
+    /**
+     * @var array
+     */
+    protected static $qcache = [];
 
     /**
      * @param Session $session
@@ -35,6 +50,7 @@ class Statement
         $this->session = $session;
         $this->yql = $yql;
 
+        $this->checkQueryCache();
         $this->detectParams();
     }
 
@@ -50,6 +66,14 @@ class Statement
         ]);
 
         return $this->session->query($q, $this->prepareParameters($parameters));
+    }
+
+    /**
+     * @return bool
+     */
+    public function isCached()
+    {
+        return $this->cached;
     }
 
     /**
@@ -84,6 +108,18 @@ class Statement
     /**
      * @return void
      */
+    protected function checkQueryCache()
+    {
+        $this->qhash = sha1(trim($this->yql));
+        if (in_array($this->qhash, static::$qcache))
+        {
+            $this->cached = true;
+        }
+    }
+
+    /**
+     * @return void
+     */
     protected function detectParams()
     {
         if (preg_match_all('/declare\s+(\$\w+)\s+as\s+(.+?);/is', $this->yql, $matches))
@@ -94,5 +130,9 @@ class Statement
                 $this->params[$param] = $type;
             }
         }
+    }
+
+    public function saveInCache(){
+        static::$qcache[$this->qhash] = $this->qhash;
     }
 }

@@ -31,7 +31,7 @@ class PreparedQueryTest extends TestCase
 
         $session = $table->createSession();
 
-        $prepared_query = $ydb->table()->session()->prepare('
+        $prepared_query = $session->prepare('
 declare $pk as Int64;
 select $pk;');
         $x = 2;
