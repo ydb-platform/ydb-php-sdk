@@ -68,7 +68,7 @@ class Session
     /**
      * @var bool
      */
-    protected $keep_query_in_cache = false;
+    protected $keep_query_in_cache = null;
 
     /**
      * @param Table $table
@@ -359,7 +359,7 @@ class Session
         $query = $this->newQuery($yql)
             ->parameters($parameters)
             ->txControl($tx_control)
-            ->keepInCache($this->keep_query_in_cache || ($parameters&&count($parameters)>0));
+            ->keepInCache($this->keep_query_in_cache ?? ($parameters&&count($parameters)>0));
 
         return $this->executeQuery($query);
     }
