@@ -1,3 +1,5 @@
+## 1.5.3
+
 * removed query id in prepare statement
 
 ## 1.5.2
