@@ -24,11 +24,6 @@ class Statement
     /**
      * @var string
      */
-    protected $query_id;
-
-    /**
-     * @var string
-     */
     protected $qhash;
 
     /**
@@ -67,7 +62,7 @@ class Statement
     public function execute(array $parameters = [])
     {
         $q = new Query([
-            'id' => $this->query_id,
+            'yql_text' => $this->yql,
         ]);
 
         return $this->session->query($q, $this->prepareParameters($parameters));
@@ -79,23 +74,6 @@ class Statement
     public function isCached()
     {
         return $this->cached;
-    }
-
-    /**
-     * @return string
-     */
-    public function getQueryId()
-    {
-        return $this->query_id;
-    }
-
-    /**
-     * @param string $query_id
-     */
-    public function saveQueryId($query_id)
-    {
-        $this->query_id = $query_id;
-        static::$qcache[$this->qhash] = $this->query_id;
     }
 
     /**
@@ -132,9 +110,8 @@ class Statement
      */
     protected function checkQueryCache()
     {
-        $this->qhash = sha1($this->session->id() . '~' . trim($this->yql));
-        $this->query_id = static::$qcache[$this->qhash] ?? null;
-        if ($this->query_id)
+        $this->qhash = sha1(trim($this->yql));
+        if (in_array($this->qhash, static::$qcache))
         {
             $this->cached = true;
         }
@@ -153,5 +130,9 @@ class Statement
                 $this->params[$param] = $type;
             }
         }
+    }
+
+    public function saveInCache(){
+        static::$qcache[$this->qhash] = $this->qhash;
     }
 }

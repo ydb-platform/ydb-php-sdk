@@ -1,3 +1,5 @@
+* removed query id in prepare statement
+
 ## 1.5.2
 
 * fixed refresh token when it expired
