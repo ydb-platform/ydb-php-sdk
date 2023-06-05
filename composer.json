@@ -30,11 +30,11 @@
         }
     },
     "autoload-dev": {
-        "psr-4": {
-            "YdbPlatform\\Ydb\\Test\\": "tests"
-        },
         "psr-0": {
             "App\\": "examples"
+        },
+        "psr-4": {
+            "YdbPlatform\\Ydb\\Test\\": "tests"
         }
     }
 }
