@@ -1,5 +1,5 @@
 {
-    "name": "ycloud/ydb-php-examples",
+    "name": "ydb-platform/ydb-php-examples",
     "description": "YDB PHP examples project",
     "license": "Apache-2.0",
     "type": "project",
