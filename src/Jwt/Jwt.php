@@ -54,7 +54,7 @@ class Jwt
      */
 	public function issuedAt(DateTimeInterface $value)
 	{
-		$this->payload['iat'] = $value->format('U');
+		$this->payload['iat'] = $value->getTimestamp();
 		return $this;
 	}
 
@@ -64,7 +64,7 @@ class Jwt
      */
 	public function expiresAt(DateTimeInterface $value)
 	{
-		$this->payload['exp'] = $value->format('U');
+		$this->payload['exp'] = $value->getTimestamp();
 		return $this;
 	}
 
