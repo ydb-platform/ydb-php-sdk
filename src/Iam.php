@@ -403,11 +403,14 @@ class Iam implements IamTokenContract
         $this->expires_at = $this->convertExpiresAt($token->expiresAt ?? '');
         $this->refresh_at = $token->refreshAt;
 
-        file_put_contents($tokenFile, json_encode([
+        $randPath = $tokenFile."-tmp".bin2hex(random_bytes(10));
+        file_put_contents($randPath, json_encode([
             'iamToken' => $this->iam_token,
             'expiresAt' => $this->expires_at,
             'refreshAt' => $this->refresh_at
         ]));
+        rename($randPath, $tokenFile);
+
     }
 
     /**
