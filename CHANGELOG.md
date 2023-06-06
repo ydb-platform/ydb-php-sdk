@@ -1,3 +1,7 @@
+## 1.5.4
+
+* fixed jwt authentication
+
 ## 1.5.3
 
 * removed query id in prepare statement
