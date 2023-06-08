@@ -1,0 +1,23 @@
+{
+    "name": "ycloud/ydb-php-examples",
+    "description": "YDB PHP examples project",
+    "license": "Apache-2.0",
+    "type": "project",
+    "authors": [
+        {
+            "name": "Alexei Shabalin",
+            "email": "mail@alshabalin.com"
+        }
+    ],
+    "require": {
+        "ydb-platform/ydb-php-sdk": "1.*",
+        "symfony/console": "^5.2",
+        "vlucas/phpdotenv": "^5.3",
+        "monolog/monolog": "^2.2"
+    },
+    "autoload": {
+        "psr-4": {
+            "App\\": "app/"
+        }
+    }
+}
