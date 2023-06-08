@@ -23,7 +23,6 @@
         "phpunit/phpunit": ">= 6.0, <10.0"
     },
     "autoload": {
-        "exclude-from-classmap": ["/examples/"],
         "psr-4": {
             "Ydb\\": "protos/Ydb/",
             "GPBMetadata\\": "protos/GPBMetadata/",
@@ -32,7 +31,8 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "YdbPlatform\\Ydb\\Test\\": "tests"
+            "YdbPlatform\\Ydb\\Test\\": "tests",
+            "App\\": "examples/"
         }
     }
 }
