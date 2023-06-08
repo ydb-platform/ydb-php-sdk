@@ -1,3 +1,5 @@
+* updated saveToken function in Iam.php
+
 ## 1.5.4
 
 * fixed jwt authentication
