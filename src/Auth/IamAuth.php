@@ -11,7 +11,7 @@ abstract class IamAuth extends Auth
      * @return mixed|null
      * @throws Exception
      */
-    public function requestToken($request_data): mixed
+    public function requestToken($request_data)
     {
         $this->logger()->info('YDB: Obtaining new IAM token...');
 
