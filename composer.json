@@ -9,7 +9,7 @@
         }
     ],
     "require": {
-        "php": ">=7.0",
+        "php": ">=7.3",
         "ext-bcmath": "*",
         "ext-curl": "*",
         "ext-grpc": "*",
@@ -31,7 +31,8 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "YdbPlatform\\Ydb\\Test\\": "tests"
+            "YdbPlatform\\Ydb\\Test\\": "tests",
+            "App\\": "examples/"
         }
     }
 }

@@ -1,3 +1,4 @@
+* added examples
 * updated saveToken function in Iam.php
 
 ## 1.5.4
