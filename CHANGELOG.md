@@ -1,3 +1,6 @@
+## 1.5.5
+
+* fixed iam auth for PHP < 8.0
 * added examples
 * updated saveToken function in Iam.php
 
