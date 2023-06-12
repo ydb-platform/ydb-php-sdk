@@ -6,6 +6,8 @@ use Closure;
 use Psr\Log\LoggerInterface;
 use YdbPlatform\Ydb\Exceptions\NonRetryableException;
 use YdbPlatform\Ydb\Exceptions\Ydb\BadSessionException;
+use YdbPlatform\Ydb\Retry\Retry;
+use YdbPlatform\Ydb\Retry\RetryParams;
 
 class Ydb
 {
@@ -264,9 +266,9 @@ class Ydb
     /**
      * @throws NonRetryableException
      */
-    public function retrySession(Closure $userFunc, bool $idempotent, ){
-        return $retry->retry(function () use ($userFunc){
-            $sessionId = null;
+    public function retry(Closure $userFunc, bool $idempotent = false, RetryParams $params){
+        $retry = new Retry($params);
+        return $retry->retry(function () use ($userFunc){null;
             try{
                 return $userFunc($this);
             }catch (\Exception $bse){

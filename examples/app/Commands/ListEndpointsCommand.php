@@ -40,11 +40,15 @@ class ListEndpointsCommand extends Command
     {
         $ydb = $this->appService->initYdb();
 
-        $discovery = $ydb->discovery();
+        $ydb->retry(function (Ydb $ydb) use ($output) {
 
-        $result = $discovery->listEndpoints();
+            $discovery = $ydb->discovery();
 
-        $output->writeln(json_encode($result, 480));
+            $result = $discovery->listEndpoints();
+
+            $output->writeln(json_encode($result, 480));
+
+        });
 
         return Command::SUCCESS;
     }

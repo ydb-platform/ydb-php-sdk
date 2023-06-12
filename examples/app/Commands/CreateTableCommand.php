@@ -7,6 +7,7 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use YdbPlatform\Ydb\Session;
 
 class CreateTableCommand extends Command
 {
@@ -48,17 +49,18 @@ class CreateTableCommand extends Command
 
         $ydb = $this->appService->initYdb();
 
-        $session = $ydb->table()->session();
+        $ydb->table()->retrySession(function (Session $session){
 
-        $result = $session->createTable($table_name, $columns, 'id');
+            $result = $session->createTable($table_name, $columns, 'id');
 
-        $output->writeln('Table ' . $table_name . ' has been created.');
+            $output->writeln('Table ' . $table_name . ' has been created.');
 
-        $session->transaction(function($session) use ($table_name, $columns) {
-            $session->query('upsert into `' . $table_name . '` (`' . implode('`, `', array_keys($columns)) . '`) values (' . implode('), (', $this->getData()) . ');');
+            $session->transaction(function($session) use ($table_name, $columns) {
+                $session->query('upsert into `' . $table_name . '` (`' . implode('`, `', array_keys($columns)) . '`) values (' . implode('), (', $this->getData()) . ');');
+            });
+
+            $output->writeln('Table ' . $table_name . ' has been populated with some data.');
         });
-
-        $output->writeln('Table ' . $table_name . ' has been populated with some data.');
 
         return Command::SUCCESS;
     }

@@ -8,6 +8,7 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use YdbPlatform\Ydb\Ydb;
 
 class ReadTableCommand extends Command
 {
@@ -47,68 +48,70 @@ class ReadTableCommand extends Command
 
         $ydb = $this->appService->initYdb();
 
-        $table = $ydb->table();
+        $ydb->retry(function (Ydb $ydb) use ($table_name, $output) {
+            $table = $ydb->table();
 
-        $description = $table->describeTable($table_name);
+            $description = $table->describeTable($table_name);
 
-        $columns = [];
+            $columns = [];
 
-        foreach ($description['columns'] ?? [] as $column)
-        {
-            $columns[] = $column['name'];
-        }
+            foreach ($description['columns'] ?? [] as $column)
+            {
+                $columns[] = $column['name'];
+            }
 
-        if ( ! $columns)
-        {
-            throw new \Exception('Failed to get columns for table ' . $table_name);
-        }
+            if ( ! $columns)
+            {
+                throw new \Exception('Failed to get columns for table ' . $table_name);
+            }
 
-        $options = [
-            'row_limit' => 10,
-            'ordered' => true,
-            'key_range' => [
-                'gte' => $table->tuple('uint64', 10),
-                'lte' => $table->tuple('uint64', 30),
+            $options = [
+                'row_limit' => 10,
+                'ordered' => true,
+                'key_range' => [
+                    'gte' => $table->tuple('uint64', 10),
+                    'lte' => $table->tuple('uint64', 30),
 
-                // other options:
+                    // other options:
 
-                // multi-column primary key:
-                // 'lte' => $table->tuple('uint64,uin64', [30, 10]), // two-column primary key
+                    // multi-column primary key:
+                    // 'lte' => $table->tuple('uint64,uin64', [30, 10]), // two-column primary key
 
-                // operators variant:
-                // 'less' => $table->tuple('uint64', 30), // less than
-                // 'lt' => $table->tuple('uint64', 30), // less than
-                // '<' => $table->tuple('uint64', 30), // less than
+                    // operators variant:
+                    // 'less' => $table->tuple('uint64', 30), // less than
+                    // 'lt' => $table->tuple('uint64', 30), // less than
+                    // '<' => $table->tuple('uint64', 30), // less than
 
-                // 'less_or_equal' => $table->tuple('uint64', 30), // less than or equal
-                // 'lte' => $table->tuple('uint64', 30), // less than or equal
-                // '<=' => $table->tuple('uint64', 30), // less than or equal
+                    // 'less_or_equal' => $table->tuple('uint64', 30), // less than or equal
+                    // 'lte' => $table->tuple('uint64', 30), // less than or equal
+                    // '<=' => $table->tuple('uint64', 30), // less than or equal
 
-                // 'greater' => $table->tuple('uint64', 30), // greater than
-                // 'gt' => $table->tuple('uint64', 30), // greater than
-                // '>' => $table->tuple('uint64', 30), // greater than
+                    // 'greater' => $table->tuple('uint64', 30), // greater than
+                    // 'gt' => $table->tuple('uint64', 30), // greater than
+                    // '>' => $table->tuple('uint64', 30), // greater than
 
-                // 'greater_or_equal' => $table->tuple('uint64', 30), // greater than or equal
-                // 'gte' => $table->tuple('uint64', 30), // greater than or equal
-                // '>=' => $table->tuple('uint64', 30), // greater than or equal
-            ],
-        ];
+                    // 'greater_or_equal' => $table->tuple('uint64', 30), // greater than or equal
+                    // 'gte' => $table->tuple('uint64', 30), // greater than or equal
+                    // '>=' => $table->tuple('uint64', 30), // greater than or equal
+                ],
+            ];
 
-        foreach ($table->readTable($table_name, $columns, $options) as $i => $result)
-        {
-            $output->writeln('Portion #' . ($i + 1));
-            $output->writeln('Column count: ' . $result->columnCount());
-            $output->writeln('Row count: ' . $result->rowCount());
+            foreach ($table->readTable($table_name, $columns, $options) as $i => $result)
+            {
+                $output->writeln('Portion #' . ($i + 1));
+                $output->writeln('Column count: ' . $result->columnCount());
+                $output->writeln('Row count: ' . $result->rowCount());
 
-            $t = new Table($output);
-            $t
-                ->setHeaders(array_map(function($column) {
-                    return $column['name'];
-                }, $result->columns()))
-                ->setRows($result->rows())
-            ;
-            $t->render();
-        }
+                $t = new Table($output);
+                $t
+                    ->setHeaders(array_map(function($column) {
+                        return $column['name'];
+                    }, $result->columns()))
+                    ->setRows($result->rows())
+                ;
+                $t->render();
+            }
+        });
 
         return Command::SUCCESS;
     }

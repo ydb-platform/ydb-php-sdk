@@ -6,6 +6,7 @@ use App\AppService;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use YdbPlatform\Ydb\Ydb;
 
 class WhoAmICommand extends Command
 {
@@ -40,11 +41,15 @@ class WhoAmICommand extends Command
     {
         $ydb = $this->appService->initYdb();
 
-        $discovery = $ydb->discovery();
+        $ydb->retry(function (Ydb $ydb) use ($output) {
 
-        $result = $discovery->whoAmI();
+            $discovery = $ydb->discovery();
 
-        $output->writeln($result);
+            $result = $discovery->whoAmI();
+
+            $output->writeln($result);
+
+        });
 
         return Command::SUCCESS;
     }

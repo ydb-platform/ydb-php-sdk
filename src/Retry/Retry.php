@@ -9,6 +9,19 @@ use YdbPlatform\Ydb\Exceptions\RetryableException;
 class Retry
 {
 
+    /**
+     * @var RetryParams
+     */
+    private $params;
+
+    public function __construct(?RetryParams $params)
+    {
+        if (is_null($params)){
+            $params = new RetryParams();
+        }
+        $this->params = $params;
+    }
+
     protected function retryDelay(int $retryCount, Backoff $backoff)
     {
         return $backoff->getBackoffSlotMillis()*(1<<min($retryCount, $backoff->getBackoffCeiling()));
@@ -18,11 +31,11 @@ class Retry
      * @throws NonRetryableException
      * @throws RetryableException
      */
-    public function retry(Closure $closure, RetryParams $params, bool $idempotent){
+    public function retry(Closure $closure, bool $idempotent){
         $startTime = microtime(true);
         $retryCount = 0;
         $lastException = null;
-        while (microtime(true) < $startTime+$params->getTimeoutMs()/1000){
+        while (microtime(true) < $startTime+$this->params->getTimeoutMs()/1000){
             try {
                 return $closure();
             } catch (RetryableException $e){

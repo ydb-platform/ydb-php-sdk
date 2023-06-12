@@ -7,6 +7,7 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use YdbPlatform\Ydb\Ydb;
 
 class MakeDirectoryCommand extends Command
 {
@@ -45,11 +46,13 @@ class MakeDirectoryCommand extends Command
 
         $ydb = $this->appService->initYdb();
 
-        $scheme = $ydb->scheme();
+        $ydb->retry(function (Ydb $ydb) use ($output, $dirname) {
+            $scheme = $ydb->scheme();
 
-        $result = $scheme->makeDirectory($dirname);
+            $result = $scheme->makeDirectory($dirname);
 
-        $output->writeln(json_encode($result, 480));
+            $output->writeln(json_encode($result, 480));
+        });
 
         return Command::SUCCESS;
     }

@@ -9,8 +9,10 @@ use Ydb\Table\Query;
 use Ydb\Table\V1\TableServiceClient as ServiceClient;
 use YdbPlatform\Ydb\Contracts\SessionPoolContract;
 use YdbPlatform\Ydb\Exceptions\NonRetryableException;
+use YdbPlatform\Ydb\Exceptions\RetryableException;
 use YdbPlatform\Ydb\Exceptions\Ydb\BadSessionException;
 use YdbPlatform\Ydb\Retry\Retry;
+use YdbPlatform\Ydb\Retry\RetryParams;
 
 class Table
 {
@@ -426,8 +428,10 @@ class Table
 
     /**
      * @throws NonRetryableException
+     * @throws RetryableException
      */
-    public function retrySession(Closure $userFunc, Retry $retry, bool $idempotent){
+    public function retrySession(Closure $userFunc, bool $idempotent = false, RetryParams $params = null){
+        $retry = new Retry($params);
         return $retry->retry(function () use ($userFunc){
             $sessionId = null;
             try{

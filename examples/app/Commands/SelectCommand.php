@@ -8,6 +8,8 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use YdbPlatform\Ydb\Session;
+use YdbPlatform\Ydb\Ydb;
 
 class SelectCommand extends Command
 {
@@ -47,21 +49,23 @@ class SelectCommand extends Command
 
         $ydb = $this->appService->initYdb();
 
-        $table = $ydb->table();
+        $ydb->table()->retrySession(function (Session $session) use ($table_name, $output) {
 
-        $result = $table->session()->query('select * from `' . $table_name . '` limit 10;');
+            $result = $session->query('select * from `' . $table_name . '` limit 10;');
 
-        $output->writeln('Column count: ' . $result->columnCount());
-        $output->writeln('Row count: ' . $result->rowCount());
+            $output->writeln('Column count: ' . $result->columnCount());
+            $output->writeln('Row count: ' . $result->rowCount());
 
-        $t = new Table($output);
-        $t
-            ->setHeaders(array_map(function($column) {
-                return $column['name'];
-            }, $result->columns()))
-            ->setRows($result->rows())
-        ;
-        $t->render();
+            $t = new Table($output);
+            $t
+                ->setHeaders(array_map(function($column) {
+                    return $column['name'];
+                }, $result->columns()))
+                ->setRows($result->rows())
+            ;
+            $t->render();
+
+        });
 
         return Command::SUCCESS;
     }
