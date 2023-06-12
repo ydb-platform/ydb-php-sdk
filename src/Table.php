@@ -4,10 +4,13 @@ namespace YdbPlatform\Ydb;
 
 use Closure;
 use Exception;
-use Ydb\Table\Query;
 use Psr\Log\LoggerInterface;
+use Ydb\Table\Query;
 use Ydb\Table\V1\TableServiceClient as ServiceClient;
 use YdbPlatform\Ydb\Contracts\SessionPoolContract;
+use YdbPlatform\Ydb\Exceptions\NonRetryableException;
+use YdbPlatform\Ydb\Exceptions\Ydb\BadSessionException;
+use YdbPlatform\Ydb\Retry\Retry;
 
 class Table
 {
@@ -419,6 +422,24 @@ class Table
     protected function streamRequest($method, array $data = [])
     {
         return $this->doStreamRequest('Table', $method, $data);
+    }
+
+    /**
+     * @throws NonRetryableException
+     */
+    public function retrySession(Closure $userFunc, Retry $retry, bool $idempotent){
+        return $retry->retry(function () use ($userFunc){
+            $sessionId = null;
+            try{
+                $session = $this->session();
+                $sessionId = $session->id();
+                return $userFunc($session);
+            }catch (BadSessionException $bse){
+                $this->dropSession($sessionId);
+                throw $bse;
+            }
+        }, $idempotent);
+
     }
 
 }

@@ -2,7 +2,10 @@
 
 namespace YdbPlatform\Ydb;
 
+use Closure;
 use Psr\Log\LoggerInterface;
+use YdbPlatform\Ydb\Exceptions\NonRetryableException;
+use YdbPlatform\Ydb\Exceptions\Ydb\BadSessionException;
 
 class Ydb
 {
@@ -258,5 +261,18 @@ class Ydb
 
         return $this->scripting;
     }
+    /**
+     * @throws NonRetryableException
+     */
+    public function retrySession(Closure $userFunc, bool $idempotent, ){
+        return $retry->retry(function () use ($userFunc){
+            $sessionId = null;
+            try{
+                return $userFunc($this);
+            }catch (\Exception $bse){
+                throw $bse;
+            }
+        }, $idempotent);
 
+    }
 }
