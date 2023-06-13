@@ -461,4 +461,23 @@ class Table
 
     }
 
+    public function retryTransaction(Closure $userFunc, bool $idempotent = false, RetryParams $params = null){
+
+        return $this->retry->withParams($params)->retry(function () use ($userFunc){
+            $sessionId = null;
+            try{
+                $session = $this->session();
+                $sessionId = $session->id();
+                $session->beginTransaction();
+                $result = $userFunc($session);
+                $session->commitTransaction();
+                return $result;
+            }catch (BadSessionException $bse){
+                $this->dropSession($sessionId);
+                throw $bse;
+            }
+        }, $idempotent);
+
+    }
+
 }
