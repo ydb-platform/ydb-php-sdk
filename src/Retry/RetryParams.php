@@ -11,21 +11,15 @@ class RetryParams
     protected $slowBackOff;
     protected $fastBackOff;
 
-    public function __construct($timeoutMs = 2000, Backoff $fastBackOff = null, Backoff $slowBackOff = null)
+    public function __construct($timeoutMs = null, Backoff $fastBackOff = null, Backoff $slowBackOff = null)
     {
         $this->timeoutMs = $timeoutMs;
-        if (!$fastBackOff){
-            $fastBackOff = new Backoff(6, 5);
-        }
         $this->fastBackOff = $fastBackOff;
-        if (!$slowBackOff){
-            $slowBackOff = new Backoff(6, 1000);
-        }
         $this->slowBackOff = $slowBackOff;
     }
 
     /**
-     * @return int|mixed
+     * @return int|null
      */
     public function getTimeoutMs()
     {

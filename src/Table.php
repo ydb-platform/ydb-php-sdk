@@ -11,6 +11,7 @@ use YdbPlatform\Ydb\Contracts\SessionPoolContract;
 use YdbPlatform\Ydb\Exceptions\NonRetryableException;
 use YdbPlatform\Ydb\Exceptions\RetryableException;
 use YdbPlatform\Ydb\Exceptions\Ydb\BadSessionException;
+use YdbPlatform\Ydb\Retry\Backoff;
 use YdbPlatform\Ydb\Retry\Retry;
 use YdbPlatform\Ydb\Retry\RetryParams;
 
@@ -52,10 +53,15 @@ class Table
     protected $credentials;
 
     /**
+     * @var Retry
+     */
+    private $retry;
+
+    /**
      * @param Ydb $ydb
      * @param LoggerInterface|null $logger
      */
-    public function __construct(Ydb $ydb, LoggerInterface $logger = null)
+    public function __construct(Ydb $ydb, LoggerInterface $logger = null, Retry &$retry)
     {
         $this->client = new ServiceClient($ydb->endpoint(), [
             'credentials' => $ydb->iam()->getCredentials(),
@@ -68,6 +74,8 @@ class Table
         $this->path = $ydb->database();
 
         $this->logger = $logger;
+
+        $this->retry = $retry;
 
         if (empty(static::$session_pool))
         {
@@ -427,12 +435,19 @@ class Table
     }
 
     /**
+     * @param RetryParams $params
+     */
+    public function setRetryParams(RetryParams $params): void
+    {
+        $this->retry = $this->retry->withParams($params);
+    }
+
+    /**
      * @throws NonRetryableException
      * @throws RetryableException
      */
     public function retrySession(Closure $userFunc, bool $idempotent = false, RetryParams $params = null){
-        $retry = new Retry($params);
-        return $retry->retry(function () use ($userFunc){
+        return $this->retry->withParams($params)->retry(function () use ($userFunc){
             $sessionId = null;
             try{
                 $session = $this->session();
