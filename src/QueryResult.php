@@ -2,6 +2,8 @@
 
 namespace YdbPlatform\Ydb;
 
+use DateTime;
+
 class QueryResult
 {
     protected $columns = [];
@@ -192,7 +194,9 @@ class QueryResult
                         break;
 
                     case 'TIMESTAMP':
-                        $_row[$column['name']] = is_numeric($value) ? date('Y-m-d H:i:s', $value / 1000000) : $value;
+                        $_row[$column['name']] = is_numeric($value) ?
+                            (DateTime::createFromFormat("U.u", $value/1000000 .".".str_pad($value%1000000,6,"0", STR_PAD_LEFT)))->format('Y-m-d H:i:s.u')
+                            : $value;
                         break;
 
                     case 'DATETIME':
