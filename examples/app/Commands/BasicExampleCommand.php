@@ -234,17 +234,15 @@ class BasicExampleCommand extends Command
 
     protected function fillTablesWithData()
     {
-        $this->ydb->table()->retrySession(function (Session $session) {
+        $this->ydb->table()->retryTransaction(function (Session $session) {
 
             $prepared_query = $session->prepare($this->getFillDataQuery());
 
-            $session->transaction(function () use ($prepared_query) {
-                $prepared_query->execute([
-                    'seriesData' => $this->getSeriesData(),
-                    'seasonsData' => $this->getSeasonsData(),
-                    'episodesData' => $this->getEpisodesData(),
-                ]);
-            });
+            $prepared_query->execute([
+                'seriesData' => $this->getSeriesData(),
+                'seasonsData' => $this->getSeasonsData(),
+                'episodesData' => $this->getEpisodesData(),
+            ]);
 
         });
 
@@ -253,7 +251,7 @@ class BasicExampleCommand extends Command
 
     protected function selectSimple()
     {
-        $session = $this->ydb->table()->session(function (Session $session){
+        $result = $this->ydb->table()->retryTransaction(function (Session $session) {
 
             $result = $session->transaction(function (Session $session) {
                 return $session->query('
@@ -265,20 +263,17 @@ class BasicExampleCommand extends Command
                 FROM series
                 WHERE series_id = 1;');
             });
-            $this->print($result->rows());
         });
 
+        $this->print($result->rows());
     }
 
     protected function upsertSimple()
     {
-        $this->ydb->table()->retrySession(function (Session $session) {
-
-            $session->transaction(function (Session $session) {
-                return $session->query('
+        $this->ydb->table()->transaction(function (Session $session) {
+            return $session->query('
                 UPSERT INTO episodes (series_id, season_id, episode_id, title)
                 VALUES (2, 6, 1, "TBD");');
-            });
         });
 
         $this->print('Finished.');
@@ -312,7 +307,7 @@ class BasicExampleCommand extends Command
      */
     protected function selectPrepared($series_id, $season_id, $episode_id)
     {
-        $this->ydb->table()->retrySession(function (Session $session) use ($series_id, $season_id, $episode_id) {
+        $this->ydb->table()->retryTransaction(function (Session $session) use ($series_id, $season_id, $episode_id) {
 
             $prepared_query = $session->prepare('
             DECLARE $series_id AS Uint64;
@@ -326,13 +321,11 @@ class BasicExampleCommand extends Command
             FROM episodes
             WHERE series_id = $series_id AND season_id = $season_id AND episode_id = $episode_id;');
 
-            $result = $session->transaction(function (Session $session) use ($prepared_query, $series_id, $season_id, $episode_id) {
-                return $prepared_query->execute(compact(
-                    'series_id',
-                    'season_id',
-                    'episode_id'
-                ));
-            });
+            $result = $prepared_query->execute(compact(
+                'series_id',
+                'season_id',
+                'episode_id'
+            ));
 
             $this->print($result->rows());
         });
@@ -345,7 +338,7 @@ class BasicExampleCommand extends Command
      */
     protected function explicitTcl($series_id, $season_id, $episode_id)
     {
-        $this->ydb->table()->retrySession(function (Session $session) use ($series_id, $season_id, $episode_id) {
+        $this->ydb->table()->transaction(function (Session $session) use ($series_id, $season_id, $episode_id) {
 
             $prepared_query = $session->prepare('
             DECLARE $today AS Uint64;
@@ -357,7 +350,6 @@ class BasicExampleCommand extends Command
             SET air_date = $today
             WHERE series_id = $series_id AND season_id = $season_id AND episode_id = $episode_id;');
 
-            $session->beginTransaction();
 
             $today = strtotime('today');
 
@@ -368,7 +360,6 @@ class BasicExampleCommand extends Command
                 'today'
             ));
 
-            $session->commitTransaction();
         });
 
         $this->print('Finished.');

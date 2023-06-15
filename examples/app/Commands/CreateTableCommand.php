@@ -49,7 +49,7 @@ class CreateTableCommand extends Command
 
         $ydb = $this->appService->initYdb();
 
-        $ydb->table()->retrySession(function (Session $session){
+        $ydb->table()->retrySession(function (Session $session) use ($output, $columns, $table_name) {
 
             $result = $session->createTable($table_name, $columns, 'id');
 
