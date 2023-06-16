@@ -149,17 +149,40 @@ class CheckTypeTest  extends TestCase{
                     "2023-06-14 17:12:15"
                 ]
             ],
-//            "Timestamp" => [
-//                "class"     => TimestampType::class,
-//                "values"    => [
-//                    new TimestampType(43578634985)
-//                ]
-//            ]
+            "Timestamp" => [
+                "class"     => TimestampType::class,
+                "values"    => [
+                    "2023-06-14 17:12:15"
+                ]
+            ]
         ];
 
         $ydb = new Ydb($config);
         $table = $ydb->table();
         $session = $table->createSession();
+
+
+        $query = "DECLARE \$v as Struct<x:Int32>; SELECT \$v as val;";
+        $prepared = $session->prepare($query);
+        $result = $prepared->execute([
+            'v' => ["x"=>2],
+        ]);
+        print_r($result);
+
+        $query = "DECLARE \$v as List<Int32>; SELECT \$v as val;";
+        $prepared = $session->prepare($query);
+        $result = $prepared->execute([
+            'v' => [2],
+        ]);
+        print_r($result);
+
+//        $query = "DECLARE \$v as Optional<Int32>; SELECT \$v as val;";
+//        $prepared = $session->prepare($query);
+//        $result = $prepared->execute([
+//            'v' => 2,
+//        ]);
+//        print_r($result);
+
         foreach ($checkTypes as $type=>$data) {
             $query = "DECLARE \$v as $type; SELECT \$v as val;";
             $prepared = $session->prepare($query);
