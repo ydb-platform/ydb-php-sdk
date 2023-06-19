@@ -167,14 +167,12 @@ class CheckTypeTest  extends TestCase{
         $result = $prepared->execute([
             'v' => ["x"=>2],
         ]);
-        print_r($result);
 
         $query = "DECLARE \$v as List<Int32>; SELECT \$v as val;";
         $prepared = $session->prepare($query);
         $result = $prepared->execute([
             'v' => [2],
         ]);
-        print_r($result);
 
 //        $query = "DECLARE \$v as Optional<Int32>; SELECT \$v as val;";
 //        $prepared = $session->prepare($query);
