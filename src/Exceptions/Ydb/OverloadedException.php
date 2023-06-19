@@ -2,7 +2,7 @@
 
 namespace YdbPlatform\Ydb\Exceptions\Ydb;
 
-class OverloadException extends \YdbPlatform\Ydb\Exceptions\RetryableException
+class OverloadedException extends \YdbPlatform\Ydb\Exceptions\RetryableException
 {
     public function isFastBackoff(): bool
     {

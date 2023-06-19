@@ -79,14 +79,10 @@ class Retry
         while (microtime(true) < $startTime+$this->timeoutMs/1000){
             try {
                 return $closure();
-            } catch (UndeterminedException $undeterminedException){
-                $lastException = $undeterminedException;
-                if (!$idempotent){
-                    break;
-                }
-                $retryCount++;
-                $this->retryDelay($retryCount,$this->backoffType($e));
             } catch (RetryableException $e){
+                if (!isset(self::$idempotentOnly[get_class($e)])){
+                    throw $e;
+                }
                 $retryCount++;
                 $this->retryDelay($retryCount,$this->backoffType($e));
                 $lastException = $e;
@@ -121,5 +117,17 @@ class Retry
             return $this->slowBackOff;
         }
     }
+
+    private static $idempotentOnly = [
+        \YdbPlatform\Ydb\Exceptions\Grpc\CanceledException::class,
+        \YdbPlatform\Ydb\Exceptions\Grpc\DeadlineExceededException::class,
+        \YdbPlatform\Ydb\Exceptions\Grpc\InternalException::class,
+        \YdbPlatform\Ydb\Exceptions\Grpc\UnavailableException::class,
+        \YdbPlatform\Ydb\Exceptions\Ydb\UndeterminedException::class
+    ];
+
+    private static $fastBackoff = [
+
+    ];
 
 }

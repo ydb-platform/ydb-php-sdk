@@ -456,26 +456,9 @@ class Table
             try {
                 $session = $this->session();
                 return $userFunc($session);
-            } catch (UnknownException $unknownException) {
-                $this->dropSession($session->id());
-                throw $unknownException;
-            } catch (InvalidArgumentException $invalidArgumentException){
-                $this->dropSession($session->id());
-                throw $invalidArgumentException;
-            } catch (BadSessionException $badSessionException){
-                $this->dropSession($session->id());
-                throw $badSessionException;
-            } catch (SessionBusyException $sessionBusyException){
-                $this->dropSession($session->id());
-                throw $sessionBusyException;
-            } catch (SessionExpiredException $sessionExpiredException){
-                $this->dropSession($session->id());
-                throw $sessionExpiredException;
             } catch (Exception $exception){
-                try {
-                    $session->rollbackTransaction();
-                } catch (Exception $e){
-
+                if (!is_null($session) && isset(self::$deleteSession[get_class($exception)])){
+                    $this->dropSession($session->id());
                 }
                 throw $exception;
             }
@@ -485,34 +468,43 @@ class Table
 
     public function retryTransaction(Closure $userFunc, bool $idempotent = false, RetryParams $params = null){
 
-        return $this->retry->withParams($params)->retry(function () use ($userFunc){
-            $session = null;
-            try{
-                $session = $this->session();
-                $session->beginTransaction();
-                $result = $userFunc($session);
-                $session->commitTransaction();
-                return $result;
-            } catch (BadSessionException $badSessionException){
-                $this->dropSession($session->id());
-                throw $badSessionException;
-            } catch (SessionBusyException $sessionBusyException){
-                $this->dropSession($session->id());
-                throw $sessionBusyException;
-            } catch (SessionExpiredException $sessionExpiredException){
-                $this->dropSession($session->id());
-                throw $sessionExpiredException;
-            } catch (Exception $exception){
-                try {
-                    $session->rollbackTransaction();
-                } catch (Exception $e){
-
+        return $this->retry->withParams($params)->retry(function () use ($params, $idempotent, $userFunc){
+            $this->retrySession(function (Session $session) use ($userFunc) {
+                try{
+                        $session->beginTransaction();
+                        $result = $userFunc($session);
+                        $session->commitTransaction();
+                        return $result;
+                } catch (Exception $exception){
+                    try {
+                        $session->rollbackTransaction();
+                    } catch (Exception $e){}
+                    throw $exception;
                 }
-                throw $exception;
-            }
-
+            }, $idempotent, $params);
         }, $idempotent);
 
     }
+
+
+    private static $deleteSession = [
+        \YdbPlatform\Ydb\Exceptions\Grpc\CanceledException::class,
+        \YdbPlatform\Ydb\Exceptions\Grpc\UnknownException::class,
+        \YdbPlatform\Ydb\Exceptions\Grpc\InvalidArgumentException::class,
+        \YdbPlatform\Ydb\Exceptions\Grpc\DeadlineExceededException::class,
+        \YdbPlatform\Ydb\Exceptions\Grpc\NotFoundException::class,
+        \YdbPlatform\Ydb\Exceptions\Grpc\AlreadyExistsException::class,
+        \YdbPlatform\Ydb\Exceptions\Grpc\PermissionDeniedException::class,
+        \YdbPlatform\Ydb\Exceptions\Grpc\FailedPreconditionException::class,
+        \YdbPlatform\Ydb\Exceptions\Grpc\AbortedException::class,
+        \YdbPlatform\Ydb\Exceptions\Grpc\UnimplementedException::class,
+        \YdbPlatform\Ydb\Exceptions\Grpc\InternalException::class,
+        \YdbPlatform\Ydb\Exceptions\Grpc\UnavailableException::class,
+        \YdbPlatform\Ydb\Exceptions\Grpc\DataLossException::class,
+        \YdbPlatform\Ydb\Exceptions\Grpc\UnauthenticatedException::class,
+        \YdbPlatform\Ydb\Exceptions\Ydb\BadSessionException::class,
+        \YdbPlatform\Ydb\Exceptions\Ydb\SessionExpiredException::class,
+        \YdbPlatform\Ydb\Exceptions\Ydb\SessionBusyException::class
+    ];
 
 }

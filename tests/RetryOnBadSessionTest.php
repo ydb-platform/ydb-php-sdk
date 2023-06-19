@@ -19,6 +19,11 @@ class SessionManager extends \YdbPlatform\Ydb\Session{
 
 class RetryOnBadSessionTest extends TestCase
 {
+    /**
+     * @var string
+     */
+    private $oldSessionId;
+
     public function test(){
 
         $config = [
@@ -38,17 +43,42 @@ class RetryOnBadSessionTest extends TestCase
             ],
             'credentials' => new AnonymousAuthentication()
         ];
+
         $ydb = new Ydb($config);
         $table = $ydb->table();
+
         $session = $table->createSession();
-        $oldSessionId = SessionManager::getSessionId($session);
+        $this->oldSessionId = SessionManager::getSessionId($session);
         $session->delete();
+
+//        $this->backwardCompatibility($table);
+
+        $this->retryTest($table);
+
+    }
+
+    private function backwardCompatibility(Table $table)
+    {
         $session = $table->createSession();
-        SessionManager::setSessionId($session,$oldSessionId);
+        SessionManager::setSessionId($session, $this->oldSessionId);
         $tres = $session->query('select 1 as res')->rows()[0]['res'];
         self::assertEquals(
             1,
             $tres
         );
+    }
+
+    private function retryTest(Table $table)
+    {
+        $i = 0;
+        $table->retrySession(function ($session) use (&$i){
+            $i++;
+            if($i==1)SessionManager::setSessionId($session, $this->oldSessionId);
+            $tres = $session->query('select 1 as res')->rows()[0]['res'];
+            self::assertEquals(
+                1,
+                $tres
+            );
+        });
     }
 }

@@ -2,23 +2,31 @@
 
 namespace YdbPlatform\Ydb\Traits;
 
-use Grpc\Status;
 use Ydb\StatusIds\StatusCode;
 
 use YdbPlatform\Ydb\Exceptions\Grpc\CanceledException;
 use YdbPlatform\Ydb\Exceptions\Grpc\DeadlineExceededException;
 use YdbPlatform\Ydb\Exceptions\Grpc\InvalidArgumentException;
+use YdbPlatform\Ydb\Exceptions\Grpc\NotFoundException;
+use YdbPlatform\Ydb\Exceptions\Grpc\PermissionDeniedException;
 use YdbPlatform\Ydb\Exceptions\Grpc\UnknownException;
 use YdbPlatform\Ydb\Exceptions\Ydb\AbortedException;
 use YdbPlatform\Ydb\Exceptions\Ydb\AlreadyExistsException;
 use YdbPlatform\Ydb\Exceptions\Ydb\BadRequestException;
 use YdbPlatform\Ydb\Exceptions\Ydb\BadSessionException;
 use YdbPlatform\Ydb\Exceptions\Ydb\ClientResourceExhaustedException;
-use YdbPlatform\Ydb\Exceptions\Ydb\OverloadException;
+use YdbPlatform\Ydb\Exceptions\Ydb\GenericErrorException;
+use YdbPlatform\Ydb\Exceptions\Ydb\InternalErrorException;
+use YdbPlatform\Ydb\Exceptions\Ydb\OverloadedException;
+use YdbPlatform\Ydb\Exceptions\Ydb\PreconditionFailedException;
+use YdbPlatform\Ydb\Exceptions\Ydb\SchemeErrorException;
 use YdbPlatform\Ydb\Exceptions\Ydb\SessionBusyException;
 use YdbPlatform\Ydb\Exceptions\Ydb\SessionExpiredException;
 use YdbPlatform\Ydb\Exceptions\Ydb\TimeoutException;
+use YdbPlatform\Ydb\Exceptions\Ydb\UnauthorisedException;
 use YdbPlatform\Ydb\Exceptions\Ydb\UnavailableException;
+use YdbPlatform\Ydb\Exceptions\Ydb\UndeterminedException;
+use YdbPlatform\Ydb\Exceptions\Ydb\UnsupportedException;
 use YdbPlatform\Ydb\Issue;
 use YdbPlatform\Ydb\Exception;
 use YdbPlatform\Ydb\QueryResult;
@@ -168,17 +176,10 @@ trait RequestTrait
     {
         if (isset($status->code) && $status->code !== 0) {
             $message = 'YDB ' . $service . ' ' . $method . ' (status code GRPC_' . $status->code . '): ' . ($status->details ?? 'no details');
-            switch ($status->code){
-                case 1:
-                    throw new CanceledException($message);
-                case 2:
-                    throw new UnknownException($message);
-                case 3:
-                    throw new InvalidArgumentException($message);
-                case 4:
-                    throw new DeadlineExceededException($message);
-                default:
-                    throw new Exception($message);
+            if (isset(self::$ydbExceptions[$status->code])) {
+                throw new self::$ydbExceptions[$status->code]($message);
+            } else {
+                throw new \Exception($message);
             }
         }
     }
@@ -247,32 +248,10 @@ trait RequestTrait
         );
 
         $msg = 'YDB ' . $service . ' ' . $method . ' (YDB_' . $statusCode . ' ' . $statusName . '): ' . $message;
-        switch ($statusCode) {
-            case StatusCode::ABORTED:
-                throw new AbortedException($msg);
-            case StatusCode::SESSION_BUSY:
-                throw new SessionBusyException($msg);
-            case StatusCode::SESSION_EXPIRED:
-                throw new SessionExpiredException($msg);
-            case StatusCode::ALREADY_EXISTS:
-                throw new AlreadyExistsException($msg);
-            case StatusCode::BAD_REQUEST:
-                throw new BadRequestException($msg);
-            case StatusCode::BAD_SESSION:
-                throw new BadSessionException($msg);
-            case StatusCode::OVERLOADED:
-                throw new OverloadException($msg);
-//            case StatusCode::CLIENT_RESOURCE_EXHAUSTED:
-//                throw new ClientResourceExhaustedException($msg);
-            case StatusCode::ABORTED:
-                throw new AbortedException($msg);
-            case StatusCode::UNAVAILABLE:
-                throw new UnavailableException($msg);
-//                 case StatusCode::TRANSPORT_UNAVAILABLE:
-            case StatusCode::TIMEOUT: // ?
-                throw new TimeoutException($message);
-            default:
-                throw new Exception($message);
+        if (isset(self::$ydbExceptions[$statusCode])) {
+            throw new self::$ydbExceptions[$statusCode]($msg);
+        } else {
+            throw new \Exception($msg);
         }
     }
 
@@ -317,5 +296,45 @@ trait RequestTrait
         $this->last_request_data = null;
         $this->last_request_try_count = 0;
     }
+
+    private static $ydbExceptions = [
+        StatusCode::BAD_REQUEST => \YdbPlatform\Ydb\Exceptions\Ydb\BadRequestException::class,
+        StatusCode::UNAUTHORIZED => \YdbPlatform\Ydb\Exceptions\Ydb\UnauthorisedException::class,
+        StatusCode::INTERNAL_ERROR => \YdbPlatform\Ydb\Exceptions\Ydb\InternalErrorException::class,
+        StatusCode::ABORTED => \YdbPlatform\Ydb\Exceptions\Ydb\AbortedException::class,
+        StatusCode::UNAVAILABLE => \YdbPlatform\Ydb\Exceptions\Ydb\UnavailableException::class,
+        StatusCode::OVERLOADED => \YdbPlatform\Ydb\Exceptions\Ydb\OverloadedException::class,
+        StatusCode::SCHEME_ERROR => \YdbPlatform\Ydb\Exceptions\Ydb\SchemeErrorException::class,
+        StatusCode::GENERIC_ERROR => \YdbPlatform\Ydb\Exceptions\Ydb\GenericErrorException::class,
+        StatusCode::TIMEOUT => \YdbPlatform\Ydb\Exceptions\Ydb\TimeoutException::class,
+        StatusCode::BAD_SESSION => \YdbPlatform\Ydb\Exceptions\Ydb\BadSessionException::class,
+        StatusCode::PRECONDITION_FAILED => \YdbPlatform\Ydb\Exceptions\Ydb\PreconditionFailedException::class,
+        StatusCode::ALREADY_EXISTS => \YdbPlatform\Ydb\Exceptions\Ydb\AlreadyExistsException::class,
+        StatusCode::NOT_FOUND => \YdbPlatform\Ydb\Exceptions\Ydb\NotFoundException::class,
+        StatusCode::SESSION_EXPIRED => \YdbPlatform\Ydb\Exceptions\Ydb\SessionExpiredException::class,
+        StatusCode::CANCELLED => \YdbPlatform\Ydb\Exceptions\Ydb\CanceledException::class,
+        StatusCode::UNDETERMINED => \YdbPlatform\Ydb\Exceptions\Ydb\UndeterminedException::class,
+        StatusCode::UNSUPPORTED => \YdbPlatform\Ydb\Exceptions\Ydb\UnsupportedException::class,
+        StatusCode::SESSION_BUSY => \YdbPlatform\Ydb\Exceptions\Ydb\SessionBusyException::class,
+    ];
+
+    private static $grpcExceptions = [
+        1 => \YdbPlatform\Ydb\Exceptions\Grpc\CanceledException::class,
+        2 => \YdbPlatform\Ydb\Exceptions\Grpc\UnknownException::class,
+        3 => \YdbPlatform\Ydb\Exceptions\Grpc\InvalidArgumentException::class,
+        4 => \YdbPlatform\Ydb\Exceptions\Grpc\DeadlineExceededException::class,
+        5 => \YdbPlatform\Ydb\Exceptions\Grpc\NotFoundException::class,
+        6 => \YdbPlatform\Ydb\Exceptions\Grpc\AlreadyExistsException::class,
+        7 => \YdbPlatform\Ydb\Exceptions\Grpc\PermissionDeniedException::class,
+        8 => \YdbPlatform\Ydb\Exceptions\Grpc\ResourceExhaustedException::class,
+        9 => \YdbPlatform\Ydb\Exceptions\Grpc\FailedPreconditionException::class,
+        10 => \YdbPlatform\Ydb\Exceptions\Grpc\AbortedException::class,
+        11 => \YdbPlatform\Ydb\Exceptions\Grpc\OutOfRangeException::class,
+        12 => \YdbPlatform\Ydb\Exceptions\Grpc\UnimplementedException::class,
+        13 => \YdbPlatform\Ydb\Exceptions\Grpc\InternalException::class,
+        14 => \YdbPlatform\Ydb\Exceptions\Grpc\UnavailableException::class,
+        15 => \YdbPlatform\Ydb\Exceptions\Grpc\DataLossException::class,
+        16 => \YdbPlatform\Ydb\Exceptions\Grpc\UnauthenticatedException::class
+    ];
 
 }
