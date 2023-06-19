@@ -31,7 +31,7 @@ class Retry
 
     protected function retryDelay(int $retryCount, Backoff $backoff)
     {
-        return $backoff->getBackoffSlotMillis()*(1<<min($retryCount, $backoff->getBackoffCeiling()));
+        return $backoff->getBackoffSlotMillis() * (1 << min($retryCount, $backoff->getBackoffCeiling()));
     }
 
     /**
@@ -72,21 +72,22 @@ class Retry
      * @throws NonRetryableException
      * @throws RetryableException
      */
-    public function retry(Closure $closure, bool $idempotent){
+    public function retry(Closure $closure, bool $idempotent)
+    {
         $startTime = microtime(true);
         $retryCount = 0;
         $lastException = null;
-        while (microtime(true) < $startTime+$this->timeoutMs/1000){
+        while (microtime(true) < $startTime + $this->timeoutMs / 1000) {
             try {
                 return $closure();
-            } catch (RetryableException $e){
-                if (!isset(self::$idempotentOnly[get_class($e)])){
+            } catch (RetryableException $e) {
+                if (isset(self::$idempotentOnly[get_class($e)]) && $idempotent) {
                     throw $e;
                 }
                 $retryCount++;
-                $this->retryDelay($retryCount,$this->backoffType($e));
+                $this->retryDelay($retryCount, $this->backoffType($e));
                 $lastException = $e;
-            } catch (Exception $e){
+            } catch (Exception $e) {
                 throw $e;
             }
         }
@@ -99,23 +100,24 @@ class Retry
      */
     protected function backoffType(RetryableException $e): Backoff
     {
-        if ($e instanceof AbortedException){
-            return $this->fastBackOff;
-        } elseif ($e instanceof BadSessionException) {
-            return $this->fastBackOff;
-        } elseif ($e instanceof SessionBusyException) {
-            return $this->fastBackOff;
-        } elseif ($e instanceof UndeterminedException) {
-            return $this->fastBackOff;
-        } elseif ($e instanceof UnavailableException) {
-            return $this->fastBackOff;
-        } elseif ($e instanceof UndeterminedException) {
-            return $this->fastBackOff;
-        } elseif ($e instanceof DeadlineExceededException){
-            return $this->fastBackOff;
-        } else {
-            return $this->slowBackOff;
-        }
+        return $this->fastBackOff;
+//        if ($e instanceof AbortedException) {
+//            return $this->fastBackOff;
+//        } elseif ($e instanceof BadSessionException) {
+//            return $this->fastBackOff;
+//        } elseif ($e instanceof SessionBusyException) {
+//            return $this->fastBackOff;
+//        } elseif ($e instanceof UndeterminedException) {
+//            return $this->fastBackOff;
+//        } elseif ($e instanceof UnavailableException) {
+//            return $this->fastBackOff;
+//        } elseif ($e instanceof UndeterminedException) {
+//            return $this->fastBackOff;
+//        } elseif ($e instanceof DeadlineExceededException) {
+//            return $this->fastBackOff;
+//        } else {
+//            return $this->slowBackOff;
+//        }
     }
 
     private static $idempotentOnly = [

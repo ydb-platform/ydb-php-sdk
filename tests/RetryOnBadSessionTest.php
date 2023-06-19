@@ -4,6 +4,7 @@ namespace YdbPlatform\Ydb\Test;
 
 use PHPUnit\Framework\TestCase;
 use YdbPlatform\Ydb\Auth\Implement\AnonymousAuthentication;
+use YdbPlatform\Ydb\Session;
 use YdbPlatform\Ydb\Table;
 use YdbPlatform\Ydb\Ydb;
 
@@ -71,7 +72,7 @@ class RetryOnBadSessionTest extends TestCase
     private function retryTest(Table $table)
     {
         $i = 0;
-        $table->retrySession(function ($session) use (&$i){
+        $table->retrySession(function (Session $session) use (&$i){
             $i++;
             if($i==1)SessionManager::setSessionId($session, $this->oldSessionId);
             $tres = $session->query('select 1 as res')->rows()[0]['res'];
@@ -79,6 +80,6 @@ class RetryOnBadSessionTest extends TestCase
                 1,
                 $tres
             );
-        });
+        }, true);
     }
 }

@@ -457,7 +457,7 @@ class Table
                 $session = $this->session();
                 return $userFunc($session);
             } catch (Exception $exception){
-                if (!is_null($session) && isset(self::$deleteSession[get_class($exception)])){
+                if ($session != null && in_array(get_class($exception), self::$deleteSession)){
                     $this->dropSession($session->id());
                 }
                 throw $exception;
