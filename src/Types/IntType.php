@@ -94,10 +94,10 @@ class IntType extends AbstractType
      */
     protected function normalizeValue($value)
     {
-        if ($value < 0)
-        {
-            $this->unsigned = true;
-        }
+//        if ($value < 0)
+//        {
+//            $this->unsigned = true;
+//        }
         return (int)$value;
     }
 

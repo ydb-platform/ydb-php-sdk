@@ -1,5 +1,9 @@
 * added retry function
 
+## 1.5.6
+
+* added support of php 7.2
+
 ## 1.5.5
 
 * fixed iam auth for PHP < 8.0

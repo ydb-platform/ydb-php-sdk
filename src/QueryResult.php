@@ -2,6 +2,8 @@
 
 namespace YdbPlatform\Ydb;
 
+use DateTime;
+
 class QueryResult
 {
     protected $columns = [];
@@ -192,7 +194,7 @@ class QueryResult
                         break;
 
                     case 'TIMESTAMP':
-                        $_row[$column['name']] = is_numeric($value) ? date('Y-m-d H:i:s', $value / 1000000) : $value;
+                        $_row[$column['name']] = is_numeric($value) ? date('Y-m-d H:i:s', $value/1000000) : $value;
                         break;
 
                     case 'DATETIME':

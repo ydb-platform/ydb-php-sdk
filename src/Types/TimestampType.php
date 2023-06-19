@@ -7,6 +7,10 @@ use Exception;
 
 class TimestampType extends DatetimeType
 {
+
+    protected $ydb_key_name = "uint64_value";
+
+    protected $ydb_type = "TIMESTAMP";
     /**
      * @inherit
      */
