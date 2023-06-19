@@ -3,8 +3,15 @@
 namespace YdbPlatform\Ydb\Retry;
 
 use Closure;
+use YdbPlatform\Ydb\Exception;
+use YdbPlatform\Ydb\Exceptions\Grpc\DeadlineExceededException;
 use YdbPlatform\Ydb\Exceptions\NonRetryableException;
 use YdbPlatform\Ydb\Exceptions\RetryableException;
+use YdbPlatform\Ydb\Exceptions\Ydb\AbortedException;
+use YdbPlatform\Ydb\Exceptions\Ydb\BadSessionException;
+use YdbPlatform\Ydb\Exceptions\Ydb\SessionBusyException;
+use YdbPlatform\Ydb\Exceptions\Ydb\UnavailableException;
+use YdbPlatform\Ydb\Exceptions\Ydb\UndeterminedException;
 
 class Retry
 {
@@ -72,16 +79,47 @@ class Retry
         while (microtime(true) < $startTime+$this->timeoutMs/1000){
             try {
                 return $closure();
+            } catch (UndeterminedException $undeterminedException){
+                $lastException = $undeterminedException;
+                if (!$idempotent){
+                    break;
+                }
+                $retryCount++;
+                $this->retryDelay($retryCount,$this->backoffType($e));
             } catch (RetryableException $e){
                 $retryCount++;
-                $this->retryDelay($retryCount,
-                    $e->isFastBackoff() ? $params->getFastBackOff() : $params->getSlowBackOff());
+                $this->retryDelay($retryCount,$this->backoffType($e));
                 $lastException = $e;
-            } catch (NonRetryableException $e){
+            } catch (Exception $e){
                 throw $e;
             }
         }
         throw $lastException;
+    }
+
+    /**
+     * @param RetryableException $e
+     * @return Backoff
+     */
+    protected function backoffType(RetryableException $e): Backoff
+    {
+        if ($e instanceof AbortedException){
+            return $this->fastBackOff;
+        } elseif ($e instanceof BadSessionException) {
+            return $this->fastBackOff;
+        } elseif ($e instanceof SessionBusyException) {
+            return $this->fastBackOff;
+        } elseif ($e instanceof UndeterminedException) {
+            return $this->fastBackOff;
+        } elseif ($e instanceof UnavailableException) {
+            return $this->fastBackOff;
+        } elseif ($e instanceof UndeterminedException) {
+            return $this->fastBackOff;
+        } elseif ($e instanceof DeadlineExceededException){
+            return $this->fastBackOff;
+        } else {
+            return $this->slowBackOff;
+        }
     }
 
 }

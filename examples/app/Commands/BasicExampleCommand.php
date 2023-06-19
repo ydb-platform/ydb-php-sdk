@@ -3,6 +3,8 @@
 namespace App\Commands;
 
 use App\AppService;
+use YdbPlatform\Ydb\Retry\Backoff;
+use YdbPlatform\Ydb\Retry\RetryParams;
 use YdbPlatform\Ydb\Session;
 use YdbPlatform\Ydb\Ydb;
 use YdbPlatform\Ydb\YdbTable;
@@ -234,6 +236,7 @@ class BasicExampleCommand extends Command
 
     protected function fillTablesWithData()
     {
+        $params = new RetryParams(4000,null,new Backoff(10,1000));
         $this->ydb->table()->retryTransaction(function (Session $session) {
 
             $prepared_query = $session->prepare($this->getFillDataQuery());
@@ -244,16 +247,15 @@ class BasicExampleCommand extends Command
                 'episodesData' => $this->getEpisodesData(),
             ]);
 
-        });
+        }, false, $params);
 
         $this->print('Finished.');
     }
 
     protected function selectSimple()
     {
+        $params = new RetryParams(4000,new Backoff(3,20));
         $result = $this->ydb->table()->retryTransaction(function (Session $session) {
-
-            $result = $session->transaction(function (Session $session) {
                 return $session->query('
                 $format = DateTime::Format("%Y-%m-%d");
                 SELECT
@@ -262,8 +264,7 @@ class BasicExampleCommand extends Command
                     $format(DateTime::FromSeconds(CAST(release_date AS Uint32))) AS release_date
                 FROM series
                 WHERE series_id = 1;');
-            });
-        });
+        }, true, $params);
 
         $this->print($result->rows());
     }
@@ -338,7 +339,7 @@ class BasicExampleCommand extends Command
      */
     protected function explicitTcl($series_id, $season_id, $episode_id)
     {
-        $this->ydb->table()->transaction(function (Session $session) use ($series_id, $season_id, $episode_id) {
+        $this->ydb->table()->retryTransaction(function (Session $session) use ($series_id, $season_id, $episode_id) {
 
             $prepared_query = $session->prepare('
             DECLARE $today AS Uint64;

@@ -8,9 +8,13 @@ use Psr\Log\LoggerInterface;
 use Ydb\Table\Query;
 use Ydb\Table\V1\TableServiceClient as ServiceClient;
 use YdbPlatform\Ydb\Contracts\SessionPoolContract;
+use YdbPlatform\Ydb\Exceptions\Grpc\InvalidArgumentException;
+use YdbPlatform\Ydb\Exceptions\Grpc\UnknownException;
 use YdbPlatform\Ydb\Exceptions\NonRetryableException;
 use YdbPlatform\Ydb\Exceptions\RetryableException;
 use YdbPlatform\Ydb\Exceptions\Ydb\BadSessionException;
+use YdbPlatform\Ydb\Exceptions\Ydb\SessionBusyException;
+use YdbPlatform\Ydb\Exceptions\Ydb\SessionExpiredException;
 use YdbPlatform\Ydb\Retry\Backoff;
 use YdbPlatform\Ydb\Retry\Retry;
 use YdbPlatform\Ydb\Retry\RetryParams;
@@ -448,14 +452,32 @@ class Table
      */
     public function retrySession(Closure $userFunc, bool $idempotent = false, RetryParams $params = null){
         return $this->retry->withParams($params)->retry(function () use ($userFunc){
-            $sessionId = null;
-            try{
+            $session = null;
+            try {
                 $session = $this->session();
-                $sessionId = $session->id();
                 return $userFunc($session);
-            }catch (BadSessionException $bse){
-                $this->dropSession($sessionId);
-                throw $bse;
+            } catch (UnknownException $unknownException) {
+                $this->dropSession($session->id());
+                throw $unknownException;
+            } catch (InvalidArgumentException $invalidArgumentException){
+                $this->dropSession($session->id());
+                throw $invalidArgumentException;
+            } catch (BadSessionException $badSessionException){
+                $this->dropSession($session->id());
+                throw $badSessionException;
+            } catch (SessionBusyException $sessionBusyException){
+                $this->dropSession($session->id());
+                throw $sessionBusyException;
+            } catch (SessionExpiredException $sessionExpiredException){
+                $this->dropSession($session->id());
+                throw $sessionExpiredException;
+            } catch (Exception $exception){
+                try {
+                    $session->rollbackTransaction();
+                } catch (Exception $e){
+
+                }
+                throw $exception;
             }
         }, $idempotent);
 
@@ -464,18 +486,31 @@ class Table
     public function retryTransaction(Closure $userFunc, bool $idempotent = false, RetryParams $params = null){
 
         return $this->retry->withParams($params)->retry(function () use ($userFunc){
-            $sessionId = null;
+            $session = null;
             try{
                 $session = $this->session();
-                $sessionId = $session->id();
                 $session->beginTransaction();
                 $result = $userFunc($session);
                 $session->commitTransaction();
                 return $result;
-            }catch (BadSessionException $bse){
-                $this->dropSession($sessionId);
-                throw $bse;
+            } catch (BadSessionException $badSessionException){
+                $this->dropSession($session->id());
+                throw $badSessionException;
+            } catch (SessionBusyException $sessionBusyException){
+                $this->dropSession($session->id());
+                throw $sessionBusyException;
+            } catch (SessionExpiredException $sessionExpiredException){
+                $this->dropSession($session->id());
+                throw $sessionExpiredException;
+            } catch (Exception $exception){
+                try {
+                    $session->rollbackTransaction();
+                } catch (Exception $e){
+
+                }
+                throw $exception;
             }
+
         }, $idempotent);
 
     }

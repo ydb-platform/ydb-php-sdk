@@ -6,6 +6,9 @@ use Closure;
 use Psr\Log\LoggerInterface;
 use YdbPlatform\Ydb\Exceptions\NonRetryableException;
 use YdbPlatform\Ydb\Exceptions\RetryableException;
+use YdbPlatform\Ydb\Exceptions\Ydb\BadSessionException;
+use YdbPlatform\Ydb\Exceptions\Ydb\SessionBusyException;
+use YdbPlatform\Ydb\Exceptions\Ydb\SessionExpiredException;
 use YdbPlatform\Ydb\Retry\Retry;
 use YdbPlatform\Ydb\Retry\RetryParams;
 
@@ -290,9 +293,10 @@ class Ydb
     public function retry(Closure $userFunc, bool $idempotent = false, RetryParams $params = null){
         return $this->retry->withParams($params)->retry(function () use ($userFunc){
             try{
-                return $userFunc($this);
-            }catch (\Exception $bse){
-                throw $bse;
+                $result = $userFunc($this);
+                return $result;
+            } catch (Exception $exception) {
+                throw $exception;
             }
         }, $idempotent);
     }
