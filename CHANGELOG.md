@@ -1,3 +1,5 @@
+* added optional type in prepare statment
+
 ## 1.5.6
 
 * added support of php 7.2
