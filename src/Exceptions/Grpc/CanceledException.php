@@ -2,9 +2,9 @@
 
 namespace YdbPlatform\Ydb\Exceptions\Grpc;
 
-use YdbPlatform\Ydb\Exceptions\NonRetryableException;
+use YdbPlatform\Ydb\Exceptions\RetryableException;
 
-class CanceledException extends NonRetryableException
+class CanceledException extends RetryableException
 {
 
 }

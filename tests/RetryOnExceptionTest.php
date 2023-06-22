@@ -4,6 +4,7 @@ namespace YdbPlatform\Ydb\Test;
 
 use PHPUnit\Framework\TestCase;
 use YdbPlatform\Ydb\Auth\Implement\AnonymousAuthentication;
+use YdbPlatform\Ydb\Retry\RetryParams;
 use YdbPlatform\Ydb\Session;
 use YdbPlatform\Ydb\Table;
 use YdbPlatform\Ydb\Ydb;
@@ -80,6 +81,6 @@ class RetryOnBadSessionTest extends TestCase
                 1,
                 $tres
             );
-        }, true);
+        }, false, new RetryParams(20000));
     }
 }

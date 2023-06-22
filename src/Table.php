@@ -457,7 +457,7 @@ class Table
                 $session = $this->session();
                 return $userFunc($session);
             } catch (Exception $exception){
-                if ($session != null && in_array(get_class($exception), self::$deleteSession)){
+                if ($session != null && $this->deleteSession(get_class($exception))){
                     $this->dropSession($session->id());
                 }
                 throw $exception;
@@ -486,6 +486,10 @@ class Table
 
     }
 
+    protected function deleteSession(string $exception): bool
+    {
+        return in_array($exception, self::$deleteSession);
+    }
 
     private static $deleteSession = [
         \YdbPlatform\Ydb\Exceptions\Grpc\CanceledException::class,
@@ -502,6 +506,7 @@ class Table
         \YdbPlatform\Ydb\Exceptions\Grpc\UnavailableException::class,
         \YdbPlatform\Ydb\Exceptions\Grpc\DataLossException::class,
         \YdbPlatform\Ydb\Exceptions\Grpc\UnauthenticatedException::class,
+        \YdbPlatform\Ydb\Exceptions\Ydb\StatusCodeUnspecified::class,
         \YdbPlatform\Ydb\Exceptions\Ydb\BadSessionException::class,
         \YdbPlatform\Ydb\Exceptions\Ydb\SessionExpiredException::class,
         \YdbPlatform\Ydb\Exceptions\Ydb\SessionBusyException::class

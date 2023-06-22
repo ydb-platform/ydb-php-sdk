@@ -2,19 +2,9 @@
 
 namespace YdbPlatform\Ydb\Exceptions;
 
-class RetryableException extends \Exception
-{
-    /**
-     * @var bool
-     */
-    protected $fastBackoff;
+use YdbPlatform\Ydb\Exception;
 
-    /**
-     * @return bool
-     */
-    public function isFastBackoff(): bool
-    {
-        return $this->fastBackoff;
-    }
+class RetryableException extends Exception
+{
 
 }

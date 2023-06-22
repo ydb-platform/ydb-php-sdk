@@ -2,6 +2,8 @@
 
 namespace YdbPlatform\Ydb\Exceptions;
 
-class NonRetryableException extends \Exception
+use YdbPlatform\Ydb\Exception;
+
+class NonRetryableException extends Exception
 {
 }

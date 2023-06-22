@@ -21,12 +21,14 @@ class Retry
     protected $slowBackOff;
 
     protected $fastBackOff;
+    protected $noBackOff;
 
     public function __construct()
     {
         $this->timeoutMs = 2000;
         $this->fastBackOff = new Backoff(6, 5);
         $this->slowBackOff = new Backoff(6, 1000);
+        $this->noBackOff = new Backoff(0, 0);
     }
 
     protected function retryDelay(int $retryCount, Backoff $backoff)
@@ -80,56 +82,61 @@ class Retry
         while (microtime(true) < $startTime + $this->timeoutMs / 1000) {
             try {
                 return $closure();
-            } catch (RetryableException $e) {
-                if (isset(self::$idempotentOnly[get_class($e)]) && $idempotent) {
+            } catch (Exception $e) {
+                if (!$this->canRetry($e, $idempotent)){
                     throw $e;
                 }
                 $retryCount++;
                 $this->retryDelay($retryCount, $this->backoffType($e));
                 $lastException = $e;
-            } catch (Exception $e) {
-                throw $e;
             }
         }
         throw $lastException;
     }
 
     /**
-     * @param RetryableException $e
+     * @param string $e
      * @return Backoff
      */
-    protected function backoffType(RetryableException $e): Backoff
+    protected function backoffType(string $e): Backoff
     {
-        return $this->fastBackOff;
-//        if ($e instanceof AbortedException) {
-//            return $this->fastBackOff;
-//        } elseif ($e instanceof BadSessionException) {
-//            return $this->fastBackOff;
-//        } elseif ($e instanceof SessionBusyException) {
-//            return $this->fastBackOff;
-//        } elseif ($e instanceof UndeterminedException) {
-//            return $this->fastBackOff;
-//        } elseif ($e instanceof UnavailableException) {
-//            return $this->fastBackOff;
-//        } elseif ($e instanceof UndeterminedException) {
-//            return $this->fastBackOff;
-//        } elseif ($e instanceof DeadlineExceededException) {
-//            return $this->fastBackOff;
-//        } else {
-//            return $this->slowBackOff;
-//        }
+        return in_array($e, self::$immediatelyBackoff)?$this->noBackOff:
+            (in_array($e, self::$fastBackoff)?$this->fastBackOff:$this->slowBackOff);
     }
 
-    private static $idempotentOnly = [
+    protected function alwaysRetry(string $exception){
+        return in_array($exception, self::$alwaysRetry);
+    }
+
+    protected function canRetry(Exception $e, bool $idempotent)
+    {
+        return is_a($e, RetryableException::class)&&($this->alwaysRetry(get_class($e)) || $idempotent);
+    }
+    private static $immediatelyBackoff = [
+        \YdbPlatform\Ydb\Exceptions\Grpc\AbortedException::class,
+        \YdbPlatform\Ydb\Exceptions\Ydb\BadSessionException::class,
+    ];
+
+    private static $fastBackoff = [
         \YdbPlatform\Ydb\Exceptions\Grpc\CanceledException::class,
         \YdbPlatform\Ydb\Exceptions\Grpc\DeadlineExceededException::class,
         \YdbPlatform\Ydb\Exceptions\Grpc\InternalException::class,
         \YdbPlatform\Ydb\Exceptions\Grpc\UnavailableException::class,
-        \YdbPlatform\Ydb\Exceptions\Ydb\UndeterminedException::class
+        \YdbPlatform\Ydb\Exceptions\Ydb\AbortedException::class,
+        \YdbPlatform\Ydb\Exceptions\Ydb\UnavailableException::class,
+        \YdbPlatform\Ydb\Exceptions\Ydb\CancelledException::class,
+        \YdbPlatform\Ydb\Exceptions\Ydb\UndeterminedException::class,
+        \YdbPlatform\Ydb\Exceptions\Ydb\SessionBusyException::class,
     ];
 
-    private static $fastBackoff = [
-
+    private static $alwaysRetry = [
+        \YdbPlatform\Ydb\Exceptions\Grpc\ResourceExhaustedException::class,
+        \YdbPlatform\Ydb\Exceptions\Grpc\AbortedException::class,
+        \YdbPlatform\Ydb\Exceptions\Ydb\AbortedException::class,
+        \YdbPlatform\Ydb\Exceptions\Ydb\UnavailableException::class,
+        \YdbPlatform\Ydb\Exceptions\Ydb\OverloadedException::class,
+        \YdbPlatform\Ydb\Exceptions\Ydb\BadSessionException::class,
+        \YdbPlatform\Ydb\Exceptions\Ydb\SessionBusyException::class,
     ];
 
 }

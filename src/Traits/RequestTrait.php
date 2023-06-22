@@ -4,29 +4,6 @@ namespace YdbPlatform\Ydb\Traits;
 
 use Ydb\StatusIds\StatusCode;
 
-use YdbPlatform\Ydb\Exceptions\Grpc\CanceledException;
-use YdbPlatform\Ydb\Exceptions\Grpc\DeadlineExceededException;
-use YdbPlatform\Ydb\Exceptions\Grpc\InvalidArgumentException;
-use YdbPlatform\Ydb\Exceptions\Grpc\NotFoundException;
-use YdbPlatform\Ydb\Exceptions\Grpc\PermissionDeniedException;
-use YdbPlatform\Ydb\Exceptions\Grpc\UnknownException;
-use YdbPlatform\Ydb\Exceptions\Ydb\AbortedException;
-use YdbPlatform\Ydb\Exceptions\Ydb\AlreadyExistsException;
-use YdbPlatform\Ydb\Exceptions\Ydb\BadRequestException;
-use YdbPlatform\Ydb\Exceptions\Ydb\BadSessionException;
-use YdbPlatform\Ydb\Exceptions\Ydb\ClientResourceExhaustedException;
-use YdbPlatform\Ydb\Exceptions\Ydb\GenericErrorException;
-use YdbPlatform\Ydb\Exceptions\Ydb\InternalErrorException;
-use YdbPlatform\Ydb\Exceptions\Ydb\OverloadedException;
-use YdbPlatform\Ydb\Exceptions\Ydb\PreconditionFailedException;
-use YdbPlatform\Ydb\Exceptions\Ydb\SchemeErrorException;
-use YdbPlatform\Ydb\Exceptions\Ydb\SessionBusyException;
-use YdbPlatform\Ydb\Exceptions\Ydb\SessionExpiredException;
-use YdbPlatform\Ydb\Exceptions\Ydb\TimeoutException;
-use YdbPlatform\Ydb\Exceptions\Ydb\UnauthorisedException;
-use YdbPlatform\Ydb\Exceptions\Ydb\UnavailableException;
-use YdbPlatform\Ydb\Exceptions\Ydb\UndeterminedException;
-use YdbPlatform\Ydb\Exceptions\Ydb\UnsupportedException;
 use YdbPlatform\Ydb\Issue;
 use YdbPlatform\Ydb\Exception;
 use YdbPlatform\Ydb\QueryResult;
@@ -176,8 +153,8 @@ trait RequestTrait
     {
         if (isset($status->code) && $status->code !== 0) {
             $message = 'YDB ' . $service . ' ' . $method . ' (status code GRPC_' . $status->code . '): ' . ($status->details ?? 'no details');
-            if (isset(self::$ydbExceptions[$status->code])) {
-                throw new self::$ydbExceptions[$status->code]($message);
+            if (isset(self::$grpcExceptions[$status->code])) {
+                throw new self::$grpcExceptions[$status->code]($message);
             } else {
                 throw new \Exception($message);
             }
@@ -206,9 +183,7 @@ trait RequestTrait
 
         $statusCode = $response->getStatus();
 
-        if ($statusCode == StatusCode::STATUS_CODE_UNSPECIFIED) {
-            return true;
-        } elseif ($statusCode == StatusCode::SUCCESS) {
+        if ($statusCode == StatusCode::SUCCESS) {
             $result = $response->getResult();
 
             if ($result === null) {
@@ -298,8 +273,9 @@ trait RequestTrait
     }
 
     private static $ydbExceptions = [
+        StatusCode::STATUS_CODE_UNSPECIFIED => \YdbPlatform\Ydb\Exceptions\Ydb\StatusCodeUnspecified::class,
         StatusCode::BAD_REQUEST => \YdbPlatform\Ydb\Exceptions\Ydb\BadRequestException::class,
-        StatusCode::UNAUTHORIZED => \YdbPlatform\Ydb\Exceptions\Ydb\UnauthorisedException::class,
+        StatusCode::UNAUTHORIZED => \YdbPlatform\Ydb\Exceptions\Ydb\UnauthorizedException::class,
         StatusCode::INTERNAL_ERROR => \YdbPlatform\Ydb\Exceptions\Ydb\InternalErrorException::class,
         StatusCode::ABORTED => \YdbPlatform\Ydb\Exceptions\Ydb\AbortedException::class,
         StatusCode::UNAVAILABLE => \YdbPlatform\Ydb\Exceptions\Ydb\UnavailableException::class,
@@ -312,7 +288,7 @@ trait RequestTrait
         StatusCode::ALREADY_EXISTS => \YdbPlatform\Ydb\Exceptions\Ydb\AlreadyExistsException::class,
         StatusCode::NOT_FOUND => \YdbPlatform\Ydb\Exceptions\Ydb\NotFoundException::class,
         StatusCode::SESSION_EXPIRED => \YdbPlatform\Ydb\Exceptions\Ydb\SessionExpiredException::class,
-        StatusCode::CANCELLED => \YdbPlatform\Ydb\Exceptions\Ydb\CanceledException::class,
+        StatusCode::CANCELLED => \YdbPlatform\Ydb\Exceptions\Ydb\CancelledException::class,
         StatusCode::UNDETERMINED => \YdbPlatform\Ydb\Exceptions\Ydb\UndeterminedException::class,
         StatusCode::UNSUPPORTED => \YdbPlatform\Ydb\Exceptions\Ydb\UnsupportedException::class,
         StatusCode::SESSION_BUSY => \YdbPlatform\Ydb\Exceptions\Ydb\SessionBusyException::class,
