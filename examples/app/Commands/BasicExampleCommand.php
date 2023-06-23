@@ -167,7 +167,7 @@ class BasicExampleCommand extends Command
                     ->primaryKey('series_id')
             );
 
-        });
+        }, true);
 
         $this->print('Table `series` has been created.');
 
@@ -184,7 +184,7 @@ class BasicExampleCommand extends Command
                     ->primaryKey(['series_id', 'season_id'])
             );
 
-        });
+        }, true);
 
         $this->print('Table `seasons` has been created.');
 
@@ -201,7 +201,7 @@ class BasicExampleCommand extends Command
                     ->primaryKey(['series_id', 'season_id', 'episode_id'])
             );
 
-        });
+        }, true);
 
         $this->print('Table `episodes` has been created.');
     }
@@ -215,7 +215,7 @@ class BasicExampleCommand extends Command
 
             return $session->describeTable($table);
 
-        });
+        }, true);
 
         $columns = [];
 
