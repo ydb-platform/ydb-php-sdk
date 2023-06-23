@@ -2,7 +2,9 @@
 
 namespace YdbPlatform\Ydb\Exceptions\Ydb;
 
-class ClientResourceExhaustedException extends \YdbPlatform\Ydb\Exceptions\NonRetryableException
+use YdbPlatform\Ydb\Exceptions\NonRetryableException;
+
+class ClientResourceExhaustedException extends NonRetryableException
 {
 
 }

@@ -83,7 +83,7 @@ class Table
 
         if (empty(static::$session_pool))
         {
-            static::$session_pool = new Sessions\MemorySessionPool;
+            static::$session_pool = new Sessions\MemorySessionPool($retry);
         }
     }
 

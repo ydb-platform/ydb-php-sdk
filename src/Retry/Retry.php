@@ -71,8 +71,7 @@ class Retry
     }
 
     /**
-     * @throws NonRetryableException
-     * @throws RetryableException
+     * @throws Exception
      */
     public function retry(Closure $closure, bool $idempotent)
     {

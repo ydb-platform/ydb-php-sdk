@@ -2,11 +2,9 @@
 
 namespace YdbPlatform\Ydb\Exceptions\Ydb;
 
-class UnavailableException extends \YdbPlatform\Ydb\Exceptions\RetryableException
+use YdbPlatform\Ydb\Exceptions\RetryableException;
+
+class UnavailableException extends RetryableException
 {
-    public function isFastBackoff(): bool
-    {
-        return true;
-    }
 
 }

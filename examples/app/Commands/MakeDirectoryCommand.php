@@ -46,13 +46,13 @@ class MakeDirectoryCommand extends Command
 
         $ydb = $this->appService->initYdb();
 
-        $ydb->retry(function (Ydb $ydb) use ($output, $dirname) {
+        $result = $ydb->retry(function (Ydb $ydb) use ($output, $dirname) {
             $scheme = $ydb->scheme();
 
-            $result = $scheme->makeDirectory($dirname);
-
-            $output->writeln(json_encode($result, 480));
+            return $scheme->makeDirectory($dirname);
         });
+
+        $output->writeln(json_encode($result, 480));
 
         return Command::SUCCESS;
     }

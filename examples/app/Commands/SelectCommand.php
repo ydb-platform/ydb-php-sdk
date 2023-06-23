@@ -49,23 +49,24 @@ class SelectCommand extends Command
 
         $ydb = $this->appService->initYdb();
 
-        $ydb->table()->retrySession(function (Session $session) use ($table_name, $output) {
+        $result = $ydb->table()->retrySession(function (Session $session) use ($table_name, $output) {
 
-            $result = $session->query('select * from `' . $table_name . '` limit 10;');
+            return $session->query('select * from `' . $table_name . '` limit 10;');
 
-            $output->writeln('Column count: ' . $result->columnCount());
-            $output->writeln('Row count: ' . $result->rowCount());
+        }, true);
 
-            $t = new Table($output);
-            $t
-                ->setHeaders(array_map(function($column) {
-                    return $column['name'];
-                }, $result->columns()))
-                ->setRows($result->rows())
-            ;
-            $t->render();
+        $output->writeln('Column count: ' . $result->columnCount());
+        $output->writeln('Row count: ' . $result->rowCount());
 
-        });
+        $t = new Table($output);
+        $t
+            ->setHeaders(array_map(function($column) {
+                return $column['name'];
+            }, $result->columns()))
+            ->setRows($result->rows())
+        ;
+        $t->render();
+
 
         return Command::SUCCESS;
     }

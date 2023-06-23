@@ -46,15 +46,15 @@ class RemoveDirectoryCommand extends Command
 
         $ydb = $this->appService->initYdb();
 
-        $ydb->retry(function (Ydb $ydb) use ($output, $dirname) {
+        $result = $ydb->retry(function (Ydb $ydb) use ($output, $dirname) {
 
             $scheme = $ydb->scheme();
 
-            $result = $scheme->removeDirectory($dirname);
-
-            $output->writeln(json_encode($result, 480));
+            return  $scheme->removeDirectory($dirname);
 
         });
+
+        $output->writeln(json_encode($result, 480));
 
         return Command::SUCCESS;
     }

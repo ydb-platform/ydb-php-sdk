@@ -47,35 +47,33 @@ class ListDirectoryCommand extends Command
 
         $ydb = $this->appService->initYdb();
 
-        $ydb->retry(function (Ydb $ydb) use ($output, $dirname) {
+        $result = $ydb->retry(function (Ydb $ydb) use ($output, $dirname) {
 
             $scheme = $ydb->scheme();
 
-            $result = $scheme->listDirectory($dirname);
-
-            if (!empty($result))
-            {
-                $t = new Table($output);
-                $t
-                    ->setHeaders(['name', 'type', 'owner'])
-                    ->setRows(array_map(function($row) {
-                        return [
-                            $row['name'] ?? null,
-                            $row['type'] ?? null,
-                            $row['owner'] ?? null,
-                        ];
-                    }, $result))
-                ;
-                $t->render();
-            }
-            else
-            {
-                $output->writeln('Empty directory');
-            }
+            return $scheme->listDirectory($dirname);
 
         });
 
-
+        if (!empty($result))
+        {
+            $t = new Table($output);
+            $t
+                ->setHeaders(['name', 'type', 'owner'])
+                ->setRows(array_map(function($row) {
+                    return [
+                        $row['name'] ?? null,
+                        $row['type'] ?? null,
+                        $row['owner'] ?? null,
+                    ];
+                }, $result))
+            ;
+            $t->render();
+        }
+        else
+        {
+            $output->writeln('Empty directory');
+        }
 
         return Command::SUCCESS;
     }

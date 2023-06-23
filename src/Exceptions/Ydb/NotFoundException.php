@@ -2,7 +2,9 @@
 
 namespace YdbPlatform\Ydb\Exceptions\Ydb;
 
-class NotFoundException extends \YdbPlatform\Ydb\Exceptions\NonRetryableException
+use YdbPlatform\Ydb\Exceptions\NonRetryableException;
+
+class NotFoundException extends NonRetryableException
 {
 
 }

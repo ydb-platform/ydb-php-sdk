@@ -2,7 +2,9 @@
 
 namespace YdbPlatform\Ydb\Exceptions\Grpc;
 
-class InvalidArgumentException extends \YdbPlatform\Ydb\Exceptions\NonRetryableException
+use YdbPlatform\Ydb\Exceptions\NonRetryableException;
+
+class InvalidArgumentException extends NonRetryableException
 {
 
 }

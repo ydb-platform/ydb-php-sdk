@@ -2,7 +2,9 @@
 
 namespace YdbPlatform\Ydb\Exceptions\Ydb;
 
-class TimeoutException extends \YdbPlatform\Ydb\Exceptions\NonRetryableException
+use YdbPlatform\Ydb\Exceptions\NonRetryableException;
+
+class TimeoutException extends NonRetryableException
 {
 
 }

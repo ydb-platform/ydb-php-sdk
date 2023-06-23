@@ -49,18 +49,16 @@ class CreateTableCommand extends Command
 
         $ydb = $this->appService->initYdb();
 
-        $ydb->table()->retrySession(function (Session $session) use ($output, $columns, $table_name) {
+        $ydb->table()->retrySession(function (Session $session) use ($columns, $table_name) {
+            $session->createTable($table_name, $columns, 'id');
+        },true);
 
-            $result = $session->createTable($table_name, $columns, 'id');
+        $output->writeln('Table ' . $table_name . ' has been created.');
 
-            $output->writeln('Table ' . $table_name . ' has been created.');
-
-            $session->transaction(function($session) use ($table_name, $columns) {
+        $ydb->table()->retryTransaction(function (Session $session) use ($columns, $table_name) {
                 $session->query('upsert into `' . $table_name . '` (`' . implode('`, `', array_keys($columns)) . '`) values (' . implode('), (', $this->getData()) . ');');
-            });
-
-            $output->writeln('Table ' . $table_name . ' has been populated with some data.');
-        });
+        },true);
+        $output->writeln('Table ' . $table_name . ' has been populated with some data.');
 
         return Command::SUCCESS;
     }

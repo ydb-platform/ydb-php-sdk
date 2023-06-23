@@ -2,7 +2,9 @@
 
 namespace YdbPlatform\Ydb\Exceptions\Grpc;
 
-class AlreadyExistsException extends \YdbPlatform\Ydb\Exceptions\NonRetryableException
+use YdbPlatform\Ydb\Exceptions\NonRetryableException;
+
+class AlreadyExistsException extends NonRetryableException
 {
 
 }

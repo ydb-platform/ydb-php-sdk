@@ -2,12 +2,9 @@
 
 namespace YdbPlatform\Ydb\Exceptions\Ydb;
 
-use Ydb\StatusIds\StatusCode;
+use YdbPlatform\Ydb\Exceptions\RetryableException;
 
-class BadSessionException extends \YdbPlatform\Ydb\Exceptions\RetryableException
+class BadSessionException extends RetryableException
 {
-    public function isFastBackoff(): bool
-    {
-        return true;
-    }
+
 }

@@ -2,7 +2,9 @@
 
 namespace YdbPlatform\Ydb\Exceptions\Ydb;
 
-class SchemeErrorException extends \YdbPlatform\Ydb\Exceptions\NonRetryableException
+use YdbPlatform\Ydb\Exceptions\NonRetryableException;
+
+class SchemeErrorException extends NonRetryableException
 {
 
 }

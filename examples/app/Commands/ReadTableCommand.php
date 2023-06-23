@@ -8,6 +8,7 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use YdbPlatform\Ydb\Exception;
 use YdbPlatform\Ydb\Ydb;
 
 class ReadTableCommand extends Command
@@ -48,7 +49,7 @@ class ReadTableCommand extends Command
 
         $ydb = $this->appService->initYdb();
 
-        $ydb->retry(function (Ydb $ydb) use ($table_name, $output) {
+        $return = $ydb->retry(function (Ydb $ydb) use ($table_name, $output) {
             $table = $ydb->table();
 
             $description = $table->describeTable($table_name);
@@ -62,7 +63,7 @@ class ReadTableCommand extends Command
 
             if ( ! $columns)
             {
-                throw new \Exception('Failed to get columns for table ' . $table_name);
+                throw new Exception('Failed to get columns for table ' . $table_name);
             }
 
             $options = [

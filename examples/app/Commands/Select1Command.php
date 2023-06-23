@@ -44,25 +44,25 @@ class Select1Command extends Command
     {
         $ydb = $this->appService->initYdb();
 
-        $ydb->retry(function (Ydb $ydb) use ($output) {
+        $result = $ydb->retry(function (Ydb $ydb) use ($output) {
 
             $table = $ydb->table();
 
-            $result = $table->session()->query('select 1;');
+            return $table->session()->query('select 1;');
 
-            $output->writeln('Column count: ' . $result->columnCount());
-            $output->writeln('Row count: ' . $result->rowCount());
+        }, true);
 
-            $t = new Table($output);
-            $t
-                ->setHeaders(array_map(function($column) {
-                    return $column['name'];
-                }, $result->columns()))
-                ->setRows($result->rows())
-            ;
-            $t->render();
+        $output->writeln('Column count: ' . $result->columnCount());
+        $output->writeln('Row count: ' . $result->rowCount());
 
-        });
+        $t = new Table($output);
+        $t
+            ->setHeaders(array_map(function($column) {
+                return $column['name'];
+            }, $result->columns()))
+            ->setRows($result->rows())
+        ;
+        $t->render();
 
         return Command::SUCCESS;
     }

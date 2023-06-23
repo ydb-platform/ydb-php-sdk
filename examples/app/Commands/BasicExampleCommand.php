@@ -167,9 +167,9 @@ class BasicExampleCommand extends Command
                     ->primaryKey('series_id')
             );
 
-            $this->print('Table `series` has been created.');
-
         });
+
+        $this->print('Table `series` has been created.');
 
         $this->ydb->table()->retrySession(function (Session $session) {
 
@@ -184,9 +184,9 @@ class BasicExampleCommand extends Command
                     ->primaryKey(['series_id', 'season_id'])
             );
 
-            $this->print('Table `seasons` has been created.');
-
         });
+
+        $this->print('Table `seasons` has been created.');
 
         $this->ydb->table()->retrySession(function (Session $session) {
 
@@ -201,9 +201,9 @@ class BasicExampleCommand extends Command
                     ->primaryKey(['series_id', 'season_id', 'episode_id'])
             );
 
-            $this->print('Table `episodes` has been created.');
-
         });
+
+        $this->print('Table `episodes` has been created.');
     }
 
     /**
@@ -211,27 +211,27 @@ class BasicExampleCommand extends Command
      */
     protected function describeTable($table)
     {
-        $this->ydb->table()->retrySession(function (Session $session) use ($table) {
+        $data = $this->ydb->table()->retrySession(function (Session $session) use ($table) {
 
-            $data = $session->describeTable($table);
-
-            $columns = [];
-
-            foreach ($data['columns'] as $column) {
-                if (isset($column['type']['optionalType']['item']['typeId'])) {
-                    $columns[] = [
-                        'Name' => $column['name'],
-                        'Type' => $column['type']['optionalType']['item']['typeId'],
-                    ];
-                }
-            }
-
-            $this->print('Table `' . $table . '`');
-            $this->print($columns);
-            $this->print('');
-            $this->print('Primary key: ' . implode(', ', (array)$data['primaryKey']));
+            return $session->describeTable($table);
 
         });
+
+        $columns = [];
+
+        foreach ($data['columns'] as $column) {
+            if (isset($column['type']['optionalType']['item']['typeId'])) {
+                $columns[] = [
+                    'Name' => $column['name'],
+                    'Type' => $column['type']['optionalType']['item']['typeId'],
+                ];
+            }
+        }
+
+        $this->print('Table `' . $table . '`');
+        $this->print($columns);
+        $this->print('');
+        $this->print('Primary key: ' . implode(', ', (array)$data['primaryKey']));
     }
 
     protected function fillTablesWithData()
@@ -271,11 +271,11 @@ class BasicExampleCommand extends Command
 
     protected function upsertSimple()
     {
-        $this->ydb->table()->transaction(function (Session $session) {
+        $this->ydb->table()->retryTransaction(function (Session $session) {
             return $session->query('
                 UPSERT INTO episodes (series_id, season_id, episode_id, title)
                 VALUES (2, 6, 1, "TBD");');
-        });
+        }, true);
 
         $this->print('Finished.');
     }
@@ -296,7 +296,7 @@ class BasicExampleCommand extends Command
                     'air_date' => 'Uint64',
                 ]
             );
-        });
+        }, true);
 
         $this->print('Finished.');
     }
@@ -308,7 +308,7 @@ class BasicExampleCommand extends Command
      */
     protected function selectPrepared($series_id, $season_id, $episode_id)
     {
-        $this->ydb->table()->retryTransaction(function (Session $session) use ($series_id, $season_id, $episode_id) {
+        $result = $this->ydb->table()->retryTransaction(function (Session $session) use ($series_id, $season_id, $episode_id) {
 
             $prepared_query = $session->prepare('
             DECLARE $series_id AS Uint64;
@@ -322,14 +322,14 @@ class BasicExampleCommand extends Command
             FROM episodes
             WHERE series_id = $series_id AND season_id = $season_id AND episode_id = $episode_id;');
 
-            $result = $prepared_query->execute(compact(
+            return $prepared_query->execute(compact(
                 'series_id',
                 'season_id',
                 'episode_id'
             ));
+        },true);
 
-            $this->print($result->rows());
-        });
+        $this->print($result->rows());
     }
 
     /**

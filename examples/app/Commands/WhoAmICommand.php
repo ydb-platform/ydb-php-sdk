@@ -41,15 +41,15 @@ class WhoAmICommand extends Command
     {
         $ydb = $this->appService->initYdb();
 
-        $ydb->retry(function (Ydb $ydb) use ($output) {
+        $result = $ydb->retry(function (Ydb $ydb) use ($output) {
 
             $discovery = $ydb->discovery();
 
-            $result = $discovery->whoAmI();
+            return $discovery->whoAmI();
 
-            $output->writeln($result);
+        }, true);
 
-        });
+        $output->writeln($result);
 
         return Command::SUCCESS;
     }

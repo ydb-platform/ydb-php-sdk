@@ -2,7 +2,9 @@
 
 namespace YdbPlatform\Ydb\Exceptions\Grpc;
 
-class PermissionDeniedException extends \YdbPlatform\Ydb\Exceptions\NonRetryableException
+use YdbPlatform\Ydb\Exceptions\NonRetryableException;
+
+class PermissionDeniedException extends NonRetryableException
 {
 
 }

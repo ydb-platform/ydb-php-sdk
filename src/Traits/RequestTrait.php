@@ -82,7 +82,7 @@ trait RequestTrait
         if (method_exists($call, 'wait')) {
             list($response, $status) = $call->wait();
 
-            $this->checkStatus($service, $method, $status);
+            $this->checkGrpcStatus($service, $method, $status);
 
             return $this->processResponse($service, $method, $response, $resultClass);
         }
@@ -149,7 +149,7 @@ trait RequestTrait
      * @param object $status
      * @throws Exception
      */
-    protected function checkStatus($service, $method, $status)
+    protected function checkGrpcStatus($service, $method, $status)
     {
         if (isset($status->code) && $status->code !== 0) {
             $message = 'YDB ' . $service . ' ' . $method . ' (status code GRPC_' . $status->code . '): ' . ($status->details ?? 'no details');
