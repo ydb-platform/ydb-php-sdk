@@ -330,7 +330,6 @@ class Session
     public function executeQuery(YdbQuery $query)
     {
         $data = $query->getRequestData();
-        $data = $query->getRequestData();
         $data['session_id'] = $this->session_id;
 
         $result = $this->request('ExecuteDataQuery', $data);

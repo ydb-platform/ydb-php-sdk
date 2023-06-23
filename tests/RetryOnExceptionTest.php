@@ -19,7 +19,7 @@ class SessionManager extends \YdbPlatform\Ydb\Session{
     }
 }
 
-class RetryOnBadSessionTest extends TestCase
+class RetryOnExceptionTest extends TestCase
 {
     /**
      * @var string
@@ -53,22 +53,10 @@ class RetryOnBadSessionTest extends TestCase
         $this->oldSessionId = SessionManager::getSessionId($session);
         $session->delete();
 
-//        $this->backwardCompatibility($table);
-
         $this->retryTest($table);
 
     }
 
-    private function backwardCompatibility(Table $table)
-    {
-        $session = $table->createSession();
-        SessionManager::setSessionId($session, $this->oldSessionId);
-        $tres = $session->query('select 1 as res')->rows()[0]['res'];
-        self::assertEquals(
-            1,
-            $tres
-        );
-    }
 
     private function retryTest(Table $table)
     {
@@ -81,6 +69,6 @@ class RetryOnBadSessionTest extends TestCase
                 1,
                 $tres
             );
-        }, false, new RetryParams(20000));
+        }, true, new RetryParams(20000));
     }
 }

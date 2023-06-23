@@ -37,11 +37,9 @@ class RunTest extends TestCase{
     {
         $ydb = new Ydb($config);
         $table = $ydb->table();
-        $x = microtime(true);
+
         $session = $table->createSession();
-        print microtime(true)-$x;
-        print "\n";
-        print microtime(true);
+
         $session->createTable(
             'episodes',
             YdbTable::make()
