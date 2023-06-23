@@ -52,7 +52,7 @@ class RemoveDirectoryCommand extends Command
 
             return  $scheme->removeDirectory($dirname);
 
-        });
+        }, true);
 
         $output->writeln(json_encode($result, 480));
 
