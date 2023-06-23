@@ -21,6 +21,7 @@ use YdbPlatform\Ydb\Types\BoolType;
 use YdbPlatform\Ydb\Types\DateType;
 use YdbPlatform\Ydb\Types\JsonType;
 use YdbPlatform\Ydb\Types\ListType;
+use YdbPlatform\Ydb\Types\OptionalType;
 use YdbPlatform\Ydb\Types\UintType;
 use YdbPlatform\Ydb\Types\Utf8Type;
 use YdbPlatform\Ydb\Types\Int8Type;
@@ -159,6 +160,11 @@ trait TypeValueHelpersTrait
         else if (substr($_type, 0, 5) === 'TUPLE')
         {
             return (new TupleType($value))->itemTypes(trim(substr($type, 6, -1)));
+        }
+
+        else if (substr($_type, 0, 8) === 'OPTIONAL')
+        {
+            return (new OptionalType($value))->itemType(trim(substr($type, 9, -1)));
         }
 
         throw new Exception('YDB: Unknown [' . $type . '] type.');
