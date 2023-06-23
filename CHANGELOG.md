@@ -1,4 +1,5 @@
 * added retry function
+* added optional type in prepare statment
 
 ## 1.5.6
 
