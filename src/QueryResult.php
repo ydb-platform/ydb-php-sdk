@@ -172,7 +172,7 @@ class QueryResult
             foreach ($row['items'] as $i => $item)
             {
                 $values = array_values($item);
-                $value = $values[0];
+                $value = count($values)>0?$values[0]:[];;
                 $column = $this->columns[$i];
                 if ($value === null)
                 {
