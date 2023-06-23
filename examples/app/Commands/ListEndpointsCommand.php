@@ -47,7 +47,7 @@ class ListEndpointsCommand extends Command
 
             return $discovery->listEndpoints();
 
-        });
+        }, true);
 
         $output->writeln(json_encode($result, 480));
 
