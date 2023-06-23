@@ -50,7 +50,7 @@ class MakeDirectoryCommand extends Command
             $scheme = $ydb->scheme();
 
             return $scheme->makeDirectory($dirname);
-        });
+        }, true);
 
         $output->writeln(json_encode($result, 480));
 
