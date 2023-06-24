@@ -179,6 +179,12 @@ class CheckTypeTest  extends TestCase{
             'v' => [2],
         ]);
 
+        $query = "DECLARE \$v as List<Int32>; SELECT \$v as val;";
+        $prepared = $session->prepare($query);
+        $result = $prepared->execute([
+            'v' => [],
+        ]);
+
         foreach ($checkTypes as $type=>$data) {
             $query = "DECLARE \$v as $type; SELECT \$v as val;";
             $prepared = $session->prepare($query);
