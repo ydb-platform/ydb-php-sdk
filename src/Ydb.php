@@ -16,7 +16,7 @@ class Ydb
 {
     use Traits\LoggerTrait;
 
-    const VERSION = '1.5.6';
+    const VERSION = '1.6.0';
 
     /**
      * @var string
