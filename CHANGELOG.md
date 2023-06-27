@@ -1,3 +1,5 @@
+## 1.6.0
+
 * added retry function
 * fixed result with empty list
 * added optional type in prepare statment
