@@ -6,6 +6,7 @@ use App\AppService;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use YdbPlatform\Ydb\Ydb;
 
 class ListEndpointsCommand extends Command
 {
@@ -40,9 +41,13 @@ class ListEndpointsCommand extends Command
     {
         $ydb = $this->appService->initYdb();
 
-        $discovery = $ydb->discovery();
+        $result = $ydb->retry(function (Ydb $ydb) use ($output) {
 
-        $result = $discovery->listEndpoints();
+            $discovery = $ydb->discovery();
+
+            return $discovery->listEndpoints();
+
+        }, true);
 
         $output->writeln(json_encode($result, 480));
 

@@ -2,6 +2,7 @@
 
 namespace YdbPlatform\Ydb\Sessions;
 
+use YdbPlatform\Ydb\Retry\Retry;
 use YdbPlatform\Ydb\Session;
 use YdbPlatform\Ydb\Contracts\SessionPoolContract;
 
@@ -21,14 +22,19 @@ class FileSessionPool implements SessionPoolContract
      * @var string
      */
     protected static $filepath;
+    /**
+     * @var Retry
+     */
+    protected static $retry;
 
     /**
      * @param array $config
      */
-    public function __construct(array $config)
+    public function __construct(array $config, Retry &$retry)
     {
         static::$table = $config['table'];
         static::$filepath = $config['filepath'];
+        static::$retry = $retry;
 
         $this->load();
     }
@@ -121,7 +127,12 @@ class FileSessionPool implements SessionPoolContract
         {
             if ($session->isAlive())
             {
-                $session->delete();
+                if (static::$retry==null){
+                    static::$retry = new Retry();
+                }
+                static::$retry->retry(function () use ($session) {
+                    $session->delete();
+                },true);
             }
             else
             {

@@ -8,6 +8,8 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use YdbPlatform\Ydb\Session;
+use YdbPlatform\Ydb\Ydb;
 
 class Select1Command extends Command
 {
@@ -43,9 +45,11 @@ class Select1Command extends Command
     {
         $ydb = $this->appService->initYdb();
 
-        $table = $ydb->table();
+        $result = $ydb->table()->retrySession(function (Session $session) use ($output) {
 
-        $result = $table->session()->query('select 1;');
+            return $session->query('select 1;');
+
+        }, true);
 
         $output->writeln('Column count: ' . $result->columnCount());
         $output->writeln('Row count: ' . $result->rowCount());

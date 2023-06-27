@@ -2,13 +2,21 @@
 
 namespace YdbPlatform\Ydb;
 
+use Closure;
 use Psr\Log\LoggerInterface;
+use YdbPlatform\Ydb\Exceptions\NonRetryableException;
+use YdbPlatform\Ydb\Exceptions\RetryableException;
+use YdbPlatform\Ydb\Exceptions\Ydb\BadSessionException;
+use YdbPlatform\Ydb\Exceptions\Ydb\SessionBusyException;
+use YdbPlatform\Ydb\Exceptions\Ydb\SessionExpiredException;
+use YdbPlatform\Ydb\Retry\Retry;
+use YdbPlatform\Ydb\Retry\RetryParams;
 
 class Ydb
 {
     use Traits\LoggerTrait;
 
-    const VERSION = '1.5.6';
+    const VERSION = '1.6.0';
 
     /**
      * @var string
@@ -66,6 +74,11 @@ class Ydb
     protected $logger;
 
     /**
+     * @var Retry
+     */
+    protected $retry;
+
+    /**
      * @param array $config
      * @param LoggerInterface|null $logger
      * @throws Exception
@@ -87,6 +100,8 @@ class Ydb
         {
             $this->discover();
         }
+
+        $this->retry = new Retry();
 
         $this->logger()->info('YDB: Initialized');
     }
@@ -214,7 +229,7 @@ class Ydb
     {
         if (!isset($this->table))
         {
-            $this->table = new Table($this, $this->logger);
+            $this->table = new Table($this, $this->logger, $this->retry);
         }
 
         return $this->table;
@@ -259,4 +274,30 @@ class Ydb
         return $this->scripting;
     }
 
+    /**
+     * @param RetryParams $params
+     */
+    public function setRetryParams(RetryParams $params): void
+    {
+        $this->retry = $this->retry->withParams($params);
+    }
+
+    /**
+     * @param Closure $userFunc
+     * @param bool $idempotent
+     * @param RetryParams|null $params
+     * @return mixed
+     * @throws NonRetryableException
+     * @throws RetryableException
+     */
+    public function retry(Closure $userFunc, bool $idempotent = false, RetryParams $params = null){
+        return $this->retry->withParams($params)->retry(function () use ($userFunc){
+            try{
+                $result = $userFunc($this);
+                return $result;
+            } catch (Exception $exception) {
+                throw $exception;
+            }
+        }, $idempotent);
+    }
 }

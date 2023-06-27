@@ -7,6 +7,7 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use YdbPlatform\Ydb\Ydb;
 
 class RemoveDirectoryCommand extends Command
 {
@@ -45,9 +46,13 @@ class RemoveDirectoryCommand extends Command
 
         $ydb = $this->appService->initYdb();
 
-        $scheme = $ydb->scheme();
+        $result = $ydb->retry(function (Ydb $ydb) use ($output, $dirname) {
 
-        $result = $scheme->removeDirectory($dirname);
+            $scheme = $ydb->scheme();
+
+            return  $scheme->removeDirectory($dirname);
+
+        }, true);
 
         $output->writeln(json_encode($result, 480));
 

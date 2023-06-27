@@ -8,6 +8,7 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use YdbPlatform\Ydb\Ydb;
 
 class ListDirectoryCommand extends Command
 {
@@ -46,9 +47,13 @@ class ListDirectoryCommand extends Command
 
         $ydb = $this->appService->initYdb();
 
-        $scheme = $ydb->scheme();
+        $result = $ydb->retry(function (Ydb $ydb) use ($output, $dirname) {
 
-        $result = $scheme->listDirectory($dirname);
+            $scheme = $ydb->scheme();
+
+            return $scheme->listDirectory($dirname);
+
+        });
 
         if (!empty($result))
         {

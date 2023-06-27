@@ -47,8 +47,7 @@ trait RequestTrait
 
         $requestClass = '\\Ydb\\' . $service . '\\' . $method . 'Request';
 
-        switch ($method)
-        {
+        switch ($method) {
             case 'BulkUpsert':
             case 'CommitTransaction':
             case 'RollbackTransaction':
@@ -80,11 +79,10 @@ trait RequestTrait
 
         $call = $this->client->$method($request, $this->meta);
 
-        if (method_exists($call, 'wait'))
-        {
+        if (method_exists($call, 'wait')) {
             list($response, $status) = $call->wait();
 
-            $this->checkStatus($service, $method, $status);
+            $this->checkGrpcStatus($service, $method, $status);
 
             return $this->processResponse($service, $method, $response, $resultClass);
         }
@@ -103,15 +101,13 @@ trait RequestTrait
      */
     protected function doStreamRequest($service, $method, $data = [])
     {
-        if (method_exists($this, 'take'))
-        {
+        if (method_exists($this, 'take')) {
             $this->take();
         }
 
         $requestClass = '\\Ydb\\' . $service . '\\' . $method . 'Request';
 
-        switch ($method)
-        {
+        switch ($method) {
             case 'StreamReadTable':
                 $requestClass = '\\Ydb\\' . $service . '\\ReadTableRequest';
                 $resultClass = '\\Ydb\\' . $service . '\\ReadTableResult';
@@ -130,20 +126,17 @@ trait RequestTrait
 
         $call = $this->client->$method($request, $this->meta);
 
-        if (method_exists($call, 'responses'))
-        {
+        if (method_exists($call, 'responses')) {
             // $status = $call->getStatus();
             // $this->checkStatus($service, $method, $status);
 
-            foreach ($call->responses() as $response)
-            {
+            foreach ($call->responses() as $response) {
                 $result = $this->processResponse($service, $method, $response, $resultClass);
                 yield $result ? new QueryResult($result) : true;
             }
         }
 
-        if (method_exists($this, 'release'))
-        {
+        if (method_exists($this, 'release')) {
             $this->release();
         }
     }
@@ -156,11 +149,15 @@ trait RequestTrait
      * @param object $status
      * @throws Exception
      */
-    protected function checkStatus($service, $method, $status)
+    protected function checkGrpcStatus($service, $method, $status)
     {
-        if (isset($status->code) && $status->code !== 0)
-        {
-            throw new Exception('YDB ' . $service . ' ' . $method . ' (status code ' . $status->code . '): ' . ($status->details ?? 'no details'));
+        if (isset($status->code) && $status->code !== 0) {
+            $message = 'YDB ' . $service . ' ' . $method . ' (status code GRPC_' . $status->code . '): ' . ($status->details ?? 'no details');
+            if (isset(self::$grpcExceptions[$status->code])) {
+                throw new self::$grpcExceptions[$status->code]($message);
+            } else {
+                throw new \Exception($message);
+            }
         }
     }
 
@@ -176,134 +173,60 @@ trait RequestTrait
      */
     protected function processResponse($service, $method, $response, $resultClass)
     {
-        if (method_exists($response, 'getOperation'))
-        {
+        if (method_exists($response, 'getOperation')) {
             $response = $response->getOperation();
         }
 
-        if (!method_exists($response, 'getStatus') || !method_exists($response, 'getResult'))
-        {
+        if (!method_exists($response, 'getStatus') || !method_exists($response, 'getResult')) {
             return $response;
         }
 
         $statusCode = $response->getStatus();
 
-        switch ($statusCode)
-        {
-            case StatusCode::STATUS_CODE_UNSPECIFIED:
+        if ($statusCode == StatusCode::SUCCESS) {
+            $result = $response->getResult();
+
+            if ($result === null) {
                 return true;
-                break;
+            }
 
-            case StatusCode::SUCCESS:
-                $result = $response->getResult();
+            if (is_object($result)) {
+                if ($resultClass && class_exists($resultClass)) {
+                    $jsonResult = $result->serializeToJsonString();
 
-                if ($result === null)
-                {
-                    return true;
+                    $this->logger()->debug('YDB: Received API response [' . $resultClass . '].', json_decode($jsonResult, true));
+
+                    $result = new $resultClass;
+                    $result->mergeFromJsonString($jsonResult);
                 }
+            }
 
-                if (is_object($result))
-                {
-                    if ($resultClass && class_exists($resultClass))
-                    {
-                        $jsonResult = $result->serializeToJsonString();
+            $this->resetLastRequest();
 
-                        $this->logger()->debug('YDB: Received API response [' . $resultClass . '].', json_decode($jsonResult, true));
+            return $result;
+        }
+        $statusName = StatusCode::name($statusCode);
 
-                        $result = new $resultClass;
-                        $result->mergeFromJsonString($jsonResult);
-                    }
-                }
+        $issues = [];
+        foreach ($response->getIssues() as $issue) {
+            $issues[] = (new Issue($issue))->toString();
+        }
 
-                $this->resetLastRequest();
+        $message = implode("\n", $issues);
 
-                return $result;
+        $this->logger()->error(
+            'YDB: Service [' . $service . '] method [' . $method . '] Failed to receive a valid response.',
+            [
+                'status' => $statusCode . ' (' . $statusName . ')',
+                'message' => $message,
+            ]
+        );
 
-                break;
-
-            case StatusCode::BAD_SESSION:
-                if (method_exists($this, 'refresh'))
-                {
-                    $data = $this->last_request_data;
-
-                    $session = $this->refresh();
-
-                    if (isset($this->last_request_data['session_id']))
-                    {
-                        $this->last_request_data['session_id'] = $session->id();
-                    }
-
-                    $data['session_id'] = $session->id();
-                    $this->saveLastRequest($service, $method, $data);
-
-                    // only 10 retries are allowed!
-                    if ($this->last_request_try_count < 10)
-                    {
-                        return $this->retryLastRequest($sleep ?? 100);
-                    }
-                }
-                else
-                {
-                    $this->logger()->error('YDB: Service [' . $service . '] method [' . $method . '] Failed to receive a valid response.', [
-                        'status' => 'BAD_SESSION',
-                    ]);
-
-                    throw new Exception('YDB ' . $service . ' ' . $method . ' (' . $statusCode . ' BAD_SESSION)');
-                }
-                break;
-
-            case StatusCode::OVERLOADED:
-            // case StatusCode::CLIENT_RESOURCE_EXHAUSTED: // ?
-                $sleep = 200; // wait 200 ms
-
-            case StatusCode::ABORTED:
-            case StatusCode::UNAVAILABLE:
-            // case StatusCode::TRANSPORT_UNAVAILABLE:
-            case StatusCode::TIMEOUT: // ?
-                $statusName = StatusCode::name($statusCode);
-
-                $issues = [];
-                foreach ($response->getIssues() as $issue)
-                {
-                    $issues[] = (new Issue($issue))->toString();
-                }
-
-                $message = implode("\n", $issues);
-
-                $this->logger()->warning('YDB: Service [' . $service . '] method [' . $method . '] Failed to receive a valid response.', [
-                    'status' => $statusCode . ' (' . $statusName . ')',
-                    'message' => $message,
-                    'try_count' => $this->last_request_try_count,
-                ]);
-
-                // only 10 retries are allowed!
-                if ($this->last_request_try_count < 10)
-                {
-                    return $this->retryLastRequest($sleep ?? 100);
-                }
-
-                // break; // no need to break here, it must proceed to default section
-
-            default:
-                $statusName = StatusCode::name($statusCode);
-
-                $issues = [];
-                foreach ($response->getIssues() as $issue)
-                {
-                    $issues[] = (new Issue($issue))->toString();
-                }
-
-                $message = implode("\n", $issues);
-
-                $this->logger()->error(
-                    'YDB: Service [' . $service . '] method [' . $method . '] Failed to receive a valid response.',
-                    [
-                    'status' => $statusCode . ' (' . $statusName . ')',
-                    'message' => $message,
-                    ]
-                );
-
-                throw new Exception('YDB ' . $service . ' ' . $method . ' (' . $statusCode . ' ' . $statusName . '): ' . $message);
+        $msg = 'YDB ' . $service . ' ' . $method . ' (YDB_' . $statusCode . ' ' . $statusName . '): ' . $message;
+        if (isset(self::$ydbExceptions[$statusCode])) {
+            throw new self::$ydbExceptions[$statusCode]($msg);
+        } else {
+            throw new \Exception($msg);
         }
     }
 
@@ -315,8 +238,7 @@ trait RequestTrait
      */
     protected function retryLastRequest($sleep = 100)
     {
-        if ($this->last_request_service && $this->last_request_method)
-        {
+        if ($this->last_request_service && $this->last_request_method) {
             $this->logger()->info('Going to retry the last request!');
 
             usleep(max($this->last_request_try_count, 1) * $sleep * 1000); // waiting 100 ms more
@@ -349,5 +271,46 @@ trait RequestTrait
         $this->last_request_data = null;
         $this->last_request_try_count = 0;
     }
+
+    private static $ydbExceptions = [
+        StatusCode::STATUS_CODE_UNSPECIFIED => \YdbPlatform\Ydb\Exceptions\Ydb\StatusCodeUnspecified::class,
+        StatusCode::BAD_REQUEST => \YdbPlatform\Ydb\Exceptions\Ydb\BadRequestException::class,
+        StatusCode::UNAUTHORIZED => \YdbPlatform\Ydb\Exceptions\Ydb\UnauthorizedException::class,
+        StatusCode::INTERNAL_ERROR => \YdbPlatform\Ydb\Exceptions\Ydb\InternalErrorException::class,
+        StatusCode::ABORTED => \YdbPlatform\Ydb\Exceptions\Ydb\AbortedException::class,
+        StatusCode::UNAVAILABLE => \YdbPlatform\Ydb\Exceptions\Ydb\UnavailableException::class,
+        StatusCode::OVERLOADED => \YdbPlatform\Ydb\Exceptions\Ydb\OverloadedException::class,
+        StatusCode::SCHEME_ERROR => \YdbPlatform\Ydb\Exceptions\Ydb\SchemeErrorException::class,
+        StatusCode::GENERIC_ERROR => \YdbPlatform\Ydb\Exceptions\Ydb\GenericErrorException::class,
+        StatusCode::TIMEOUT => \YdbPlatform\Ydb\Exceptions\Ydb\TimeoutException::class,
+        StatusCode::BAD_SESSION => \YdbPlatform\Ydb\Exceptions\Ydb\BadSessionException::class,
+        StatusCode::PRECONDITION_FAILED => \YdbPlatform\Ydb\Exceptions\Ydb\PreconditionFailedException::class,
+        StatusCode::ALREADY_EXISTS => \YdbPlatform\Ydb\Exceptions\Ydb\AlreadyExistsException::class,
+        StatusCode::NOT_FOUND => \YdbPlatform\Ydb\Exceptions\Ydb\NotFoundException::class,
+        StatusCode::SESSION_EXPIRED => \YdbPlatform\Ydb\Exceptions\Ydb\SessionExpiredException::class,
+        StatusCode::CANCELLED => \YdbPlatform\Ydb\Exceptions\Ydb\CancelledException::class,
+        StatusCode::UNDETERMINED => \YdbPlatform\Ydb\Exceptions\Ydb\UndeterminedException::class,
+        StatusCode::UNSUPPORTED => \YdbPlatform\Ydb\Exceptions\Ydb\UnsupportedException::class,
+        StatusCode::SESSION_BUSY => \YdbPlatform\Ydb\Exceptions\Ydb\SessionBusyException::class,
+    ];
+
+    private static $grpcExceptions = [
+        1 => \YdbPlatform\Ydb\Exceptions\Grpc\CanceledException::class,
+        2 => \YdbPlatform\Ydb\Exceptions\Grpc\UnknownException::class,
+        3 => \YdbPlatform\Ydb\Exceptions\Grpc\InvalidArgumentException::class,
+        4 => \YdbPlatform\Ydb\Exceptions\Grpc\DeadlineExceededException::class,
+        5 => \YdbPlatform\Ydb\Exceptions\Grpc\NotFoundException::class,
+        6 => \YdbPlatform\Ydb\Exceptions\Grpc\AlreadyExistsException::class,
+        7 => \YdbPlatform\Ydb\Exceptions\Grpc\PermissionDeniedException::class,
+        8 => \YdbPlatform\Ydb\Exceptions\Grpc\ResourceExhaustedException::class,
+        9 => \YdbPlatform\Ydb\Exceptions\Grpc\FailedPreconditionException::class,
+        10 => \YdbPlatform\Ydb\Exceptions\Grpc\AbortedException::class,
+        11 => \YdbPlatform\Ydb\Exceptions\Grpc\OutOfRangeException::class,
+        12 => \YdbPlatform\Ydb\Exceptions\Grpc\UnimplementedException::class,
+        13 => \YdbPlatform\Ydb\Exceptions\Grpc\InternalException::class,
+        14 => \YdbPlatform\Ydb\Exceptions\Grpc\UnavailableException::class,
+        15 => \YdbPlatform\Ydb\Exceptions\Grpc\DataLossException::class,
+        16 => \YdbPlatform\Ydb\Exceptions\Grpc\UnauthenticatedException::class
+    ];
 
 }

@@ -4,6 +4,8 @@ namespace YdbPlatform\Ydb\Test;
 
 use PHPUnit\Framework\TestCase;
 use YdbPlatform\Ydb\Auth\Implement\AnonymousAuthentication;
+use YdbPlatform\Ydb\Retry\RetryParams;
+use YdbPlatform\Ydb\Session;
 use YdbPlatform\Ydb\Table;
 use YdbPlatform\Ydb\Ydb;
 
@@ -17,8 +19,13 @@ class SessionManager extends \YdbPlatform\Ydb\Session{
     }
 }
 
-class RetryOnBadSessionTest extends TestCase
+class RetryOnExceptionTest extends TestCase
 {
+    /**
+     * @var string
+     */
+    private $oldSessionId;
+
     public function test(){
 
         $config = [
@@ -38,17 +45,30 @@ class RetryOnBadSessionTest extends TestCase
             ],
             'credentials' => new AnonymousAuthentication()
         ];
+
         $ydb = new Ydb($config);
         $table = $ydb->table();
+
         $session = $table->createSession();
-        $oldSessionId = SessionManager::getSessionId($session);
+        $this->oldSessionId = SessionManager::getSessionId($session);
         $session->delete();
-        $session = $table->createSession();
-        SessionManager::setSessionId($session,$oldSessionId);
-        $tres = $session->query('select 1 as res')->rows()[0]['res'];
-        self::assertEquals(
-            1,
-            $tres
-        );
+
+        $this->retryTest($table);
+
+    }
+
+
+    private function retryTest(Table $table)
+    {
+        $i = 0;
+        $table->retrySession(function (Session $session) use (&$i){
+            $i++;
+            if($i==1)SessionManager::setSessionId($session, $this->oldSessionId);
+            $tres = $session->query('select 1 as res')->rows()[0]['res'];
+            self::assertEquals(
+                1,
+                $tres
+            );
+        }, true, new RetryParams(20000));
     }
 }

@@ -4,10 +4,20 @@ namespace YdbPlatform\Ydb;
 
 use Closure;
 use Exception;
-use Ydb\Table\Query;
 use Psr\Log\LoggerInterface;
+use Ydb\Table\Query;
 use Ydb\Table\V1\TableServiceClient as ServiceClient;
 use YdbPlatform\Ydb\Contracts\SessionPoolContract;
+use YdbPlatform\Ydb\Exceptions\Grpc\InvalidArgumentException;
+use YdbPlatform\Ydb\Exceptions\Grpc\UnknownException;
+use YdbPlatform\Ydb\Exceptions\NonRetryableException;
+use YdbPlatform\Ydb\Exceptions\RetryableException;
+use YdbPlatform\Ydb\Exceptions\Ydb\BadSessionException;
+use YdbPlatform\Ydb\Exceptions\Ydb\SessionBusyException;
+use YdbPlatform\Ydb\Exceptions\Ydb\SessionExpiredException;
+use YdbPlatform\Ydb\Retry\Backoff;
+use YdbPlatform\Ydb\Retry\Retry;
+use YdbPlatform\Ydb\Retry\RetryParams;
 
 class Table
 {
@@ -47,10 +57,15 @@ class Table
     protected $credentials;
 
     /**
+     * @var Retry
+     */
+    private $retry;
+
+    /**
      * @param Ydb $ydb
      * @param LoggerInterface|null $logger
      */
-    public function __construct(Ydb $ydb, LoggerInterface $logger = null)
+    public function __construct(Ydb $ydb, LoggerInterface $logger = null, Retry &$retry)
     {
         $this->client = new ServiceClient($ydb->endpoint(), [
             'credentials' => $ydb->iam()->getCredentials(),
@@ -64,9 +79,11 @@ class Table
 
         $this->logger = $logger;
 
+        $this->retry = $retry;
+
         if (empty(static::$session_pool))
         {
-            static::$session_pool = new Sessions\MemorySessionPool;
+            static::$session_pool = new Sessions\MemorySessionPool($retry);
         }
     }
 
@@ -420,5 +437,79 @@ class Table
     {
         return $this->doStreamRequest('Table', $method, $data);
     }
+
+    /**
+     * @param RetryParams $params
+     */
+    public function setRetryParams(RetryParams $params): void
+    {
+        $this->retry = $this->retry->withParams($params);
+    }
+
+    /**
+     * @throws NonRetryableException
+     * @throws RetryableException
+     */
+    public function retrySession(Closure $userFunc, bool $idempotent = false, RetryParams $params = null){
+        return $this->retry->withParams($params)->retry(function () use ($userFunc){
+            $session = null;
+            try {
+                $session = $this->session();
+                return $userFunc($session);
+            } catch (Exception $exception){
+                if ($session != null && $this->deleteSession(get_class($exception))){
+                    $this->dropSession($session->id());
+                }
+                throw $exception;
+            }
+        }, $idempotent);
+
+    }
+
+    public function retryTransaction(Closure $userFunc, bool $idempotent = false, RetryParams $params = null){
+
+        return $this->retry->withParams($params)->retry(function () use ($params, $idempotent, $userFunc){
+            $this->retrySession(function (Session $session) use ($userFunc) {
+                try{
+                        $session->beginTransaction();
+                        $result = $userFunc($session);
+                        $session->commitTransaction();
+                        return $result;
+                } catch (Exception $exception){
+                    try {
+                        $session->rollbackTransaction();
+                    } catch (Exception $e){}
+                    throw $exception;
+                }
+            }, $idempotent, $params);
+        }, $idempotent);
+
+    }
+
+    protected function deleteSession(string $exception): bool
+    {
+        return in_array($exception, self::$deleteSession);
+    }
+
+    private static $deleteSession = [
+        \YdbPlatform\Ydb\Exceptions\Grpc\CanceledException::class,
+        \YdbPlatform\Ydb\Exceptions\Grpc\UnknownException::class,
+        \YdbPlatform\Ydb\Exceptions\Grpc\InvalidArgumentException::class,
+        \YdbPlatform\Ydb\Exceptions\Grpc\DeadlineExceededException::class,
+        \YdbPlatform\Ydb\Exceptions\Grpc\NotFoundException::class,
+        \YdbPlatform\Ydb\Exceptions\Grpc\AlreadyExistsException::class,
+        \YdbPlatform\Ydb\Exceptions\Grpc\PermissionDeniedException::class,
+        \YdbPlatform\Ydb\Exceptions\Grpc\FailedPreconditionException::class,
+        \YdbPlatform\Ydb\Exceptions\Grpc\AbortedException::class,
+        \YdbPlatform\Ydb\Exceptions\Grpc\UnimplementedException::class,
+        \YdbPlatform\Ydb\Exceptions\Grpc\InternalException::class,
+        \YdbPlatform\Ydb\Exceptions\Grpc\UnavailableException::class,
+        \YdbPlatform\Ydb\Exceptions\Grpc\DataLossException::class,
+        \YdbPlatform\Ydb\Exceptions\Grpc\UnauthenticatedException::class,
+        \YdbPlatform\Ydb\Exceptions\Ydb\StatusCodeUnspecified::class,
+        \YdbPlatform\Ydb\Exceptions\Ydb\BadSessionException::class,
+        \YdbPlatform\Ydb\Exceptions\Ydb\SessionExpiredException::class,
+        \YdbPlatform\Ydb\Exceptions\Ydb\SessionBusyException::class
+    ];
 
 }

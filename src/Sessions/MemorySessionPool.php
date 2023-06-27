@@ -2,6 +2,7 @@
 
 namespace YdbPlatform\Ydb\Sessions;
 
+use YdbPlatform\Ydb\Retry\Retry;
 use YdbPlatform\Ydb\Session;
 use YdbPlatform\Ydb\Contracts\SessionPoolContract;
 
@@ -11,6 +12,12 @@ class MemorySessionPool implements SessionPoolContract
      * @var array
      */
     protected static $sessions = [];
+    protected static $retry = null;
+
+    public function __construct(Retry &$retry)
+    {
+        self::$retry = $retry;
+    }
 
     /**
      * Destroy all current sessions.
@@ -20,7 +27,12 @@ class MemorySessionPool implements SessionPoolContract
     {
         foreach (static::$sessions as $session_id => $session)
         {
-            $session->delete();
+            if (static::$retry==null){
+                static::$retry = new Retry();
+            }
+            static::$retry->retry(function () use ($session) {
+                $session->delete();
+            },true);
         }
     }
 
