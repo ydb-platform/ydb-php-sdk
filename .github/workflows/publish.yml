@@ -9,7 +9,6 @@ on:
         options:
           - PATCH
           - MINOR
-          - MAJOR
 
 permissions:
   contents: write
@@ -31,12 +30,6 @@ jobs:
           MINOR=$(cat $VERSION_FILE | grep "const MINOR" | sed -e 's/^.*\ \(=\ \)*\(\"\)*\([0-9]*\)\(\"\)*.*/\3/g');
           PATCH=$(cat $VERSION_FILE | grep "const PATCH" | sed -e 's/^.*\ \(=\ \)*\(\"\)*\([0-9]*\)\(\"\)*.*/\3/g');
           LAST_TAG="v$MAJOR.$MINOR.$PATCH";
-          if [ "$VERSION_CHANGE" = "MAJOR" ]
-          then
-            MAJOR=$((MAJOR+1));
-            MINOR=0;
-            PATCH=0;
-          fi;
           if [ "$VERSION_CHANGE" = "MINOR" ]
           then
             MINOR=$((MINOR+1));
@@ -46,9 +39,12 @@ jobs:
           then
             PATCH=$((PATCH+1));
           fi;
-          sed -e 's/const MAJOR = "\([0-9]*\)"/const MAJOR = "'$MAJOR'"/g' -i $VERSION_FILE;
-          sed -e 's/const MINOR = "\([0-9]*\)"/const MINOR = "'$MINOR'"/g' -i $VERSION_FILE;
-          sed -e 's/const PATCH = "\([0-9]*\)"/const PATCH = "'$PATCH'"/g' -i $VERSION_FILE;
+          echo "<?php
+          const MAJOR = "$MAJOR";
+          const MINOR = "$MINOR";
+          const PATCH = "$PATCH";
+          " >> $VERSION_FILE.tmp
+          mv $VERSION_FILE.tmp $VERSION_FILE;
           git add $VERSION_FILE;
           echo "## $MAJOR.$MINOR.$PATCH" >> $CHANGELOG_FILE.tmp
           cat $CHANGELOG_FILE >> $CHANGELOG_FILE.tmp
