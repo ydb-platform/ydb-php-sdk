@@ -12,11 +12,13 @@ use YdbPlatform\Ydb\Exceptions\Ydb\SessionExpiredException;
 use YdbPlatform\Ydb\Retry\Retry;
 use YdbPlatform\Ydb\Retry\RetryParams;
 
+require "Version.php";
+
 class Ydb
 {
     use Traits\LoggerTrait;
 
-    const VERSION = '1.6.0';
+    const VERSION = MAJOR.".".MINOR.".".PATCH;
 
     /**
      * @var string
