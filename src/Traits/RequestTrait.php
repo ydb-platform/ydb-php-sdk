@@ -7,6 +7,7 @@ use Ydb\StatusIds\StatusCode;
 use YdbPlatform\Ydb\Issue;
 use YdbPlatform\Ydb\Exception;
 use YdbPlatform\Ydb\QueryResult;
+use YdbPlatform\Ydb\Ydb;
 
 trait RequestTrait
 {
@@ -31,6 +32,13 @@ trait RequestTrait
     protected $last_request_try_count = 0;
 
     /**
+     * @var Ydb
+     */
+    protected $ydb;
+
+    protected $lastDiscovery = 0;
+
+    /**
      * Make a request to the service with the given method.
      *
      * @param string $service
@@ -41,6 +49,8 @@ trait RequestTrait
      */
     protected function doRequest($service, $method, array $data = [])
     {
+        $this->checkDiscovery();
+
         $this->meta['x-ydb-auth-ticket'] = [$this->credentials->token()];
 
         $this->saveLastRequest($service, $method, $data);
@@ -101,6 +111,11 @@ trait RequestTrait
      */
     protected function doStreamRequest($service, $method, $data = [])
     {
+
+        $this->checkDiscovery();
+
+        $this->meta['x-ydb-auth-ticket'] = [$this->credentials->token()];
+
         if (method_exists($this, 'take')) {
             $this->take();
         }
@@ -153,6 +168,13 @@ trait RequestTrait
     {
         if (isset($status->code) && $status->code !== 0) {
             $message = 'YDB ' . $service . ' ' . $method . ' (status code GRPC_' . $status->code . '): ' . ($status->details ?? 'no details');
+            $endpoint = $this->ydb->endpoint();
+            if ($this->ydb->needDiscovery()){
+                $endpoint = $this->ydb->cluster()->all()[array_rand($this->ydb->cluster()->all())];
+            }
+            $this->client = new $this->client($endpoint,[
+                'credentials' => $this->ydb->iam()->getCredentials()
+            ]);
             if (isset(self::$grpcExceptions[$status->code])) {
                 throw new self::$grpcExceptions[$status->code]($message);
             } else {
@@ -270,6 +292,17 @@ trait RequestTrait
         $this->last_request_method = null;
         $this->last_request_data = null;
         $this->last_request_try_count = 0;
+    }
+
+    protected function checkDiscovery(){
+        if ($this->ydb->needDiscovery() && time()-$this->lastDiscovery>60){
+            try{
+                $this->lastDiscovery = time();
+                $this->ydb->discover();
+            } catch (\Exception $e){
+
+            }
+        }
     }
 
     private static $ydbExceptions = [

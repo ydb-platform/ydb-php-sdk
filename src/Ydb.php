@@ -80,6 +80,8 @@ class Ydb
      */
     protected $retry;
 
+    protected $discover;
+
     /**
      * @param array $config
      * @param LoggerInterface|null $logger
@@ -301,5 +303,13 @@ class Ydb
                 throw $exception;
             }
         }, $idempotent);
+    }
+
+    /**
+     * @return bool
+     */
+    public function needDiscovery(): bool
+    {
+        return $this->discover;
     }
 }

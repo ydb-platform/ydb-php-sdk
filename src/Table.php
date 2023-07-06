@@ -62,6 +62,11 @@ class Table
     private $retry;
 
     /**
+     * @var Ydb
+     */
+    protected $ydb;
+
+    /**
      * @param Ydb $ydb
      * @param LoggerInterface|null $logger
      */

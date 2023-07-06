@@ -78,6 +78,8 @@ class Session
     {
         $this->table = $table;
 
+        $this->ydb = $table->ydb();
+
         $this->session_id = $session_id;
 
         $this->client = $table->client();
