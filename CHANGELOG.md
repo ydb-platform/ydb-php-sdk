@@ -1,3 +1,4 @@
+## 1.7.0
 * added environment credentials
 
 ## 1.6.0
