@@ -71,7 +71,7 @@ or:
 <?php
 
 use YdbPlatform\Ydb\Ydb;
-use YdbPlatform\Ydb\Auth\AccessTokenAuthentication;
+use YdbPlatform\Ydb\Auth\Implement\AccessTokenAuthentication;
 
 $config = [
 
@@ -134,7 +134,7 @@ or
 <?php
 
 use YdbPlatform\Ydb\Ydb;
-use YdbPlatform\Ydb\Auth\OAuthTokenAuthentication;
+use YdbPlatform\Ydb\Auth\Implement\OAuthTokenAuthentication;
 
 $config = [
 
@@ -192,7 +192,7 @@ or
 <?php
 
 use YdbPlatform\Ydb\Ydb;
-use YdbPlatform\Ydb\Auth\JwtWithPrivateKeyAuthentication;
+use YdbPlatform\Ydb\Auth\Implement\JwtWithPrivateKeyAuthentication;
 
 $config = [
     'database'    => '/ru-central1/b1glxxxxxxxxxxxxxxxx/etn0xxxxxxxxxxxxxxxx',
@@ -249,7 +249,7 @@ or:
 <?php
 
 use YdbPlatform\Ydb\Ydb;
-use YdbPlatform\Ydb\Auth\JwtWithJsonAuthentication;
+use YdbPlatform\Ydb\Auth\Implement\JwtWithJsonAuthentication;
 
 $config = [
     'database'    => '/ru-central1/b1glxxxxxxxxxxxxxxxx/etn0xxxxxxxxxxxxxxxx',
@@ -299,7 +299,7 @@ or
 <?php
 
 use YdbPlatform\Ydb\Ydb;
-use YdbPlatform\Ydb\Auth\MetadataAuthentication;
+use YdbPlatform\Ydb\Auth\Implement\MetadataAuthentication;
 
 $config = [
 
@@ -355,7 +355,7 @@ or:
 <?php
 
 use YdbPlatform\Ydb\Ydb;
-use YdbPlatform\Ydb\Auth\AnonymousAuthentication;
+use YdbPlatform\Ydb\Auth\Implement\AnonymousAuthentication;
 
 $config = [
 
@@ -378,6 +378,44 @@ $config = [
 
 $ydb = new Ydb($config);
 ```
+
+## Determined by environment variables
+
+```php
+<?php
+
+use YdbPlatform\Ydb\Ydb;
+use YdbPlatform\Ydb\Auth\Implement\EnvironCredentials;
+
+$config = [
+
+    // Database path
+    'database'    => '/local',
+
+    // Database endpoint
+    'endpoint'    => 'localhost:2136',
+
+    // Auto discovery (dedicated server only)
+    'discovery'   => false,
+
+    // IAM config
+    'iam_config'  => [
+        'insecure' => true,
+    ],
+    
+    'credentials' => new EnvironCredentials()
+];
+
+$ydb = new Ydb($config);
+```
+
+The following algorithm that is the same for YDB-PHP-SDK applies:
+
+1. If the value of the `YDB_SERVICE_ACCOUNT_KEY_FILE_CREDENTIALS` environment variable is set, the **System Account Key** authentication mode is used and the key is taken from the file whose name is specified in this variable.
+2. Otherwise, if the value of the `YDB_ANONYMOUS_CREDENTIALS` environment variable is set to 1, the anonymous authentication mode is used.
+3. Otherwise, if the value of the `YDB_METADATA_CREDENTIALS` environment variable is set to 1, the **Metadata** authentication mode is used.
+4. Otherwise, if the value of the `YDB_ACCESS_TOKEN_CREDENTIALS` environment variable is set, the **Access token** authentication mode is used, where the this variable value is passed.
+5. Otherwise, the **Metadata** authentication mode is used.
 
 # Usage
 
