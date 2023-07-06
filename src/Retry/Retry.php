@@ -3,6 +3,7 @@
 namespace YdbPlatform\Ydb\Retry;
 
 use Closure;
+use Psr\Log\LoggerInterface;
 use YdbPlatform\Ydb\Exception;
 use YdbPlatform\Ydb\Exceptions\Grpc\DeadlineExceededException;
 use YdbPlatform\Ydb\Exceptions\NonRetryableException;
@@ -22,9 +23,14 @@ class Retry
 
     protected $fastBackOff;
     protected $noBackOff;
+    /**
+     * @var LoggerInterface
+     */
+    protected $logger;
 
-    public function __construct()
+    public function __construct(LoggerInterface $logger)
     {
+        $this->logger = $logger;
         $this->timeoutMs = 2000;
         $this->fastBackOff = new Backoff(6, 5);
         $this->slowBackOff = new Backoff(6, 1000);
@@ -79,11 +85,14 @@ class Retry
         $retryCount = 0;
         $lastException = null;
         while (microtime(true) < $startTime + $this->timeoutMs / 1000) {
+            $this->logger->debug("YDB: Run user function. Retry count: $retryCount. Ms: ".(microtime(true) - $startTime));
             try {
                 return $closure();
             } catch (Exception $e) {
+                $this->logger->warning("YDB: Received exception: ".$e->getMessage());
                 if (!$this->canRetry($e, $idempotent)){
-                    throw $e;
+                    $lastException = $e;
+                    break;
                 }
                 $retryCount++;
                 $this->retryDelay($retryCount, $this->backoffType($e));

@@ -167,8 +167,11 @@ trait RequestTrait
     protected function checkGrpcStatus($service, $method, $status)
     {
         if (isset($status->code) && $status->code !== 0) {
-            $message = 'YDB ' . $service . ' ' . $method . ' (status code GRPC_' . $status->code . '): ' . ($status->details ?? 'no details');
+            $message = 'YDB ' . $service . ' ' . $method . ' (status code GRPC_'.
+                (isset(self::$grpcExceptions[$status->code])?self::$grpcNames[$status->code]:$status->code)
+                .' ' . $status->code . '): ' . ($status->details ?? 'no details');
             $endpoint = $this->ydb->endpoint();
+            $this->logger->error($message);
             if ($this->ydb->needDiscovery()){
                 $endpoint = $this->ydb->cluster()->all()[array_rand($this->ydb->cluster()->all())]->endpoint();
             }
@@ -344,6 +347,25 @@ trait RequestTrait
         14 => \YdbPlatform\Ydb\Exceptions\Grpc\UnavailableException::class,
         15 => \YdbPlatform\Ydb\Exceptions\Grpc\DataLossException::class,
         16 => \YdbPlatform\Ydb\Exceptions\Grpc\UnauthenticatedException::class
+    ];
+
+    private static $grpcNames = [
+        1 => "CANCELLED",
+        2 => "UNKNOWN",
+        3 => "INVALID_ARGUMENT",
+        4 => "DEADLINE_EXCEEDED",
+        5 => "NOT_FOUND",
+        6 => "ALREADY_EXISTS",
+        7 => "PERMISSION_DENIED",
+        8 => "RESOURCE_EXHAUSTED",
+        9 => "FAILED_PRECONDITION",
+        10 => "ABORTED",
+        11 => "OUT_OF_RANGE",
+        12 => "UNIMPLEMENTED",
+        13 => "INTERNAL",
+        14 => "UNAVAILABLE",
+        15 => "DATA_LOSS",
+        16 => "UNAUTHENTICATED"
     ];
 
 }
