@@ -170,7 +170,7 @@ trait RequestTrait
             $message = 'YDB ' . $service . ' ' . $method . ' (status code GRPC_' . $status->code . '): ' . ($status->details ?? 'no details');
             $endpoint = $this->ydb->endpoint();
             if ($this->ydb->needDiscovery()){
-                $endpoint = $this->ydb->cluster()->all()[array_rand($this->ydb->cluster()->all())];
+                $endpoint = $this->ydb->cluster()->all()[array_rand($this->ydb->cluster()->all())]->endpoint();
             }
             $this->client = new $this->client($endpoint,[
                 'credentials' => $this->ydb->iam()->getCredentials()
