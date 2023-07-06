@@ -1,3 +1,5 @@
+* added environment credentials
+
 ## 1.6.0
 
 * added retry function
