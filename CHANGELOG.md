@@ -1,3 +1,5 @@
+* fixed exception on re-create server nodes
+
 ## 1.6.0
 
 * added retry function
