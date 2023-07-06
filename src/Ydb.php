@@ -80,7 +80,7 @@ class Ydb
      */
     protected $retry;
 
-    protected $discover;
+    protected $discover = false;
 
     /**
      * @param array $config
@@ -102,6 +102,7 @@ class Ydb
 
         if (!empty($config['discovery']))
         {
+            $this->discover = true;
             $this->discover();
         }
 

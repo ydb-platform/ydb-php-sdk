@@ -36,6 +36,8 @@ class Operations
      */
     public function __construct(Ydb $ydb, LoggerInterface $logger = null)
     {
+        $this->ydb = $ydb;
+
         $this->client = new ServiceClient($ydb->endpoint(), [
             'credentials' => $ydb->iam()->getCredentials(),
         ]);

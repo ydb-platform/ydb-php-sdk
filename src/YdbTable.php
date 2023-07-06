@@ -126,7 +126,7 @@ class YdbTable
         foreach ((array)$indexes as $name => $columns)
         {
             $this->indexes[] = is_a($columns, TableIndex::class) ? $columns : $this->tableIndex($name, (array)$columns);
-        }        
+        }
         return $this;
     }
 
