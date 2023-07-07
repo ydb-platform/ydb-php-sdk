@@ -115,7 +115,7 @@ class Ydb
             $this->discover();
         }
 
-        $this->retry = new Retry($logger˚);
+        $this->retry = new Retry($this->logger);
 
         $this->logger()->info('YDB: Initialized');
     }
