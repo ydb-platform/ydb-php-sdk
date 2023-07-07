@@ -92,7 +92,7 @@ trait RequestTrait
         if (method_exists($call, 'wait')) {
             list($response, $status) = $call->wait();
 
-            $this->checkGrpcStatus($service, $method, $status);
+            $this->handleGrpcStatus($service, $method, $status);
 
             return $this->processResponse($service, $method, $response, $resultClass);
         }
@@ -164,9 +164,12 @@ trait RequestTrait
      * @param object $status
      * @throws Exception
      */
-    protected function checkGrpcStatus($service, $method, $status)
+    protected function handleGrpcStatus($service, $method, $status)
     {
         if (isset($status->code) && $status->code !== 0) {
+            try{
+                $this->ydb->discover();
+            }catch (\Exception $e){}
             $message = 'YDB ' . $service . ' ' . $method . ' (status code GRPC_'.
                 (isset(self::$grpcExceptions[$status->code])?self::$grpcNames[$status->code]:$status->code)
                 .' ' . $status->code . '): ' . ($status->details ?? 'no details');
@@ -298,7 +301,7 @@ trait RequestTrait
     }
 
     protected function checkDiscovery(){
-        if ($this->ydb->needDiscovery() && time()-$this->lastDiscovery>60){
+        if ($this->ydb->needDiscovery() && time()-$this->lastDiscovery>$this->ydb->discoveryInterval()){
             try{
                 $this->lastDiscovery = time();
                 $this->ydb->discover();

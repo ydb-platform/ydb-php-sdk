@@ -82,6 +82,8 @@ class Ydb
 
     protected $discover = false;
 
+    protected $discoveryInterval = 60;
+
     /**
      * @param array $config
      * @param LoggerInterface|null $logger
@@ -103,6 +105,9 @@ class Ydb
         if (!empty($config['discovery']))
         {
             $this->discover = true;
+            if (isset($config['discoveryInterval'])){
+                $this->discoveryInterval = $config['discoveryInterval'];
+            }
             $this->discover();
         }
 
@@ -312,5 +317,10 @@ class Ydb
     public function needDiscovery(): bool
     {
         return $this->discover;
+    }
+
+    public function discoveryInterval()
+    {
+        return $this->discoveryInterval;
     }
 }
