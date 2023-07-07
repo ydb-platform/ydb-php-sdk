@@ -91,7 +91,11 @@ class Ydb
         $this->database = $config['database'] ?? null;
         $this->iam_config = $config['iam_config'] ?? [];
 
-        $this->logger = $logger;
+        if ($logger){
+            $this->logger = $logger;
+        } else {
+            $this->logger = new NullLogger();
+        }
 
         if(isset($config['credentials'])){
             $this->iam_config['credentials'] = $config['credentials'];
