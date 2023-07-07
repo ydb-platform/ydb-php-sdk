@@ -2,7 +2,7 @@
 
 namespace YdbPlatform\Ydb\Logger;
 
-class SampleStdLogger implements \Psr\Log\LoggerInterface
+class SimpleStdLogger implements \Psr\Log\LoggerInterface
 {
     const DEBUG = 7;
     const INFO = 6;
