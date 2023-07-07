@@ -11,6 +11,7 @@ use YdbPlatform\Ydb\Exceptions\Ydb\SessionBusyException;
 use YdbPlatform\Ydb\Exceptions\Ydb\SessionExpiredException;
 use YdbPlatform\Ydb\Retry\Retry;
 use YdbPlatform\Ydb\Retry\RetryParams;
+use YdbPlatform\Ydb\Logger\NullLogger;
 
 require "Version.php";
 
