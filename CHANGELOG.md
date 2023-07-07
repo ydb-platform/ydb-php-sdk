@@ -1,4 +1,4 @@
-* added sample std looger
+* added simple std looger
 
 ## 1.7.0
 
