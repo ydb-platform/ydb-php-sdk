@@ -9,6 +9,7 @@ use YdbPlatform\Ydb\Exceptions\RetryableException;
 use YdbPlatform\Ydb\Exceptions\Ydb\BadSessionException;
 use YdbPlatform\Ydb\Exceptions\Ydb\SessionBusyException;
 use YdbPlatform\Ydb\Exceptions\Ydb\SessionExpiredException;
+use YdbPlatform\Ydb\Logger\NullLogger;
 use YdbPlatform\Ydb\Retry\Retry;
 use YdbPlatform\Ydb\Retry\RetryParams;
 
@@ -94,8 +95,11 @@ class Ydb
         $this->endpoint = $config['endpoint'] ?? null;
         $this->database = $config['database'] ?? null;
         $this->iam_config = $config['iam_config'] ?? [];
-
-        $this->logger = $logger;
+        if ($logger){
+            $this->logger = $logger;
+        } else {
+            $this->logger = new NullLogger();
+        }
 
         if(isset($config['credentials'])){
             $this->iam_config['credentials'] = $config['credentials'];
@@ -111,7 +115,7 @@ class Ydb
             $this->discover();
         }
 
-        $this->retry = new Retry();
+        $this->retry = new Retry($logger˚);
 
         $this->logger()->info('YDB: Initialized');
     }
