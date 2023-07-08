@@ -62,11 +62,18 @@ class Table
     private $retry;
 
     /**
+     * @var Ydb
+     */
+    protected $ydb;
+
+    /**
      * @param Ydb $ydb
      * @param LoggerInterface|null $logger
      */
     public function __construct(Ydb $ydb, LoggerInterface $logger = null, Retry &$retry)
     {
+        $this->ydb = $ydb;
+
         $this->client = new ServiceClient($ydb->endpoint(), [
             'credentials' => $ydb->iam()->getCredentials(),
         ]);
@@ -140,6 +147,14 @@ class Table
         }
 
         return $session;
+    }
+
+    /**
+     * @return Ydb
+     */
+    public function ydb()
+    {
+        return $this->ydb;
     }
 
     /**
