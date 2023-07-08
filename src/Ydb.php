@@ -9,9 +9,9 @@ use YdbPlatform\Ydb\Exceptions\RetryableException;
 use YdbPlatform\Ydb\Exceptions\Ydb\BadSessionException;
 use YdbPlatform\Ydb\Exceptions\Ydb\SessionBusyException;
 use YdbPlatform\Ydb\Exceptions\Ydb\SessionExpiredException;
+use YdbPlatform\Ydb\Logger\NullLogger;
 use YdbPlatform\Ydb\Retry\Retry;
 use YdbPlatform\Ydb\Retry\RetryParams;
-use YdbPlatform\Ydb\Logger\NullLogger;
 
 require "Version.php";
 
@@ -81,6 +81,13 @@ class Ydb
      */
     protected $retry;
 
+    protected $discover = false;
+
+    /**
+     * @var int
+     */
+    protected $discoveryInterval = 60;
+
     /**
      * @param array $config
      * @param LoggerInterface|null $logger
@@ -108,7 +115,7 @@ class Ydb
             $this->discover();
         }
 
-        $this->retry = new Retry();
+        $this->retry = new Retry($this->logger);
 
         $this->logger()->info('YDB: Initialized');
     }
@@ -133,7 +140,7 @@ class Ydb
     {
         $meta = [
             'x-ydb-database' => [$this->database],
-            'x-ydb-sdk-build-info' => ['ydb-php-sdk/' . static::VERSION],
+            'x-ydb-sdk-build-info' => ['ydb-php-sdk/' . self::VERSION],
         ];
 
         if (!$this->iam()->config('anonymous'))
@@ -156,28 +163,11 @@ class Ydb
         if (!empty($endpoints))
         {
             $this->cluster()->sync((array)$endpoints);
-            while ($connection = $this->cluster()->get())
-            {
-                if ($this->endpoint === $connection->endpoint())
-                {
-                    continue;
-                }
-
-                $this->logger()->info('YDB: Connecting to [' . $connection->endpoint() . ']...');
-                $this->endpoint = $connection->endpoint();
-                try
-                {
-                    $this->discovery()->whoAmI();
-                    $this->logger()->info('YDB: Connected to [' . $connection->endpoint() . '] successfully');
-                    return;
-                }
-                catch (\Exception $e)
-                {
-                    $this->logger()->warning('YDB: Failed to connect to [' . $connection->endpoint() . ']. Trying another...');
-                    $connection->degradePriority();
-                }
-                $this->logger()->error('YDB: Failed to connect to any endpoints.');
-                throw new Exception('YDB: Failed to connect to any endpoints.');
+            $clusterEndpoints = array_map(function($e){
+                return $e["address"].":".$e["port"];
+                }, (array)$endpoints);
+            if(!array_search($this->endpoint, $clusterEndpoints)){
+                $this->endpoint = $clusterEndpoints[array_rand($clusterEndpoints)];
             }
         }
     }
@@ -294,8 +284,7 @@ class Ydb
      * @param bool $idempotent
      * @param RetryParams|null $params
      * @return mixed
-     * @throws NonRetryableException
-     * @throws RetryableException
+     * @throws Exception
      */
     public function retry(Closure $userFunc, bool $idempotent = false, RetryParams $params = null){
         return $this->retry->withParams($params)->retry(function () use ($userFunc){
@@ -306,5 +295,21 @@ class Ydb
                 throw $exception;
             }
         }, $idempotent);
+    }
+
+    /**
+     * @return bool
+     */
+    public function needDiscovery(): bool
+    {
+        return $this->discover;
+    }
+
+    /**
+     * @return int
+     */
+    public function discoveryInterval()
+    {
+        return $this->discoveryInterval;
     }
 }
