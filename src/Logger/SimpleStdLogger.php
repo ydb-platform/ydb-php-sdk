@@ -74,7 +74,7 @@ class SimpleStdLogger implements \Psr\Log\LoggerInterface
     {
         if ($level>$this->level) return;
         fwrite(STDERR,
-            date("d/m/y H:i")." ".$level. " ".$message." ".json_encode($context)
+            date("d/m/y H:i")." ".$level. " ".$message." ".json_encode($context)."\n"
         );
     }
 }
