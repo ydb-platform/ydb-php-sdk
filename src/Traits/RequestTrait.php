@@ -7,6 +7,7 @@ use Ydb\StatusIds\StatusCode;
 use YdbPlatform\Ydb\Issue;
 use YdbPlatform\Ydb\Exception;
 use YdbPlatform\Ydb\QueryResult;
+use YdbPlatform\Ydb\Ydb;
 
 trait RequestTrait
 {
@@ -31,6 +32,16 @@ trait RequestTrait
     protected $last_request_try_count = 0;
 
     /**
+     * @var Ydb
+     */
+    protected $ydb;
+
+    /**
+     * @var int
+     */
+    protected $lastDiscovery = 0;
+
+    /**
      * Make a request to the service with the given method.
      *
      * @param string $service
@@ -41,6 +52,8 @@ trait RequestTrait
      */
     protected function doRequest($service, $method, array $data = [])
     {
+        $this->checkDiscovery();
+
         $this->meta['x-ydb-auth-ticket'] = [$this->credentials->token()];
 
         $this->saveLastRequest($service, $method, $data);
@@ -82,7 +95,7 @@ trait RequestTrait
         if (method_exists($call, 'wait')) {
             list($response, $status) = $call->wait();
 
-            $this->checkGrpcStatus($service, $method, $status);
+            $this->handleGrpcStatus($service, $method, $status);
 
             return $this->processResponse($service, $method, $response, $resultClass);
         }
@@ -101,6 +114,10 @@ trait RequestTrait
      */
     protected function doStreamRequest($service, $method, $data = [])
     {
+        $this->checkDiscovery();
+
+        $this->meta['x-ydb-auth-ticket'] = [$this->credentials->token()];
+
         if (method_exists($this, 'take')) {
             $this->take();
         }
@@ -149,10 +166,23 @@ trait RequestTrait
      * @param object $status
      * @throws Exception
      */
-    protected function checkGrpcStatus($service, $method, $status)
+    protected function handleGrpcStatus($service, $method, $status)
     {
         if (isset($status->code) && $status->code !== 0) {
-            $message = 'YDB ' . $service . ' ' . $method . ' (status code GRPC_' . $status->code . '): ' . ($status->details ?? 'no details');
+            try{
+                $this->ydb->discover();
+            }catch (\Exception $e){}
+            $message = 'YDB ' . $service . ' ' . $method . ' (status code GRPC_'.
+                (isset(self::$grpcExceptions[$status->code])?self::$grpcNames[$status->code]:$status->code)
+                .' ' . $status->code . '): ' . ($status->details ?? 'no details');
+            $endpoint = $this->ydb->endpoint();
+            $this->logger->error($message);
+            if ($this->ydb->needDiscovery()){
+                $endpoint = $this->ydb->cluster()->all()[array_rand($this->ydb->cluster()->all())]->endpoint();
+            }
+            $this->client = new $this->client($endpoint,[
+                'credentials' => $this->ydb->iam()->getCredentials()
+            ]);
             if (isset(self::$grpcExceptions[$status->code])) {
                 throw new self::$grpcExceptions[$status->code]($message);
             } else {
@@ -272,6 +302,17 @@ trait RequestTrait
         $this->last_request_try_count = 0;
     }
 
+    protected function checkDiscovery(){
+        if ($this->ydb->needDiscovery() && time()-$this->lastDiscovery>$this->ydb->discoveryInterval()){
+            try{
+                $this->lastDiscovery = time();
+                $this->ydb->discover();
+            } catch (\Exception $e){
+
+            }
+        }
+    }
+
     private static $ydbExceptions = [
         StatusCode::STATUS_CODE_UNSPECIFIED => \YdbPlatform\Ydb\Exceptions\Ydb\StatusCodeUnspecified::class,
         StatusCode::BAD_REQUEST => \YdbPlatform\Ydb\Exceptions\Ydb\BadRequestException::class,
@@ -313,4 +354,22 @@ trait RequestTrait
         16 => \YdbPlatform\Ydb\Exceptions\Grpc\UnauthenticatedException::class
     ];
 
+    private static $grpcNames = [
+        1 => "CANCELLED",
+        2 => "UNKNOWN",
+        3 => "INVALID_ARGUMENT",
+        4 => "DEADLINE_EXCEEDED",
+        5 => "NOT_FOUND",
+        6 => "ALREADY_EXISTS",
+        7 => "PERMISSION_DENIED",
+        8 => "RESOURCE_EXHAUSTED",
+        9 => "FAILED_PRECONDITION",
+        10 => "ABORTED",
+        11 => "OUT_OF_RANGE",
+        12 => "UNIMPLEMENTED",
+        13 => "INTERNAL",
+        14 => "UNAVAILABLE",
+        15 => "DATA_LOSS",
+        16 => "UNAUTHENTICATED"
+    ];
 }
