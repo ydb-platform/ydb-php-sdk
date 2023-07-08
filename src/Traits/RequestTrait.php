@@ -169,14 +169,14 @@ trait RequestTrait
     protected function handleGrpcStatus($service, $method, $status)
     {
         if (isset($status->code) && $status->code !== 0) {
-            try{
-                $this->ydb->discover();
-            }catch (\Exception $e){}
             $message = 'YDB ' . $service . ' ' . $method . ' (status code GRPC_'.
                 (isset(self::$grpcExceptions[$status->code])?self::$grpcNames[$status->code]:$status->code)
                 .' ' . $status->code . '): ' . ($status->details ?? 'no details');
-            $endpoint = $this->ydb->endpoint();
             $this->logger->error($message);
+            try{
+                $this->ydb->discover();
+            }catch (\Exception $e){}
+            $endpoint = $this->ydb->endpoint();
             if ($this->ydb->needDiscovery()){
                 $endpoint = $this->ydb->cluster()->all()[array_rand($this->ydb->cluster()->all())]->endpoint();
             }
