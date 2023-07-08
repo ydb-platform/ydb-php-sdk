@@ -4,14 +4,8 @@ namespace YdbPlatform\Ydb\Retry;
 
 use Closure;
 use YdbPlatform\Ydb\Exception;
-use YdbPlatform\Ydb\Exceptions\Grpc\DeadlineExceededException;
-use YdbPlatform\Ydb\Exceptions\NonRetryableException;
 use YdbPlatform\Ydb\Exceptions\RetryableException;
-use YdbPlatform\Ydb\Exceptions\Ydb\AbortedException;
-use YdbPlatform\Ydb\Exceptions\Ydb\BadSessionException;
-use YdbPlatform\Ydb\Exceptions\Ydb\SessionBusyException;
-use YdbPlatform\Ydb\Exceptions\Ydb\UnavailableException;
-use YdbPlatform\Ydb\Exceptions\Ydb\UndeterminedException;
+use Psr\Log\LoggerInterface;
 
 class Retry
 {
@@ -22,9 +16,14 @@ class Retry
 
     protected $fastBackOff;
     protected $noBackOff;
+    /**
+     * @var LoggerInterface
+     */
+    protected $logger;
 
-    public function __construct()
+    public function __construct(LoggerInterface $logger)
     {
+        $this->logger = $logger;
         $this->timeoutMs = 2000;
         $this->fastBackOff = new Backoff(6, 5);
         $this->slowBackOff = new Backoff(6, 1000);
@@ -79,11 +78,14 @@ class Retry
         $retryCount = 0;
         $lastException = null;
         while (microtime(true) < $startTime + $this->timeoutMs / 1000) {
+            $this->logger->debug("YDB: Run user function. Retry count: $retryCount. Ms: ".(microtime(true) - $startTime));
             try {
                 return $closure();
             } catch (Exception $e) {
+                $this->logger->warning("YDB: Received exception: ".$e->getMessage());
                 if (!$this->canRetry($e, $idempotent)){
-                    throw $e;
+                    $lastException = $e;
+                    break;
                 }
                 $retryCount++;
                 $this->retryDelay($retryCount, $this->backoffType($e));
@@ -99,18 +101,20 @@ class Retry
      */
     protected function backoffType(string $e): Backoff
     {
-        return in_array($e, self::$immediatelyBackoff)?$this->noBackOff:
-            (in_array($e, self::$fastBackoff)?$this->fastBackOff:$this->slowBackOff);
+        return in_array($e, self::$immediatelyBackoff) ? $this->noBackOff :
+            (in_array($e, self::$fastBackoff) ? $this->fastBackOff : $this->slowBackOff);
     }
 
-    protected function alwaysRetry(string $exception){
+    protected function alwaysRetry(string $exception)
+    {
         return in_array($exception, self::$alwaysRetry);
     }
 
     protected function canRetry(Exception $e, bool $idempotent)
     {
-        return is_a($e, RetryableException::class)&&($this->alwaysRetry(get_class($e)) || $idempotent);
+        return is_a($e, RetryableException::class) && ($this->alwaysRetry(get_class($e)) || $idempotent);
     }
+
     private static $immediatelyBackoff = [
         \YdbPlatform\Ydb\Exceptions\Grpc\AbortedException::class,
         \YdbPlatform\Ydb\Exceptions\Ydb\BadSessionException::class,
