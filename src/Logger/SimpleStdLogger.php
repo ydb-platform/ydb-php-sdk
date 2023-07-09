@@ -37,37 +37,37 @@ class SimpleStdLogger implements \Psr\Log\LoggerInterface
 
     public function alert($message, array $context = []): void
     {
-        $this->log(self::EMERGENCY, $message, $context);
+        $this->log(self::ALERT, $message, $context);
     }
 
     public function critical($message, array $context = []): void
     {
-        $this->log(self::EMERGENCY, $message, $context);
+        $this->log(self::CRITICAL, $message, $context);
     }
 
     public function error($message, array $context = []): void
     {
-        $this->log(self::EMERGENCY, $message, $context);
+        $this->log(self::ERROR, $message, $context);
     }
 
     public function warning($message, array $context = []): void
     {
-        $this->log(self::EMERGENCY, $message, $context);
+        $this->log(self::WARNING, $message, $context);
     }
 
     public function notice($message, array $context = []): void
     {
-        $this->log(self::EMERGENCY, $message, $context);
+        $this->log(self::NOTICE, $message, $context);
     }
 
     public function info($message, array $context = []): void
     {
-        $this->log(self::EMERGENCY, $message, $context);
+        $this->log(self::INFO, $message, $context);
     }
 
     public function debug($message, array $context = []): void
     {
-        $this->log(self::EMERGENCY, $message, $context);
+        $this->log(self::DEBUG
     }
 
     public function log($level, $message, array $context = []): void

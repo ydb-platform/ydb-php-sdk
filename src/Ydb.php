@@ -112,6 +112,9 @@ class Ydb
 
         if (!empty($config['discovery']))
         {
+            if (isset($config['discoveryInterval'])){
+                $this->discoveryInterval = $config['discoveryInterval'];
+            }
             $this->discover();
         }
 
