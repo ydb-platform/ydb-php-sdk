@@ -67,7 +67,7 @@ class SimpleStdLogger implements \Psr\Log\LoggerInterface
 
     public function debug($message, array $context = []): void
     {
-        $this->log(self::DEBUG);
+        $this->log(self::DEBUG, $message, $context);
     }
 
     public function log($level, $message, array $context = []): void
