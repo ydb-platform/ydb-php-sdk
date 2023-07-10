@@ -171,9 +171,11 @@ trait RequestTrait
                 (isset(self::$grpcExceptions[$status->code])?self::$grpcNames[$status->code]:$status->code)
                 .' ' . $status->code . '): ' . ($status->details ?? 'no details');
             $this->logger->error($message);
-            try{
-                $this->ydb->discover();
-            }catch (\Exception $e){}
+            if (get_class($this)!==Discovery::class){
+                try{
+                    $this->ydb->discover();
+                }catch (\Exception $e){}
+            }
             $endpoint = $this->ydb->endpoint();
             if ($this->ydb->needDiscovery()){
                 $endpoint = $this->ydb->cluster()->all()[array_rand($this->ydb->cluster()->all())]->endpoint();
