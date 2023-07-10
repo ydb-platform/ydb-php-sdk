@@ -116,8 +116,6 @@ trait RequestTrait
     {
         $this->checkDiscovery();
 
-        $this->meta['x-ydb-auth-ticket'] = [$this->credentials->token()];
-
         if (method_exists($this, 'take')) {
             $this->take();
         }
