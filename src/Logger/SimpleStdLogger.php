@@ -24,7 +24,17 @@ class SimpleStdLogger implements \Psr\Log\LoggerInterface
         self::EMERGENCY => 'EMERGENCY',
     ];
 
+    protected static function getLevelName(int $level): string
+    {
+        if (!isset(static::$levels[$level])) {
+            throw new InvalidArgumentException('Level "'.$level.'" is not defined, use one of: '.implode(', ', array_keys(static::$levels)));
+        }
+
+        return static::$levels[$level];
+    }
+
     protected $level;
+
     public function __construct(int $level)
     {
         $this->level = $level;
@@ -74,7 +84,7 @@ class SimpleStdLogger implements \Psr\Log\LoggerInterface
     {
         if ($level>$this->level) return;
         fwrite(STDERR,
-            date("d/m/y H:i")." ".$level. " ".$message." ".json_encode($context)."\n"
+            date("d/m/y H:i:s")." ".self::getLevelName($level). " ".$message." ".json_encode($context)."\n"
         );
     }
 }
