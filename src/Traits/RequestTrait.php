@@ -171,7 +171,7 @@ trait RequestTrait
                 (isset(self::$grpcExceptions[$status->code])?self::$grpcNames[$status->code]:$status->code)
                 .' ' . $status->code . '): ' . ($status->details ?? 'no details');
             $this->logger->error($message);
-            if (get_class($this)!==Discovery::class){
+            if ($this->ydb->needDiscovery()&&get_class($this)!==Discovery::class){
                 try{
                     $this->ydb->discover();
                 }catch (\Exception $e){}
