@@ -164,8 +164,11 @@ class Ydb
      */
     public function discover()
     {
-        if ($this->triedDiscovery) return;
+        if ($this->triedDiscovery)
+            return;
+
         $this->triedDiscovery = true;
+
         try {
             $endpoints = $this->discovery()->listEndpoints();
             if (!empty($endpoints)) {
