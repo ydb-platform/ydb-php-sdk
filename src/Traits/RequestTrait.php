@@ -116,6 +116,8 @@ trait RequestTrait
     {
         $this->checkDiscovery();
 
+        $this->meta['x-ydb-auth-ticket'] = [$this->credentials->token()];
+
         if (method_exists($this, 'take')) {
             $this->take();
         }
@@ -171,7 +173,7 @@ trait RequestTrait
                 (isset(self::$grpcExceptions[$status->code])?self::$grpcNames[$status->code]:$status->code)
                 .' ' . $status->code . '): ' . ($status->details ?? 'no details');
             $this->logger->error($message);
-            if ($this->ydb->needDiscovery()&&get_class($this)!==Discovery::class){
+            if ($this->ydb->needDiscovery()){
                 try{
                     $this->ydb->discover();
                 }catch (\Exception $e){}

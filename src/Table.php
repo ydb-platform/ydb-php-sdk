@@ -483,8 +483,7 @@ class Table
 
     public function retryTransaction(Closure $userFunc, bool $idempotent = false, RetryParams $params = null){
 
-        return $this->retry->withParams($params)->retry(function () use ($params, $idempotent, $userFunc){
-            $this->retrySession(function (Session $session) use ($userFunc) {
+        return $this->retrySession(function (Session $session) use ($userFunc) {
                 try{
                         $session->beginTransaction();
                         $result = $userFunc($session);
@@ -497,7 +496,6 @@ class Table
                     throw $exception;
                 }
             }, $idempotent, $params);
-        }, $idempotent);
 
     }
 

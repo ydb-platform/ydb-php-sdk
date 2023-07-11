@@ -89,7 +89,7 @@ class Retry
                 }
                 $retryCount++;
                 $lastException = $e;
-                $delay = $this->retryDelay($retryCount, $this->backoffType($e))*1000; // in microseconds
+                $delay = $this->retryDelay($retryCount, $this->backoffType($e))*1000;
                 usleep($delay);
             }
         }
