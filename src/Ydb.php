@@ -88,6 +88,8 @@ class Ydb
      */
     protected $discoveryInterval = 60;
 
+    protected $triedDiscovery = false;
+
     /**
      * @param array $config
      * @param LoggerInterface|null $logger
@@ -162,16 +164,21 @@ class Ydb
      */
     public function discover()
     {
-        $endpoints = $this->discovery()->listEndpoints();
-        if (!empty($endpoints))
-        {
-            $this->cluster()->sync((array)$endpoints);
-            $clusterEndpoints = array_map(function($e){
-                return $e["address"].":".$e["port"];
+        if ($this->triedDiscovery) return;
+        $this->triedDiscovery = true;
+        try {
+            $endpoints = $this->discovery()->listEndpoints();
+            if (!empty($endpoints)) {
+                $this->cluster()->sync((array)$endpoints);
+                $clusterEndpoints = array_map(function ($e) {
+                    return $e["address"] . ":" . $e["port"];
                 }, (array)$endpoints);
-            if(!array_search($this->endpoint, $clusterEndpoints)){
-                $this->endpoint = $clusterEndpoints[array_rand($clusterEndpoints)];
+                if (!array_search($this->endpoint, $clusterEndpoints)) {
+                    $this->endpoint = $clusterEndpoints[array_rand($clusterEndpoints)];
+                }
             }
+        } finally {
+            $this->triedDiscovery = false;
         }
     }
 
