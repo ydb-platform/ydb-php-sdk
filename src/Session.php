@@ -490,7 +490,7 @@ class Session
             $data['column_families'] = $columns->getColumnFamilies();
             $data['attributes'] = $columns->getAttributes();
             $data['compaction_policy'] = $columns->getCompactionPolicy();
-            $data['partition_settings'] = $columns->getPartitionSettings();
+            $data['partitioning_settings'] = $columns->getPartitionSettings();
             $data['uniform_partitions'] = $columns->getUniformPartitions();
             $data['key_bloom_filter'] = $columns->getKeyBloomFilter();
             $data['read_replicas_settings'] = $columns->getReadReplicasSettings();
