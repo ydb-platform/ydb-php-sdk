@@ -1,3 +1,4 @@
+* fixed exception on re-create server nodes
 * added simple std looger
 
 ## 1.7.0
