@@ -1,3 +1,4 @@
+* fixed key name in createTable function
 * added simple std looger
 
 ## 1.7.0
