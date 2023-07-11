@@ -1,4 +1,5 @@
 * fixed exception on re-create server nodes
+* fixed key name in createTable function
 * added simple std looger
 
 ## 1.7.0
