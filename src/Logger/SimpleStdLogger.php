@@ -24,7 +24,17 @@ class SimpleStdLogger implements \Psr\Log\LoggerInterface
         self::EMERGENCY => 'EMERGENCY',
     ];
 
+    protected static function getLevelName(int $level): string
+    {
+        if (!isset(static::$levels[$level])) {
+            throw new InvalidArgumentException('Level "'.$level.'" is not defined, use one of: '.implode(', ', array_keys(static::$levels)));
+        }
+
+        return static::$levels[$level];
+    }
+
     protected $level;
+
     public function __construct(int $level)
     {
         $this->level = $level;
@@ -37,44 +47,44 @@ class SimpleStdLogger implements \Psr\Log\LoggerInterface
 
     public function alert($message, array $context = []): void
     {
-        $this->log(self::EMERGENCY, $message, $context);
+        $this->log(self::ALERT, $message, $context);
     }
 
     public function critical($message, array $context = []): void
     {
-        $this->log(self::EMERGENCY, $message, $context);
+        $this->log(self::CRITICAL, $message, $context);
     }
 
     public function error($message, array $context = []): void
     {
-        $this->log(self::EMERGENCY, $message, $context);
+        $this->log(self::ERROR, $message, $context);
     }
 
     public function warning($message, array $context = []): void
     {
-        $this->log(self::EMERGENCY, $message, $context);
+        $this->log(self::WARNING, $message, $context);
     }
 
     public function notice($message, array $context = []): void
     {
-        $this->log(self::EMERGENCY, $message, $context);
+        $this->log(self::NOTICE, $message, $context);
     }
 
     public function info($message, array $context = []): void
     {
-        $this->log(self::EMERGENCY, $message, $context);
+        $this->log(self::INFO, $message, $context);
     }
 
     public function debug($message, array $context = []): void
     {
-        $this->log(self::EMERGENCY, $message, $context);
+        $this->log(self::DEBUG, $message, $context);
     }
 
     public function log($level, $message, array $context = []): void
     {
         if ($level>$this->level) return;
         fwrite(STDERR,
-            date("d/m/y H:i")." ".$level. " ".$message." ".json_encode($context)
+            date("d/m/y H:i:s")." ".self::getLevelName($level). " ".$message." ".json_encode($context)."\n"
         );
     }
 }

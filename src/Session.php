@@ -76,6 +76,8 @@ class Session
      */
     public function __construct(Table $table, $session_id)
     {
+        $this->ydb = $table->ydb();
+
         $this->table = $table;
 
         $this->session_id = $session_id;

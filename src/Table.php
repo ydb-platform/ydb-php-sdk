@@ -62,11 +62,18 @@ class Table
     private $retry;
 
     /**
+     * @var Ydb
+     */
+    protected $ydb;
+
+    /**
      * @param Ydb $ydb
      * @param LoggerInterface|null $logger
      */
     public function __construct(Ydb $ydb, LoggerInterface $logger = null, Retry &$retry)
     {
+        $this->ydb = $ydb;
+
         $this->client = new ServiceClient($ydb->endpoint(), [
             'credentials' => $ydb->iam()->getCredentials(),
         ]);
@@ -140,6 +147,14 @@ class Table
         }
 
         return $session;
+    }
+
+    /**
+     * @return Ydb
+     */
+    public function ydb()
+    {
+        return $this->ydb;
     }
 
     /**
@@ -468,8 +483,7 @@ class Table
 
     public function retryTransaction(Closure $userFunc, bool $idempotent = false, RetryParams $params = null){
 
-        return $this->retry->withParams($params)->retry(function () use ($params, $idempotent, $userFunc){
-            $this->retrySession(function (Session $session) use ($userFunc) {
+        return $this->retrySession(function (Session $session) use ($userFunc) {
                 try{
                         $session->beginTransaction();
                         $result = $userFunc($session);
@@ -482,7 +496,6 @@ class Table
                     throw $exception;
                 }
             }, $idempotent, $params);
-        }, $idempotent);
 
     }
 
