@@ -1,3 +1,4 @@
+* update destructor in MemorySessionPool
 * fixed exception on re-create server nodes
 * fixed key name in createTable function
 * added simple std looger

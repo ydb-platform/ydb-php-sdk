@@ -25,14 +25,13 @@ class MemorySessionPool implements SessionPoolContract
      */
     public function __destruct()
     {
-        foreach (static::$sessions as $session_id => $session)
-        {
-            if (static::$retry==null){
-                static::$retry = new Retry();
+        foreach (static::$sessions as $session_id => $session) {
+            try {
+                static::$retry->retry(function () use ($session) {
+                    $session->delete();
+                }, true);
+            } catch (\Exception $e) {
             }
-            static::$retry->retry(function () use ($session) {
-                $session->delete();
-            },true);
         }
     }
 
