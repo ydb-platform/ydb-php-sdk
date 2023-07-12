@@ -419,7 +419,7 @@ The following algorithm that is the same for YDB-PHP-SDK applies:
 
 # Usage
 
-You should initialize a session from the Table service to start querying.
+You should initialize a session from the Table service to start querying with retry.
 
 ```php
 <?php
@@ -435,28 +435,15 @@ $ydb = new Ydb($config);
 // obtaining the Table service
 $table = $ydb->table();
 
-// obtaining a session
-$session = $table->session();
-
-// making a query
-$result = $session->query('select * from `users` limit 10;');
+$result = $table->retrySession(function(Session $session){
+    // making a query
+    return $session->query('select * from `users` limit 10;');
+}, true);
 
 $users_count = $result->rowCount();
 $users = $result->rows();
 
 $columns = $result->columns();
-
-```
-
-Also, you may call the `query()` method directly on the Table service. In this case a session will be created behind the scenes, and it will proxy your query to the session.
-
-```php
-<?php
-
-$table = $ydb->table();
-
-// making a query
-$result = $table->query('select * from `users` limit 10;');
 
 ```
 
@@ -469,18 +456,19 @@ Normally, a regular query through the `query()` method is sufficient, but in exc
 ```php
 <?php
 
-$session = $table->session();
+$result = $table->retrySession(function(Session $session){
 
-// creating a new query builder instance
-$query = $session->newQuery('select * from `users` limit 10;');
-
-// a setting to keep in cache
-$query->keepInCache();
-
-// a setting to begin a transaction with the given mode
-$query->beginTx('stale');
-
-$result = $query->execute();
+    // creating a new query builder instance
+    $query = $session->newQuery('select * from `users` limit 10;');
+    
+    // a setting to keep in cache
+    $query->keepInCache();
+    
+    // a setting to begin a transaction with the given mode
+    $query->beginTx('stale');
+    
+    return $query->execute();
+}, true);
 ```
 
 Methods of the query builder:
