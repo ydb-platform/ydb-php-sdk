@@ -435,7 +435,7 @@ $ydb = new Ydb($config);
 // obtaining the Table service
 $table = $ydb->table();
 
-$result = $table->retrySession(function(Session $session){
+$result = $table->retryTransaction(function(Session $session){
     // making a query
     return $session->query('select * from `users` limit 10;');
 }, true);
@@ -456,7 +456,7 @@ Normally, a regular query through the `query()` method is sufficient, but in exc
 ```php
 <?php
 
-$result = $table->retrySession(function(Session $session){
+$result = $table->retryTransaction(function(Session $session){
 
     // creating a new query builder instance
     $query = $session->newQuery('select * from `users` limit 10;');
