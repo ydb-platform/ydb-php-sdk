@@ -1,4 +1,4 @@
 <?php
 const MAJOR = "1";
-const MINOR = "6";
+const MINOR = "8";
 const PATCH = "0";
