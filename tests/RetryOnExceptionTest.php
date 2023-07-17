@@ -8,7 +8,6 @@ use YdbPlatform\Ydb\Retry\RetryParams;
 use YdbPlatform\Ydb\Session;
 use YdbPlatform\Ydb\Table;
 use YdbPlatform\Ydb\Ydb;
-use YdbPlatform\Ydb\Logger\SimpleFileLogger;
 
 class SessionManager extends \YdbPlatform\Ydb\Session{
     public static function setSessionId(\YdbPlatform\Ydb\Session $session, string $id){
@@ -47,8 +46,7 @@ class RetryOnExceptionTest extends TestCase
             'credentials' => new AnonymousAuthentication()
         ];
 
-        $ydb = new Ydb($config, new SimpleFileLogger(7, "l.log"));
-//        $ydb = new Ydb($config);
+        $ydb = new Ydb($config);
         $table = $ydb->table();
 
         $session = $table->createSession();
