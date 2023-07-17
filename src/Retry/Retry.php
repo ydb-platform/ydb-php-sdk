@@ -78,7 +78,7 @@ class Retry
         $retryCount = 0;
         $lastException = null;
         while (microtime(true) < $startTime + $this->timeoutMs / 1000) {
-            $this->logger->debug("YDB: Run user function. Retry count: $retryCount. Ms: ".(microtime(true) - $startTime));
+            $this->logger->debug("YDB: Run user function. Retry count: $retryCount. s: ".(microtime(true) - $startTime));
             try {
                 return $closure();
             } catch (Exception $e) {
@@ -89,7 +89,7 @@ class Retry
                 }
                 $retryCount++;
                 $lastException = $e;
-                $delay = $this->retryDelay($retryCount, $this->backoffType($e))*1000;
+                $delay = $this->retryDelay($retryCount, $this->backoffType(get_class($e)))*1000;
                 usleep($delay);
             }
         }

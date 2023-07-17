@@ -69,6 +69,6 @@ class RetryOnExceptionTest extends TestCase
                 1,
                 $tres
             );
-        }, true, new RetryParams(20000));
+        }, true, new RetryParams(2000));
     }
 }
