@@ -4,7 +4,7 @@ namespace YdbPlatform\Ydb;
 
 use Closure;
 use Exception;
-use Psr\Log\LoggerInterface;
+use YdbPlatform\Ydb\Logger\LoggerInterface;
 use Ydb\Table\Query;
 use Ydb\Table\V1\TableServiceClient as ServiceClient;
 use YdbPlatform\Ydb\Contracts\SessionPoolContract;
@@ -88,8 +88,7 @@ class Table
 
         $this->retry = $retry;
 
-        if (empty(static::$session_pool))
-        {
+        if (empty(static::$session_pool)) {
             static::$session_pool = new Sessions\MemorySessionPool($retry);
         }
     }
@@ -139,13 +138,15 @@ class Table
      */
     public function session()
     {
+        $this->logger->debug("YDB DEBUG run takeSession");
         $session = $this->takeSession();
 
-        if (!$session)
-        {
+        if (!$session) {
+            $this->logger->debug("YDB DEBUG run createSession");
             $session = $this->createSession();
         }
 
+        $this->logger->debug("YDB DEBUG return session");
         return $session;
     }
 
@@ -164,8 +165,7 @@ class Table
     {
         $session = static::$session_pool->getIdleSession();
 
-        if ($session)
-        {
+        if ($session) {
             return $session->take();
         }
 
@@ -465,17 +465,24 @@ class Table
      * @throws NonRetryableException
      * @throws RetryableException
      */
-    public function retrySession(Closure $userFunc, bool $idempotent = false, RetryParams $params = null){
-        return $this->retry->withParams($params)->retry(function () use ($userFunc){
+    public function retrySession(Closure $userFunc, bool $idempotent = false, RetryParams $params = null)
+    {
+        $this->logger->debug("YDB DEBUG start retrySession");
+        return $this->retry->withParams($params)->retry(function () use ($userFunc) {
             $session = null;
             try {
+                $this->logger->debug("YDB DEBUG run session()");
                 $session = $this->session();
+                $this->logger->debug("YDB DEBUG run \$userFunc(\$session) in retrySession");
                 return $userFunc($session);
-            } catch (Exception $exception){
-                if ($session != null && $this->deleteSession(get_class($exception))){
+            } catch (Exception $exception) {
+                $this->logger->debug("YDB DEBUG catch ". get_class($exception) ." in retrySession. Can delete session: "
+                    .($session != null && $this->deleteSession(get_class($exception))));
+                if ($session != null && $this->deleteSession(get_class($exception))) {
                     try {
+                        $this->logger->debug("YDB DEBUG run dropSession in retrySession in catch");
                         $this->dropSession($session->id());
-                    } catch (\YdbPlatform\Ydb\Exception $except){
+                    } catch (\YdbPlatform\Ydb\Exception $except) {
                         $this->logger->error("YDB: Failed to fetch session");
                     }
                 }
@@ -485,21 +492,30 @@ class Table
 
     }
 
-    public function retryTransaction(Closure $userFunc, bool $idempotent = false, RetryParams $params = null){
-
+    public function retryTransaction(Closure $userFunc, bool $idempotent = false, RetryParams $params = null)
+    {
+        $this->logger->prefix = bin2hex(random_bytes(round(lcg_value() * 20)));
+        $this->logger->debug("YDB DEBUG start retryTransaction");
         return $this->retrySession(function (Session $session) use ($userFunc) {
-                try{
-                        $session->beginTransaction();
-                        $result = $userFunc($session);
-                        $session->commitTransaction();
-                        return $result;
-                } catch (Exception $exception){
-                    try {
-                        $session->rollbackTransaction();
-                    } catch (Exception $e){}
-                    throw $exception;
+            try {
+                $this->logger->debug("YDB DEBUG run beginTransaction in retryTransaction");
+                $session->beginTransaction();
+                $this->logger->debug("YDB DEBUG run \$userFunc(\$session) in retryTransaction");
+                $result = $userFunc($session);
+                $this->logger->debug("YDB DEBUG run commitTransaction in retryTransaction");
+                $session->commitTransaction();
+                return $result;
+            } catch (Exception $exception) {
+                $this->logger->debug("YDB DEBUG catch ". get_class($exception) ." in retryTransaction");
+                try {
+                    $this->logger->debug("YDB DEBUG run rollbackTransaction in retryTransaction");
+                    $session->rollbackTransaction();
+                } catch (Exception $e) {
+                    $this->logger->debug("YDB DEBUG catch ". get_class($e) ." in rollbackTransaction");
                 }
-            }, $idempotent, $params);
+                throw $exception;
+            }
+        }, $idempotent, $params);
 
     }
 

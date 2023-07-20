@@ -4,6 +4,7 @@ namespace YdbPlatform\Ydb\Auth;
 
 use DateTime;
 use YdbPlatform\Ydb\Iam;
+use YdbPlatform\Ydb\Logger\LoggerInterface;
 
 abstract class Auth
 {
@@ -11,6 +12,9 @@ abstract class Auth
 
     public abstract function getName(): string;
 
+    /**
+     * @var LoggerInterface
+     */
     protected $logger;
 
     public function logger(){

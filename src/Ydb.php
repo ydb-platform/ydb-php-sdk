@@ -3,7 +3,7 @@
 namespace YdbPlatform\Ydb;
 
 use Closure;
-use Psr\Log\LoggerInterface;
+use YdbPlatform\Ydb\Logger\LoggerInterface;
 use YdbPlatform\Ydb\Exceptions\NonRetryableException;
 use YdbPlatform\Ydb\Exceptions\RetryableException;
 use YdbPlatform\Ydb\Exceptions\Ydb\BadSessionException;

@@ -83,10 +83,13 @@ class Iam implements IamTokenContract
      */
     public function token($force = false)
     {
+        $this->logger->debug("YDB DEBUG run loadToken");
         if ($force || !($token = $this->loadToken()))
         {
+            $this->logger->debug("YDB DEBUG run newToken");
             $token = $this->newToken();
         }
+        $this->logger->debug("YDB DEBUG return token");
         return $token;
     }
 
@@ -107,6 +110,7 @@ class Iam implements IamTokenContract
             "expiresAt" => $tokenInfo->getExpiresAt(),
             "refreshAt" => $tokenInfo->getRefreshAt()
         ]);
+        $this->logger->debug("YDB DEBUG token:".json_encode($tokenInfo));
         return $tokenInfo->getToken();
     }
 
