@@ -494,7 +494,7 @@ class Table
 
     public function retryTransaction(Closure $userFunc, bool $idempotent = false, RetryParams $params = null)
     {
-        $this->logger->prefix = bin2hex(random_bytes(round(lcg_value() * 20)));
+        $this->logger->prefix = bin2hex(random_bytes(round(lcg_value() * 20+8)));
         $this->logger->debug("YDB DEBUG start retryTransaction");
         return $this->retrySession(function (Session $session) use ($userFunc) {
             try {

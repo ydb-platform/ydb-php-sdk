@@ -5,6 +5,7 @@ error_reporting(E_ALL^E_DEPRECATED);
 use PHPUnit\Framework\TestCase;
 use YdbPlatform\Ydb\Auth\Implement\AnonymousAuthentication;
 use YdbPlatform\Ydb\Logger\SimpleFileLogger;
+use YdbPlatform\Ydb\Logger\SimpleStdLogger;
 use YdbPlatform\Ydb\Retry\RetryParams;
 use YdbPlatform\Ydb\Session;
 use YdbPlatform\Ydb\Table;

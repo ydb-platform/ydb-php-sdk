@@ -13,6 +13,8 @@ class SimpleFileLogger implements LoggerInterface
     const ALERT = 1;
     const EMERGENCY = 0;
 
+    public $prefix = "";
+
     protected static $levels = [
         self::DEBUG     => 'DEBUG',
         self::INFO      => 'INFO',
@@ -86,7 +88,7 @@ class SimpleFileLogger implements LoggerInterface
     {
         if ($level>$this->level) return;
         file_put_contents($this->file,
-            date("d/m/y H:i:s")." ".self::getLevelName($level). " ".$message." ".json_encode($context)."\n",
+            date("d/m/y H:i:s").$this->prefix." ".self::getLevelName($level). " ".$message." ".json_encode($context)."\n",
         FILE_APPEND);
     }
 }
