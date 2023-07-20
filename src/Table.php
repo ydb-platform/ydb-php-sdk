@@ -473,7 +473,11 @@ class Table
                 return $userFunc($session);
             } catch (Exception $exception){
                 if ($session != null && $this->deleteSession(get_class($exception))){
-                    $this->dropSession($session->id());
+                    try {
+                        $this->dropSession($session->id());
+                    } catch (\YdbPlatform\Ydb\Exception $except){
+                        $this->logger->error("YDB: Failed to fetch session");
+                    }
                 }
                 throw $exception;
             }

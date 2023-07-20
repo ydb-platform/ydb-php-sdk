@@ -48,6 +48,7 @@ class MemorySessionPool implements SessionPoolContract
                 return $session;
             }
         }
+        return null;
     }
 
     /**
@@ -69,13 +70,10 @@ class MemorySessionPool implements SessionPoolContract
 
         if ($session)
         {
+            unset(static::$sessions[$session_id]);
             if ($session->isAlive())
             {
                 $session->delete();
-            }
-            else
-            {
-                unset(static::$sessions[$session_id]);
             }
         }
     }

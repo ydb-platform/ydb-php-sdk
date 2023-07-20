@@ -239,6 +239,11 @@ class Session
         }
         else
         {
+            $this->logger->debug('YDB failed to begin transaction',[
+                "result"    => $result,
+                "method_exists" => method_exists($result, 'getTxMeta')
+            ]);
+            $this->logger->error('YDB failed to begin transaction');
             throw new Exception('YDB failed to begin transaction');
         }
     }

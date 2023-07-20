@@ -61,9 +61,13 @@ class RetryOnExceptionTest extends TestCase
     private function retryTest(Table $table)
     {
         $i = 0;
-        $table->retrySession(function (Session $session) use (&$i){
+        $table->retrySession(function (Session $session) use ($table, &$i){
             $i++;
-            if($i==1)SessionManager::setSessionId($session, $this->oldSessionId);
+            if($i==1) {
+                $newSessionId = SessionManager::getSessionId($session);
+                SessionManager::setSessionId($session, $this->oldSessionId);
+                $table->syncSession($newSessionId);
+            }
             $tres = $session->query('select 1 as res')->rows()[0]['res'];
             self::assertEquals(
                 1,
