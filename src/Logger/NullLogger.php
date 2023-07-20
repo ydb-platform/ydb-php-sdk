@@ -2,8 +2,6 @@
 
 namespace YdbPlatform\Ydb\Logger;
 
-use Psr\Log\LoggerTrait;
-use Psr\Log\NullLogger as BaseNullLogger;
 
 class NullLogger implements LoggerInterface
 {
@@ -48,17 +46,17 @@ class NullLogger implements LoggerInterface
         // TODO: Implement warning() method.
     }
 
-    public function notice(\Stringable $message, array $context = []): void
+    public function notice( $message, array $context = []): void
     {
         // TODO: Implement notice() method.
     }
 
-    public function info(\Stringable $message, array $context = []): void
+    public function info( $message, array $context = []): void
     {
         // TODO: Implement info() method.
     }
 
-    public function debug(\Stringable $message, array $context = []): void
+    public function debug( $message, array $context = []): void
     {
         // TODO: Implement debug() method.
     }
