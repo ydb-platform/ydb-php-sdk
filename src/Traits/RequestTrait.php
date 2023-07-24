@@ -179,7 +179,7 @@ trait RequestTrait
                 }catch (\Exception $e){}
             }
             $endpoint = $this->ydb->endpoint();
-            if ($this->ydb->needDiscovery()){
+            if ($this->ydb->needDiscovery() && count($this->ydb->cluster()->all()) > 0){
                 $endpoint = $this->ydb->cluster()->all()[array_rand($this->ydb->cluster()->all())]->endpoint();
             }
             $this->client = new $this->client($endpoint,[
