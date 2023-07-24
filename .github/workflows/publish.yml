@@ -40,9 +40,9 @@ jobs:
             PATCH=$((PATCH+1));
           fi;
           echo "<?php
-          const MAJOR = "$MAJOR";
-          const MINOR = "$MINOR";
-          const PATCH = "$PATCH";
+          const MAJOR = \"$MAJOR\";
+          const MINOR = \"$MINOR\";
+          const PATCH = \"$PATCH\";
           " >> $VERSION_FILE.tmp
           mv $VERSION_FILE.tmp $VERSION_FILE;
           git add $VERSION_FILE;
