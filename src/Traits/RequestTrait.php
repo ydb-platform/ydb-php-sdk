@@ -186,10 +186,6 @@ trait RequestTrait
                 'credentials' => $this->ydb->iam()->getCredentials()
             ]);
             if (isset(self::$grpcExceptions[$status->code])) {
-                if (!class_exists(self::$grpcExceptions[$status->code])){
-                    $this->logger->error("Class ".self::$grpcExceptions[$status->code]." not found");
-                    throw new \Exception($message);
-                }
                 throw new self::$grpcExceptions[$status->code]($message);
             } else {
                 throw new \Exception($message);
@@ -259,11 +255,7 @@ trait RequestTrait
         );
 
         $msg = 'YDB ' . $service . ' ' . $method . ' (YDB_' . $statusCode . ' ' . $statusName . '): ' . $message;
-        if (isset(self::$ydbExceptions[$statusCode]) && class_exists(self::$ydbExceptions[$statusCode])) {
-                if (!class_exists(self::$ydbExceptions[$statusCode])){
-                    $this->logger->error("Class ".self::$ydbExceptions[$statusCode]." not found");
-                    throw new \Exception($message);
-                }
+        if (isset(self::$ydbExceptions[$statusCode])) {
             throw new self::$ydbExceptions[$statusCode]($msg);
         } else {
             throw new \Exception($msg);
