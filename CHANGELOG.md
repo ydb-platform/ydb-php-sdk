@@ -1,3 +1,4 @@
+* fixed discovery on exception
 * fixed logger in EnvironCredentials
 
 # 1.8.1

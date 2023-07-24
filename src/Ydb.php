@@ -107,6 +107,8 @@ class Ydb
             $this->logger = new NullLogger();
         }
 
+        $this->retry = new Retry($this->logger);
+
         if(isset($config['credentials'])){
             $this->iam_config['credentials'] = $config['credentials'];
             $config['credentials']->setLogger($this->logger());
@@ -114,13 +116,15 @@ class Ydb
 
         if (!empty($config['discovery']))
         {
+            $this->discover = true;
             if (isset($config['discoveryInterval'])){
                 $this->discoveryInterval = $config['discoveryInterval'];
             }
-            $this->discover();
-        }
 
-        $this->retry = new Retry($this->logger);
+            $this->retry(function (){
+                $this->discover();
+            }, true);
+        }
 
         $this->logger()->info('YDB: Initialized');
     }
