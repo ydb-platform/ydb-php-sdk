@@ -1,3 +1,5 @@
+* add class exist check in RequestTrait
+
 # 1.8.1
 
 * fixed bug, when function Retry::backoffType always return SlowBackoff
