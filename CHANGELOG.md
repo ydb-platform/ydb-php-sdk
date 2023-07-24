@@ -1,4 +1,6 @@
-* add class exist check in RequestTrait
+
+* fixed discovery on exception
+* fixed logger in EnvironCredentials
 
 # 1.8.1
 

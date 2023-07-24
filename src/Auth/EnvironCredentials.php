@@ -37,4 +37,14 @@ class EnvironCredentials extends \YdbPlatform\Ydb\Auth\Auth
     {
         return $this->auth->getName();
     }
+
+    public function logger()
+    {
+        return $this->auth->logger();
+    }
+
+    public function setLogger($logger)
+    {
+        $this->auth->setLogger($logger);
+    }
 }
