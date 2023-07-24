@@ -260,8 +260,8 @@ trait RequestTrait
 
         $msg = 'YDB ' . $service . ' ' . $method . ' (YDB_' . $statusCode . ' ' . $statusName . '): ' . $message;
         if (isset(self::$ydbExceptions[$statusCode]) && class_exists(self::$ydbExceptions[$statusCode])) {
-                if (!class_exists(self::$ydbExceptions[$status->code])){
-                    $this->logger->error("Class ".self::$ydbExceptions[$status->code]." not found");
+                if (!class_exists(self::$ydbExceptions[$statusCode])){
+                    $this->logger->error("Class ".self::$ydbExceptions[$statusCode]." not found");
                     throw new \Exception($message);
                 }
             throw new self::$ydbExceptions[$statusCode]($msg);
