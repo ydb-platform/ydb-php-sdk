@@ -2,11 +2,11 @@
 * fixed discovery on exception
 * fixed logger in EnvironCredentials
 
-# 1.8.1
+## 1.8.1
 
 * fixed bug, when function Retry::backoffType always return SlowBackoff
 
-# 1.8.0
+## 1.8.0
 
 * update destructor in MemorySessionPool
 * fixed exception on re-create server nodes
