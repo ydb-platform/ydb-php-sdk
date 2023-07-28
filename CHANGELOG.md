@@ -1,3 +1,5 @@
+* added microseconds in Timestamp type
+
 ## 1.8.2
 * fixed discovery on exception
 * fixed logger in EnvironCredentials
