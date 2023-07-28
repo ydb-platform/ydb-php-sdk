@@ -194,7 +194,12 @@ class QueryResult
                         break;
 
                     case 'TIMESTAMP':
-                        $_row[$column['name']] = is_numeric($value) ? date('Y-m-d H:i:s.u', $value/1000000) : $value;
+                        if(is_numeric($value)){
+                            $date = DateTime::createFromFormat('U.u', $value/1000000);
+                            $_row[$column['name']] = $date->format('Y-m-d H:i:s.u');
+                        } else {
+                            $_row[$column['name']] = $value;
+                        }
                         break;
 
                     case 'DATETIME':
