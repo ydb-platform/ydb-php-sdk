@@ -195,7 +195,7 @@ class QueryResult
 
                     case 'TIMESTAMP':
                         if(is_numeric($value)){
-                            $value = number_format($value*1.0/1000000.0,6,'.','');
+                            $value = number_format($value/1000000,6,'.','');
                             $date = DateTime::createFromFormat('U.u', $value);
                             $_row[$column['name']] = $date->format('Y-m-d H:i:s.u');
                         } else {
