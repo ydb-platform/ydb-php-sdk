@@ -29,6 +29,6 @@ class TimestampType extends DatetimeType
     protected function getYdbValue()
     {
         $value = new DateTime($this->value);
-        return $value->getTimestamp() * 1000000;
+        return $value->format("U.u") * 1000000;
     }
 }
