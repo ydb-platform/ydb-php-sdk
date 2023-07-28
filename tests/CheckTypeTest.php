@@ -146,7 +146,7 @@ class CheckTypeTest  extends TestCase{
             "Timestamp" => [
                 "class"     => TimestampType::class,
                 "values"    => [
-                    "2023-06-14 17:12:15"
+                    "2023-06-14 17:12:15.000000"
                 ]
             ]
         ];

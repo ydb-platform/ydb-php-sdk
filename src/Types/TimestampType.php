@@ -7,6 +7,10 @@ use Exception;
 
 class TimestampType extends DatetimeType
 {
+    /**
+     * @var string
+     */
+    protected static $datetime_format = 'Y-m-d\TH:i:s.u\Z';
 
     protected $ydb_key_name = "uint64_value";
 
