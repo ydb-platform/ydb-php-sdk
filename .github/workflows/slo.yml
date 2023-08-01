@@ -12,11 +12,11 @@ jobs:
 
     runs-on: ubuntu-latest
     name: SLO test
-    permissions:
-      checks: write
-      pull-requests: write
-      contents: read
-      issues: write
+#    permissions:
+#      checks: write
+#      pull-requests: write
+#      contents: read
+#      issues: write
 
     steps:
       - name: Checkout repository
