@@ -1,0 +1,25 @@
+{
+    "name": "ydb-platform/ydb-php-slo",
+    "description": "YDB PHP SDK",
+    "license": "Apache-2.0",
+    "authors": [
+        {
+            "name": "Ilia Kharev",
+            "email": "ilyakharev@ydb.tech"
+        }
+    ],
+    "repositories": [
+        {
+            "type": "path",
+            "url": "../"
+        }
+    ],
+    "require": {
+        "ydb-platform/ydb-php-sdk": "@dev"
+    },
+    "autoload": {
+        "psr-4": {
+            "YdbPlatform\\Ydb\\Slo\\": "src/"
+        }
+    }
+}
