@@ -18,14 +18,13 @@ use YdbPlatform\Ydb\Exceptions\Grpc\ResourceExhaustedException;
 use YdbPlatform\Ydb\Exceptions\Grpc\UnavailableException;
 use YdbPlatform\Ydb\Exceptions\Grpc\UnimplementedException;
 use YdbPlatform\Ydb\Exceptions\Grpc\UnknownException;
-use YdbPlatform\Ydb\Exceptions\RetryableException;
 use YdbPlatform\Ydb\Exceptions\Ydb\BadRequestException;
 use YdbPlatform\Ydb\Exceptions\Ydb\InternalErrorException;
 use YdbPlatform\Ydb\Exceptions\Ydb\StatusCodeUnspecified;
 use YdbPlatform\Ydb\Exceptions\Ydb\UnauthorizedException;
+use YdbPlatform\Ydb\Logger\SimpleStdLogger;
 use YdbPlatform\Ydb\Retry\Backoff;
 use YdbPlatform\Ydb\Retry\RetryParams;
-use YdbPlatform\Ydb\Session;
 use YdbPlatform\Ydb\Table;
 use YdbPlatform\Ydb\Ydb;
 use YdbPlatform\Ydb\Retry\Retry;
@@ -48,7 +47,7 @@ class TableSubclass extends Table{
     }
 }
 
-class RetryTest2 extends \PHPUnit\Framework\TestCase
+class RetryParamsTest extends \PHPUnit\Framework\TestCase
 {
     protected const FAST = 5;
     protected const SLOW = 20;
@@ -370,22 +369,25 @@ class RetryTest2 extends \PHPUnit\Framework\TestCase
         $retryParams = new RetryParams(1000, new Backoff(6,self::FAST),
             new Backoff(6,self::SLOW));
 
-        $retry = (new RetrySubclass())->withParams($retryParams);
-        $table = new TableSubclass(new Ydb(["credentials"=>new AnonymousAuthentication()]), null, $retry);
+        $logger = new SimpleStdLogger(7);
+        $retry = (new RetrySubclass($logger))->withParams($retryParams);
+        $table = new TableSubclass(new Ydb(["credentials"=>new AnonymousAuthentication()]), $logger, $retry);
 
         foreach ($this->errsToCheck as $error) {
+
+            $exception = new $error["class"]();
 
             $resultDeleteSession = $table->deleteSession($error["class"]) ? "true" : "false";
             $wantDeleteSession = $error["deleteSession"] ? "true" : "false";
             self::assertEquals($wantDeleteSession, $resultDeleteSession,
             "{$error["class"]}: unexpected delete session status: $resultDeleteSession, want: $wantDeleteSession");
 
-            $resultRetryIdempotent = $retry->canRetry(new $error["class"](), true) ? "true" : "false";
+            $resultRetryIdempotent = $retry->canRetry($exception, true) ? "true" : "false";
             $wantRetryIdempotent = $error["retry"]["idempotent"] ? "true" : "false";
             self::assertEquals($wantRetryIdempotent, $resultRetryIdempotent,
                 "{$error["class"]}: unexpected must retry idempotent operation status: $resultRetryIdempotent, want: $wantRetryIdempotent");
 
-            $resultRetryNonIdempotent = $retry->canRetry(new $error["class"](), false) ? "true" : "false";
+            $resultRetryNonIdempotent = $retry->canRetry($exception, false) ? "true" : "false";
             $wantRetryNonIdempotent = $error["retry"]["nonIdempotent"] ? "true" : "false";
             self::assertEquals($wantRetryNonIdempotent, $resultRetryNonIdempotent,
                 "{$error["class"]}: unexpected must retry non-idempotent operation status: $resultDeleteSession, want: $wantDeleteSession");
