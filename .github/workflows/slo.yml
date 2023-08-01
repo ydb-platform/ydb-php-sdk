@@ -6,10 +6,47 @@ name: SLO
 
 jobs:
   test-slo:
-    if: github.event.pull_request.head.repo.full_name == 'ydb-platform/ydb-php-sdk'
-    uses: ydb-platform/slo-tests/.github/workflows/slo.yml@js-version
-    secrets: inherit
-    with:
-      language_id: php
-      language: php
-      workload_path: slo-workload
+    concurrency:
+      group: slo-${{ github.ref }}
+    if: (!contains(github.event.pull_request.labels.*.name, 'no slo'))
+
+    runs-on: ubuntu-latest
+    name: SLO test
+    permissions:
+      checks: write
+      pull-requests: write
+      contents: read
+      issues: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Run SLO
+        uses: ydb-platform/slo-tests@js-version
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          KUBECONFIG_B64: ${{ secrets.SLO_KUBE_CONFIG }}
+          AWS_CREDENTIALS_B64: ${{ secrets.SLO_AWS_CREDENTIALS }}
+          AWS_CONFIG_B64: ${{ secrets.SLO_AWS_CONFIG }}
+          DOCKER_USERNAME: ${{ secrets.SLO_DOCKER_USERNAME }}
+          DOCKER_PASSWORD: ${{ secrets.SLO_DOCKER_PASSWORD }}
+          DOCKER_REPO: ${{ secrets.SLO_DOCKER_REPO }}
+          DOCKER_FOLDER: ${{ secrets.SLO_DOCKER_FOLDER }}
+          s3_endpoint: ${{ secrets.SLO_S3_ENDPOINT }}
+          s3_images_folder: ${{ vars.SLO_S3_IMAGES_FOLDER }}
+          grafana_domain: ${{ vars.SLO_GRAFANA_DOMAIN }}
+          grafana_dashboard: ${{ vars.SLO_GRAFANA_DASHBOARD }}
+          ydb_version: 'newest'
+          timeBetweenPhases: 30
+          shutdownTime: 30
+
+          language_id0: 'php'
+          workload_path0: 'slo-workload'
+          language0: 'php'
+
+      - uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: slo-logs
+          path: logs/
