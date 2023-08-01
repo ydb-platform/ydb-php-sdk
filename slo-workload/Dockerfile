@@ -1,4 +1,4 @@
-FROM ghcr.io/ilyakharev/php-grpc-and-go:7.2
+FROM ilyakharev/php-grpc-and-go:7.2
 
 WORKDIR /workload
 COPY . .
