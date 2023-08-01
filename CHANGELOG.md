@@ -1,3 +1,5 @@
+## 1.9.0
+
 * added microseconds in Timestamp type
 
 ## 1.8.2
