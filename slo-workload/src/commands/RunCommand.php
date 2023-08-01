@@ -89,6 +89,7 @@ class RunCommand extends \YdbPlatform\Ydb\Slo\Command
                 exit(1);
             } elseif ($pid == 0){
                 $this->readJob($endpoint, $path, $tableName, $initialDataCount, $time, $readTimeout,$i);
+                exit(0);
             }
         }
         for ($i = 0; $i < $writeForks; $i++) {
@@ -99,6 +100,7 @@ class RunCommand extends \YdbPlatform\Ydb\Slo\Command
                 exit(1);
             } elseif ($pid == 0){
                 $this->writeJob($endpoint, $path, $tableName, $initialDataCount, $time, $writeTimeout,$i);
+                exit(0);
             }
         }
         sleep($time+$shutdownTime-1);
