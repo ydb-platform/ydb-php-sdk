@@ -6,5 +6,5 @@ RUN composer update
 RUN cd go-server
 RUN go build .
 RUN cd ../
-
+RUN pkill php
 ENTRYPOINT ./go-server/testHttpServer & php application.php
