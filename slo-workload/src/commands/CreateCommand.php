@@ -56,18 +56,6 @@ class CreateCommand extends \YdbPlatform\Ydb\Slo\Command
 
         $table = $ydb->table();
 
-        $ydb->table()->getLogger()->info("Drop table", [
-            "tableName"    => $tableName
-        ]);
-
-        $table->retrySession(function (Session $session) use ($tableName) {
-            $session->dropTable($tableName);
-        }, true);
-
-        $ydb->table()->getLogger()->info("Dropped table", [
-            "tableName"    => $tableName
-        ]);
-
         $ydb->table()->getLogger()->info("Create table", [
             "tableName"    => $tableName,
             "minPartitionsCount"    => $minPartitionsCount,
