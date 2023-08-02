@@ -103,7 +103,7 @@ class RunCommand extends \YdbPlatform\Ydb\Slo\Command
                 exit(0);
             }
         }
-        sleep($time+$shutdownTime-1);
+        sleep($time+1);
         exec("pkill php");
         exec("pkill test");
     }
