@@ -36,7 +36,7 @@ class Utils
 
     public static function initPush(string $endpoint, string $interval, string $time)
     {
-        file_get_contents('http://localhost:88/prepare?' .
+        file_get_contents('http://127.0.0.1:88/prepare?' .
             http_build_query([
                 "endpoint" => $endpoint,
                 "label" => "php",
@@ -48,7 +48,7 @@ class Utils
 
     public static function metricInflight(string $job, int $process)
     {
-        file_get_contents('http://localhost:88/start?' .
+        file_get_contents('http://127.0.0.1:88/start?' .
             http_build_query([
                 "job" => $job,
                 "process" => $process
@@ -57,7 +57,7 @@ class Utils
 
     public static function metricDone(string $job, int $process, int $attemps)
     {
-        file_get_contents('http://localhost:88/done?' .
+        file_get_contents('http://127.0.0.1:88/done?' .
             http_build_query([
                 "job" => $job,
                 "process" => $process,
@@ -67,7 +67,7 @@ class Utils
 
     public static function metricFail(string $job, int $process, int $attemps)
     {
-        file_get_contents('http://localhost:88/fail?' .
+        file_get_contents('http://127.0.0.1:88/fail?' .
             http_build_query([
                 "job" => $job,
                 "process" => $process,

@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"net/url"
 	"strconv"
+	"os"
 	"sync"
 	"time"
 )
@@ -12,6 +13,7 @@ func main() {
 
 	var m *Metrics
 	var spans = sync.Map{}
+	println("dgdfg")
 	//var spans = map[SpanName]map[int]Span{}
 	//spans["read"] = map[int]Span{} /**/
 	http.HandleFunc("/prepare", func(writer http.ResponseWriter, request *http.Request) {
@@ -60,7 +62,7 @@ func main() {
 	})
 	err := http.ListenAndServe(":88", nil)
 	if err != nil {
-		//println(err.Error())
+		println(err.Error())
 		return
 	}
 }
@@ -72,6 +74,7 @@ func pushGate(m *Metrics, workTime int, interval int) {
 		select {
 		case <-timer.C:
 			finish = true
+			os.Exit(0)
 			break
 		default:
 			time.Sleep(time.Duration(interval))

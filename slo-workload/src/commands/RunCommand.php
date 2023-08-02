@@ -103,9 +103,9 @@ class RunCommand extends \YdbPlatform\Ydb\Slo\Command
                 exit(0);
             }
         }
-        sleep($time+1);
-        exec("pkill php");
-        exec("pkill test");
+        pcntl_wait($status);
+        $exitStatus = pcntl_wexitstatus($status);
+        echo $exitStatus . "\n";
     }
 
     protected function readJob(string $endpoint, string $path, string $tableName, int $initialDataCount,
