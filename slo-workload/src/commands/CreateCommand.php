@@ -76,6 +76,7 @@ class CreateCommand extends \YdbPlatform\Ydb\Slo\Command
         $table->addColumn('payload_timestamp', 'TIMESTAMP');
         $table->addColumn('payload_hash', 'UINT64');
         $table->primaryKey(['hash', 'id']);
+        $table->compactionPolicy('small_table');
 
         $ydb->table()->retrySession(function (Session $session) use ($table, $tableName) {
             $session->createTable($tableName, $table, ['hash', 'id']);

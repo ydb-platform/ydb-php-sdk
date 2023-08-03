@@ -13,7 +13,6 @@ func main() {
 
 	var m *Metrics
 	var spans = sync.Map{}
-	println("dgdfg")
 	//var spans = map[SpanName]map[int]Span{}
 	//spans["read"] = map[int]Span{} /**/
 	http.HandleFunc("/prepare", func(writer http.ResponseWriter, request *http.Request) {
