@@ -70,6 +70,7 @@ class RunCommand extends \YdbPlatform\Ydb\Slo\Command
     {
         print_r($options);
         shell_exec('./go-server/testHttpServer > /dev/null &');
+        sleep(1);
         $tableName = $options["table-name"] ?? Defaults::TABLE_NAME;
         $initialDataCount = (int)($options["initial-data-count"] ?? Defaults::GENERATOR_DATA_COUNT);
         $promPgw = ($options["prom-pgw"] ?? Defaults::PROMETHEUS_PUSH_GATEWAY);
