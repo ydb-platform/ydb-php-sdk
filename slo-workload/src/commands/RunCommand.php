@@ -115,20 +115,28 @@ class RunCommand extends \YdbPlatform\Ydb\Slo\Command
                 exit(0);
             }
         }
-        pcntl_wait($status);
-        $exitStatus = pcntl_wexitstatus($status);
-        echo $exitStatus . "\n";
+        try {
+            pcntl_wait($status);
+            $exitStatus = pcntl_wexitstatus($status);
+            echo $exitStatus . "\n";
+        } catch (Exception $e){
+            echo $e->getMessage();
+        }
     }
 
     protected function readJob(string $endpoint, string $path, string $tableName, int $initialDataCount,
                                int    $time, int $readTimeout, int $process)
     {
-        $ydb = Utils::initDriver($endpoint, $path);
-        $dataGenerator = new DataGenerator();
-        $dataGenerator::setMaxId($initialDataCount);
-        $query = sprintf(Defaults::READ_QUERY, $tableName);
-        $startTime = microtime(true);
-        $table = $ydb->table();
+        try {
+            $ydb = Utils::initDriver($endpoint, $path);
+            $dataGenerator = new DataGenerator();
+            $dataGenerator::setMaxId($initialDataCount);
+            $query = sprintf(Defaults::READ_QUERY, $tableName);
+            $startTime = microtime(true);
+            $table = $ydb->table();
+        } catch (\Exception $e){
+            echo $e->getMessage();
+        }
 
         while (microtime(true) <= $startTime + $time) {
             $begin = microtime(true);
@@ -143,7 +151,7 @@ class RunCommand extends \YdbPlatform\Ydb\Slo\Command
                     ]);
                 }, true, new \YdbPlatform\Ydb\Retry\RetryParams($readTimeout));
                 Utils::metricDone("read", $process, $attemps);
-            } catch (Exception $e) {
+            } catch (\Exception $e) {
                 if ($attemps == 0) $attemps++;
                 Utils::metricFail("read", $process, $attemps, get_class($e));
             } finally {
@@ -158,12 +166,16 @@ class RunCommand extends \YdbPlatform\Ydb\Slo\Command
     protected function writeJob(string $endpoint, string $path, $tableName, int $initialDataCount,
                                 int    $time, int $writeTimeout, int $process)
     {
-        $ydb = Utils::initDriver($endpoint, $path);
-        $dataGenerator = new DataGenerator();
-        $dataGenerator::setMaxId($initialDataCount);
-        $query = sprintf(Defaults::READ_QUERY, $tableName);
-        $startTime = microtime(true);
-        $table = $ydb->table();
+        try {
+            $ydb = Utils::initDriver($endpoint, $path);
+            $dataGenerator = new DataGenerator();
+            $dataGenerator::setMaxId($initialDataCount);
+            $query = sprintf(Defaults::READ_QUERY, $tableName);
+            $startTime = microtime(true);
+            $table = $ydb->table();
+        }catch (\Exception $e){
+            echo $e->getMessage();
+        }
 
         while (microtime(true) <= $startTime + $time) {
             $begin = microtime(true);
@@ -176,7 +188,7 @@ class RunCommand extends \YdbPlatform\Ydb\Slo\Command
                     return $session->query($query, $dataGenerator::getUpsertData());
                 }, true, new \YdbPlatform\Ydb\Retry\RetryParams($writeTimeout));
                 Utils::metricDone("write", $process, $attemps);
-            } catch (Exception $e) {
+            } catch (\Exception $e) {
                 if ($attemps == 0) $attemps++;
                 Utils::metricFail("write", $process, $attemps, get_class($e));
             } finally {
