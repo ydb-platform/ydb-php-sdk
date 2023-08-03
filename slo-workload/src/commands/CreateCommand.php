@@ -2,6 +2,7 @@
 
 namespace YdbPlatform\Ydb\Slo\commands;
 
+use Ydb\Table\Query;
 use YdbPlatform\Ydb\Session;
 use YdbPlatform\Ydb\Slo\DataGenerator;
 use YdbPlatform\Ydb\Slo\Defaults;
@@ -83,7 +84,7 @@ class CreateCommand extends \YdbPlatform\Ydb\Slo\Command
 //        });
 
         $table->retrySession(function (Session $session) use ($tableName) {
-            $session->query("CREATE TABLE `$tableName`
+            $session->executeQuery(new Query(["yql"=>"CREATE TABLE `$tableName`
 (
     `hash` Uint64,
     `id` Uint64,
@@ -98,7 +99,7 @@ WITH(
     AUTO_PARTITIONING_MIN_PARTITIONS_COUNT = 1000,
     AUTO_PARTITIONING_PARTITION_SIZE_MB = 1
 );
-");
+"]));
         });
 
         $ydb->table()->getLogger()->info("Table created");
