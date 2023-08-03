@@ -3,10 +3,12 @@
 namespace YdbPlatform\Ydb\Slo\commands;
 
 use Ydb\Table\Query;
+use Ydb\Table\TransactionControl;
 use YdbPlatform\Ydb\Session;
 use YdbPlatform\Ydb\Slo\DataGenerator;
 use YdbPlatform\Ydb\Slo\Defaults;
 use YdbPlatform\Ydb\Slo\Utils;
+use YdbPlatform\Ydb\YdbQuery;
 use YdbPlatform\Ydb\YdbTable;
 
 class CreateCommand extends \YdbPlatform\Ydb\Slo\Command
@@ -16,39 +18,39 @@ class CreateCommand extends \YdbPlatform\Ydb\Slo\Command
     public $description = "creates table in database";
     public $options = [
         [
-            "alias"         => ["t", "table-name"],
-            "type"          => "string",
-            "description"   =>  "table name to create"
+            "alias" => ["t", "table-name"],
+            "type" => "string",
+            "description" => "table name to create"
         ],
         [
-            "alias"         => ["c", "initial-data-count"],
-            "type"          => "int",
-            "description"   =>  "table name to create"
+            "alias" => ["c", "initial-data-count"],
+            "type" => "int",
+            "description" => "table name to create"
         ],
         [
-            "alias"         => ["min-partitions-count"],
-            "type"          => "int",
-            "description"   =>  "table name to create"
+            "alias" => ["min-partitions-count"],
+            "type" => "int",
+            "description" => "table name to create"
         ],
         [
-            "alias"         => ["partition-size"],
-            "type"          => "int",
-            "description"   =>  "table name to create"
+            "alias" => ["partition-size"],
+            "type" => "int",
+            "description" => "table name to create"
         ],
         [
-            "alias"         => ["write-timeout"],
-            "type"          => "int",
-            "description"   =>  "table name to create"
+            "alias" => ["write-timeout"],
+            "type" => "int",
+            "description" => "table name to create"
         ],
     ];
 
     public function execute(string $endpoint, string $path, array $options)
     {
-        $tableName          = $options["table-name"] ?? Defaults::TABLE_NAME;
+        $tableName = $options["table-name"] ?? Defaults::TABLE_NAME;
         $minPartitionsCount = (int)($options["min-partitions-count"] ?? Defaults::TABLE_MIN_PARTITION_COUNT);
         $maxPartitionsCount = (int)($options["max-partitions-count"] ?? Defaults::TABLE_MAX_PARTITION_COUNT);
-        $partitionSize      = (int)($options["partition-size"] ?? Defaults::TABLE_PARTITION_SIZE);
-        $initialDataCount   = (int)($options["initial-data-count"] ?? Defaults::GENERATOR_DATA_COUNT);
+        $partitionSize = (int)($options["partition-size"] ?? Defaults::TABLE_PARTITION_SIZE);
+        $initialDataCount = (int)($options["initial-data-count"] ?? Defaults::GENERATOR_DATA_COUNT);
 
         $ydb = Utils::initDriver($endpoint, $path);
 
@@ -58,10 +60,10 @@ class CreateCommand extends \YdbPlatform\Ydb\Slo\Command
         $table = $ydb->table();
 
         $ydb->table()->getLogger()->info("Create table", [
-            "tableName"    => $tableName,
-            "minPartitionsCount"    => $minPartitionsCount,
-            "maxPartitionsCount"    => $maxPartitionsCount,
-            "partitionSize"    => $partitionSize,
+            "tableName" => $tableName,
+            "minPartitionsCount" => $minPartitionsCount,
+            "maxPartitionsCount" => $maxPartitionsCount,
+            "partitionSize" => $partitionSize,
         ]);
 
 //        $table = new YdbTable();
@@ -84,7 +86,8 @@ class CreateCommand extends \YdbPlatform\Ydb\Slo\Command
 //        });
 
         $table->retrySession(function (Session $session) use ($tableName) {
-            $session->executeQuery(new Query(["yql"=>"CREATE TABLE `$tableName`
+            $tx = $session->beginTransaction();
+            $q = $session->Yql("CREATE TABLE `$tableName`
 (
     `hash` Uint64,
     `id` Uint64,
@@ -99,14 +102,14 @@ WITH(
     AUTO_PARTITIONING_MIN_PARTITIONS_COUNT = 1000,
     AUTO_PARTITIONING_PARTITION_SIZE_MB = 1
 );
-"]));
+");
         });
 
         $ydb->table()->getLogger()->info("Table created");
 
-        $ydb->table()->retryTransaction(function (Session $session) use ($tableName, $initialDataCount){
-            $prepared = $session->prepare(sprintf(Defaults::WRITE_QUERY,$tableName));
-            for ($i = 0; $i < $initialDataCount; $i++){
+        $ydb->table()->retryTransaction(function (Session $session) use ($tableName, $initialDataCount) {
+            $prepared = $session->prepare(sprintf(Defaults::WRITE_QUERY, $tableName));
+            for ($i = 0; $i < $initialDataCount; $i++) {
                 $prepared->execute(DataGenerator::getUpsertData());
             }
         });

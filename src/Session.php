@@ -339,6 +339,22 @@ class Session
         return $result ? new QueryResult($result) : true;
     }
 
+    public function Yql(string $yql){
+        if(!$this->tx_id){
+            $this->beginTransaction();
+        }
+        $data = [];
+        $data['query'] = $yql;
+        $data['tx_control'] = new TransactionControl([
+            "tx_id" => $this->tx_id
+        ]);
+        $data['collect_stats'] = 0;
+
+        $result = $this->request('ExecuteDataQuery', $data);
+
+        return $result ? new QueryResult($result) : true;
+    }
+
     /**
      * @param string|\Ydb\Table\Query $yql
      * @param array|null $parameters
