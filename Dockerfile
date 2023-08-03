@@ -8,4 +8,5 @@ COPY /slo-workload .
 RUN composer update
 #RUN cd go-server && go install && go build .
 #RUN cd ../
+RUN go version
 ENTRYPOINT  ["php", "application.php"]
