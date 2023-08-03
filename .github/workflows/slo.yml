@@ -52,7 +52,7 @@ jobs:
           shutdownTime: 30
 
           language_id0: 'php'
-          workload_path0: 'slo-workload'
+          workload_path0: './'
           language0: 'php'
 
       - uses: actions/upload-artifact@v3

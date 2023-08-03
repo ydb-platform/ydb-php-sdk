@@ -86,8 +86,7 @@ class CreateCommand extends \YdbPlatform\Ydb\Slo\Command
 //        });
 
         $table->retrySession(function (Session $session) use ($tableName) {
-            $tx = $session->beginTransaction();
-            $q = $session->Yql("CREATE TABLE `$tableName`
+            $q = $session->schemeQuery("CREATE TABLE `$tableName`
 (
     `hash` Uint64,
     `id` Uint64,
