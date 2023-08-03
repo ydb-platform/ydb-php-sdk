@@ -11,6 +11,7 @@ use YdbPlatform\Ydb\Traits\TypeHelpersTrait;
 class RunCommand extends \YdbPlatform\Ydb\Slo\Command
 {
     use TypeHelpersTrait;
+
     public $name = "run";
     public $description = "runs workload (read and write to table with sets RPS)";
     public $options = [
@@ -86,23 +87,31 @@ class RunCommand extends \YdbPlatform\Ydb\Slo\Command
 
         for ($i = 0; $i < $readForks; $i++) {
             $pid = pcntl_fork();
-            usleep($i*1e3);
+            usleep($i * 1e3);
             if ($pid == -1) {
                 echo "Error fork";
                 exit(1);
-            } elseif ($pid == 0){
-                $this->readJob($endpoint, $path, $tableName, $initialDataCount, $time, $readTimeout,$i);
+            } elseif ($pid == 0) {
+                try {
+                    $this->readJob($endpoint, $path, $tableName, $initialDataCount, $time, $readTimeout, $i);
+                } catch (\Exception $e) {
+                    echo "Error on $i'th fork: " . $e->getMessage();
+                }
                 exit(0);
             }
         }
         for ($i = 0; $i < $writeForks; $i++) {
-            usleep($i*1e3);
+            usleep($i * 1e3);
             $pid = pcntl_fork();
             if ($pid == -1) {
                 echo "Error fork";
                 exit(1);
-            } elseif ($pid == 0){
-                $this->writeJob($endpoint, $path, $tableName, $initialDataCount, $time, $writeTimeout,$i);
+            } elseif ($pid == 0) {
+                try {
+                    $this->writeJob($endpoint, $path, $tableName, $initialDataCount, $time, $writeTimeout, $i);
+                } catch (\Exception $e) {
+                    echo "Error on $i'th fork: " . $e->getMessage();
+                }
                 exit(0);
             }
         }
@@ -112,7 +121,7 @@ class RunCommand extends \YdbPlatform\Ydb\Slo\Command
     }
 
     protected function readJob(string $endpoint, string $path, string $tableName, int $initialDataCount,
-                               int $time, int $readTimeout, int $process)
+                               int    $time, int $readTimeout, int $process)
     {
         $ydb = Utils::initDriver($endpoint, $path);
         $dataGenerator = new DataGenerator();
@@ -138,8 +147,8 @@ class RunCommand extends \YdbPlatform\Ydb\Slo\Command
                 if ($attemps == 0) $attemps++;
                 Utils::metricFail("read", $process, $attemps, get_class($e));
             } finally {
-                $delay = ($begin-microtime(true))*1e6+1e6/Defaults::RPS_PER_FORK;
-                usleep($delay>0?$delay:1);
+                $delay = ($begin - microtime(true)) * 1e6 + 1e6 / Defaults::RPS_PER_FORK;
+                usleep($delay > 0 ? $delay : 1);
             }
 
         }
@@ -147,7 +156,7 @@ class RunCommand extends \YdbPlatform\Ydb\Slo\Command
     }
 
     protected function writeJob(string $endpoint, string $path, $tableName, int $initialDataCount,
-                                int $time, int $writeTimeout, int $process)
+                                int    $time, int $writeTimeout, int $process)
     {
         $ydb = Utils::initDriver($endpoint, $path);
         $dataGenerator = new DataGenerator();
@@ -171,8 +180,8 @@ class RunCommand extends \YdbPlatform\Ydb\Slo\Command
                 if ($attemps == 0) $attemps++;
                 Utils::metricFail("write", $process, $attemps, get_class($e));
             } finally {
-                $delay = ($begin-microtime(true))*1e6+1e6/Defaults::RPS_PER_FORK;
-                usleep($delay>0?$delay:1);
+                $delay = ($begin - microtime(true)) * 1e6 + 1e6 / Defaults::RPS_PER_FORK;
+                usleep($delay > 0 ? $delay : 1);
             }
         }
     }
