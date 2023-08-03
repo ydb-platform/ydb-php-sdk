@@ -93,7 +93,7 @@ class RunCommand extends \YdbPlatform\Ydb\Slo\Command
                 exit(1);
             } elseif ($pid == 0) {
                 try {
-                    $this->readJob($endpoint, $path, $tableName, $initialDataCount, $time, $readTimeout, $i);
+                    $this->readJob($endpoint, $path, $tableName, $initialDataCount, $time, $readTimeout, $i, $shutdownTime);
                 } catch (\Exception $e) {
                     echo "Error on $i'th fork: " . $e->getMessage();
                 }
@@ -108,7 +108,7 @@ class RunCommand extends \YdbPlatform\Ydb\Slo\Command
                 exit(1);
             } elseif ($pid == 0) {
                 try {
-                    $this->writeJob($endpoint, $path, $tableName, $initialDataCount, $time, $writeTimeout, $i);
+                    $this->writeJob($endpoint, $path, $tableName, $initialDataCount, $time, $writeTimeout, $i,$shutdownTime);
                 } catch (\Exception $e) {
                     echo "Error on $i'th fork: " . $e->getMessage();
                 }
@@ -125,7 +125,7 @@ class RunCommand extends \YdbPlatform\Ydb\Slo\Command
     }
 
     protected function readJob(string $endpoint, string $path, string $tableName, int $initialDataCount,
-                               int    $time, int $readTimeout, int $process)
+                               int    $time, int $readTimeout, int $process, int $shutdownTime)
     {
         try {
             $ydb = Utils::initDriver($endpoint, $path);
@@ -138,7 +138,7 @@ class RunCommand extends \YdbPlatform\Ydb\Slo\Command
             echo $e->getMessage();
         }
 
-        while (microtime(true) <= $startTime + $time) {
+        while (microtime(true) <= $startTime + $time - $shutdownTime) {
             $begin = microtime(true);
             Utils::metricInflight("read", $process);
             $attemps = 0;
@@ -164,7 +164,7 @@ class RunCommand extends \YdbPlatform\Ydb\Slo\Command
     }
 
     protected function writeJob(string $endpoint, string $path, $tableName, int $initialDataCount,
-                                int    $time, int $writeTimeout, int $process)
+                                int    $time, int $writeTimeout, int $process, int $shutdownTime)
     {
         try {
             $ydb = Utils::initDriver($endpoint, $path);
@@ -177,7 +177,7 @@ class RunCommand extends \YdbPlatform\Ydb\Slo\Command
             echo $e->getMessage();
         }
 
-        while (microtime(true) <= $startTime + $time) {
+        while (microtime(true) <= $startTime + $time - $shutdownTime) {
             $begin = microtime(true);
             Utils::metricInflight("write", $process);
             $attemps = 0;
