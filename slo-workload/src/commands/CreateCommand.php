@@ -49,6 +49,8 @@ class CreateCommand extends \YdbPlatform\Ydb\Slo\Command
         $partitionSize      = (int)($options["partition-size"] ?? Defaults::TABLE_PARTITION_SIZE);
         $initialDataCount   = (int)($options["initial-data-count"] ?? Defaults::GENERATOR_DATA_COUNT);
 
+        (new CleanupCommand())->execute($endpoint,$path,$options);
+
         $ydb = Utils::initDriver($endpoint, $path);
 
         $dataGenerator = new DataGenerator();

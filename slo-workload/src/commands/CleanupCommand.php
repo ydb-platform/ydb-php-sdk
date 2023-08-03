@@ -11,7 +11,7 @@ use YdbPlatform\Ydb\YdbTable;
 class CleanupCommand extends \YdbPlatform\Ydb\Slo\Command
 {
 
-    public $name = "create";
+    public $name = "cleanup";
     public $description = "drops table in database";
     public $options = [
         [
