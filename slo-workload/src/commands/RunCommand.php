@@ -115,7 +115,7 @@ class RunCommand extends \YdbPlatform\Ydb\Slo\Command
                 exit(0);
             }
         }
-        sleep(microtime(true) + $time);
+        sleep(microtime(true) + $time-$shutdownTime);
         exit(0);
     }
 
