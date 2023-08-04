@@ -84,7 +84,7 @@ class RunCommand extends \YdbPlatform\Ydb\Slo\Command
         $time = (int)($options["time"] ?? Defaults::READ_TIME);
         $shutdownTime = (int)($options["shutdown-time"] ?? Defaults::SHUTDOWN_TIME);
 
-        Utils::initPush($promPgw, $reportPeriod, $time);
+        Utils::initPush($promPgw, $reportPeriod, $time-$shutdownTime-1);
 
         for ($i = 0; $i < $readForks; $i++) {
             $pid = pcntl_fork();
