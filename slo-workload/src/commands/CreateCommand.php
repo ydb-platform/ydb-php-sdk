@@ -85,6 +85,12 @@ class CreateCommand extends \YdbPlatform\Ydb\Slo\Command
 //            $session->createTable($tableName, $table, ['hash', 'id']);
 //        });
 
+        try {
+            $table->dropTable($tableName);
+        }catch (\Exception $e){
+
+        }
+
         $table->retrySession(function (Session $session) use ($tableName) {
             $q = $session->schemeQuery("CREATE TABLE `$tableName`
 (

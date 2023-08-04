@@ -166,7 +166,7 @@ class RunCommand extends \YdbPlatform\Ydb\Slo\Command
             $ydb = Utils::initDriver($endpoint, $path);
             $dataGenerator = new DataGenerator();
             $dataGenerator::setMaxId($initialDataCount);
-            $query = sprintf(Defaults::READ_QUERY, $tableName);
+            $query = sprintf(Defaults::WRITE_QUERY, $tableName);
             $startTime = microtime(true);
             $table = $ydb->table();
         }catch (\Exception $e){
