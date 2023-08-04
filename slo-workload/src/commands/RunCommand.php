@@ -16,42 +16,42 @@ class RunCommand extends \YdbPlatform\Ydb\Slo\Command
     public $description = "runs workload (read and write to table with sets RPS)";
     public $options = [
         [
-            "alias" => ["t", "table-name"],
+            "alias" => ["t", "-table-name"],
             "type" => "string",
             "description" => "table name to create"
         ],
         [
-            "alias" => ["initial-data-count"],
+            "alias" => ["-initial-data-count"],
             "type" => "int",
             "description" => "amount of initially created rows"
         ],
         [
-            "alias" => ["prom-pgw"],
+            "alias" => ["-prom-pgw"],
             "type" => "string",
             "description" => "prometheus push gateway"
         ],
         [
-            "alias" => ["report-period"],
+            "alias" => ["-report-period"],
             "type" => "int",
             "description" => "prometheus push period in milliseconds"
         ],
         [
-            "alias" => ["read-rps"],
+            "alias" => ["-read-rps"],
             "type" => "int",
             "description" => "read RPS"
         ],
         [
-            "alias" => ["read-timeout"],
+            "alias" => ["-read-timeout"],
             "type" => "int",
             "description" => "read timeout milliseconds"
         ],
         [
-            "alias" => ["write-rps"],
+            "alias" => ["-write-rps"],
             "type" => "int",
             "description" => "write RPS"
         ],
         [
-            "alias" => ["write-timeout"],
+            "alias" => ["-write-timeout"],
             "type" => "int",
             "description" => "write timeout milliseconds"
         ],
@@ -61,7 +61,7 @@ class RunCommand extends \YdbPlatform\Ydb\Slo\Command
             "description" => "run time in seconds"
         ],
         [
-            "alias" => ["shutdown-time"],
+            "alias" => ["-shutdown-time"],
             "type" => "int",
             "description" => "graceful shutdown time in seconds"
         ]
@@ -148,7 +148,7 @@ class RunCommand extends \YdbPlatform\Ydb\Slo\Command
             echo $e->getMessage();
         }
 
-        while (microtime(true) <= $startTime + $time - 30) {
+        while (microtime(true) <= $startTime + $time) {
             $begin = microtime(true);
             Utils::metricInflight("read", $process);
             $attemps = 0;
@@ -188,7 +188,7 @@ class RunCommand extends \YdbPlatform\Ydb\Slo\Command
             echo $e->getMessage();
         }
 
-        while (microtime(true) <= $startTime + $time - 30) {
+        while (microtime(true) <= $startTime + $time) {
             $begin = microtime(true);
             Utils::metricInflight("write", $process);
             $attemps = 0;

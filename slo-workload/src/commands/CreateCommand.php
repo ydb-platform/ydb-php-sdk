@@ -19,27 +19,27 @@ class CreateCommand extends \YdbPlatform\Ydb\Slo\Command
     public $description = "creates table in database";
     public $options = [
         [
-            "alias" => ["t", "table-name"],
+            "alias" => ["t", "-table-name"],
             "type" => "string",
             "description" => "table name to create"
         ],
         [
-            "alias" => ["c", "initial-data-count"],
+            "alias" => ["c", "-initial-data-count"],
             "type" => "int",
             "description" => "table name to create"
         ],
         [
-            "alias" => ["min-partitions-count"],
+            "alias" => ["-min-partitions-count"],
             "type" => "int",
             "description" => "table name to create"
         ],
         [
-            "alias" => ["partition-size"],
+            "alias" => ["-partition-size"],
             "type" => "int",
             "description" => "table name to create"
         ],
         [
-            "alias" => ["write-timeout"],
+            "alias" => ["-write-timeout"],
             "type" => "int",
             "description" => "table name to create"
         ],
