@@ -115,13 +115,7 @@ class RunCommand extends \YdbPlatform\Ydb\Slo\Command
                 exit(0);
             }
         }
-        try {
-            pcntl_wait($status);
-            $exitStatus = pcntl_wexitstatus($status);
-            echo $exitStatus . "\n";
-        } catch (Exception $e){
-            echo $e->getMessage();
-        }
+        exit(0);
     }
 
     protected function readJob(string $endpoint, string $path, string $tableName, int $initialDataCount,
