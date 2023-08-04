@@ -12,7 +12,7 @@ jobs:
     with:
       language_id: php
       language: php
-      workload_path: slo-workload
+      workload_path: .
 
 #jobs:
 #  test-slo:
