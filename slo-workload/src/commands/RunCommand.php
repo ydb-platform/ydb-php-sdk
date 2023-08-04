@@ -72,6 +72,7 @@ class RunCommand extends \YdbPlatform\Ydb\Slo\Command
         print_r($options);
         shell_exec('./go-server/testHttpServer > /dev/null &');
         sleep(1);
+        $childs = array();
         $tableName = $options["table-name"] ?? Defaults::TABLE_NAME;
         $initialDataCount = (int)($options["initial-data-count"] ?? Defaults::GENERATOR_DATA_COUNT);
         $promPgw = ($options["prom-pgw"] ?? Defaults::PROMETHEUS_PUSH_GATEWAY);
@@ -98,6 +99,8 @@ class RunCommand extends \YdbPlatform\Ydb\Slo\Command
                     echo "Error on $i'th fork: " . $e->getMessage();
                 }
                 exit(0);
+            } else {
+                $childs[] = $pid;
             }
         }
         for ($i = 0; $i < $writeForks; $i++) {
@@ -113,9 +116,21 @@ class RunCommand extends \YdbPlatform\Ydb\Slo\Command
                     echo "Error on $i'th fork: " . $e->getMessage();
                 }
                 exit(0);
+            } else {
+                $childs[] = $pid;
             }
         }
-        sleep(microtime(true) + $time-$shutdownTime);
+        while(count($childs) > 0) {
+            foreach($childs as $key => $pid) {
+                $res = pcntl_waitpid($pid, $status, WNOHANG);
+
+                // If the process has already exited
+                if($res == -1 || $res > 0)
+                    unset($childs[$key]);
+            }
+
+            sleep(1);
+        }
         exit(0);
     }
 
