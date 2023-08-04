@@ -15,11 +15,11 @@ class Defaults
 
     const READ_RPS = 1000;
     const READ_TIMEOUT = 70; // milliseconds
-    const READ_TIME = 360; // seconds
+    const READ_TIME = 270; // seconds
 
     const WRITE_RPS = 100;
     const WRITE_TIMEOUT = 20000; // milliseconds
-    const WRITE_TIME = 360; // seconds
+    const WRITE_TIME = 270; // seconds
 
     const SHUTDOWN_TIME = 30;
     const PROMETHEUS_PUSH_GATEWAY = 'http://prometheus-pushgateway:9091';
