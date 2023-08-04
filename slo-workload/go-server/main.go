@@ -67,7 +67,7 @@ func main() {
 }
 
 func pushGate(m *Metrics, workTime int, interval int) {
-	timer := time.NewTimer(time.Duration(1e9 * workTime-30e9))
+	timer := time.NewTimer(time.Duration(1e9 * workTime))
 	finish := false
 	for !finish {
 		select {
