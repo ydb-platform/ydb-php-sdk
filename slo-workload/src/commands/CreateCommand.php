@@ -4,6 +4,7 @@ namespace YdbPlatform\Ydb\Slo\commands;
 
 use Ydb\Table\Query;
 use Ydb\Table\TransactionControl;
+use YdbPlatform\Ydb\Retry\RetryParams;
 use YdbPlatform\Ydb\Session;
 use YdbPlatform\Ydb\Slo\DataGenerator;
 use YdbPlatform\Ydb\Slo\Defaults;
@@ -117,7 +118,7 @@ WITH(
             for ($i = 0; $i < $initialDataCount; $i++) {
                 $prepared->execute(DataGenerator::getUpsertData());
             }
-        });
+        }, false, new RetryParams(40e3));
 
         $ydb->table()->getLogger()->info("Data filled");
     }
