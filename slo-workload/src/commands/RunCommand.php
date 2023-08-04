@@ -115,6 +115,7 @@ class RunCommand extends \YdbPlatform\Ydb\Slo\Command
                 exit(0);
             }
         }
+        sleep(microtime(true) + $time);
         exit(0);
     }
 
@@ -146,6 +147,7 @@ class RunCommand extends \YdbPlatform\Ydb\Slo\Command
                 }, true, new \YdbPlatform\Ydb\Retry\RetryParams($readTimeout));
                 Utils::metricDone("read", $process, $attemps);
             } catch (\Exception $e) {
+                print_r($e->getMessage());
                 if ($attemps == 0) $attemps++;
                 Utils::metricFail("read", $process, $attemps, get_class($e));
             } finally {
