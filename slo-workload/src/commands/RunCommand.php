@@ -148,7 +148,7 @@ class RunCommand extends \YdbPlatform\Ydb\Slo\Command
             echo $e->getMessage();
         }
 
-        while (microtime(true) <= $startTime + $time - $shutdownTime) {
+        while (microtime(true) <= $startTime + $time - 30) {
             $begin = microtime(true);
             Utils::metricInflight("read", $process);
             $attemps = 0;
@@ -188,7 +188,7 @@ class RunCommand extends \YdbPlatform\Ydb\Slo\Command
             echo $e->getMessage();
         }
 
-        while (microtime(true) <= $startTime + $time - $shutdownTime) {
+        while (microtime(true) <= $startTime + $time - 30) {
             $begin = microtime(true);
             Utils::metricInflight("write", $process);
             $attemps = 0;
