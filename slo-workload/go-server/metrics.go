@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	sdk        = "go"
+	sdk        = "php"
 	sdkVersion = "ydb.Version"
 )
 
@@ -76,7 +76,7 @@ func New(url, label, jobName string) (*Metrics, error) {
 	)
 
 	m.p = push.New(url, jobName).
-		Grouping("sdk", fmt.Sprintf("%s-%s", sdk, m.label)).
+		Grouping("sdk", sdk).
 		Grouping("sdkVersion", sdkVersion).
 		Collector(m.oks).
 		Collector(m.notOks).

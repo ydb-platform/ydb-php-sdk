@@ -56,7 +56,7 @@ class RunCommand extends \YdbPlatform\Ydb\Slo\Command
             "description" => "write timeout milliseconds"
         ],
         [
-            "alias" => ["time"],
+            "alias" => ["-time"],
             "type" => "int",
             "description" => "run time in seconds"
         ],

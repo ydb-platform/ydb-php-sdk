@@ -19,7 +19,7 @@ func main() {
 		endpoint, _ := url.Parse(request.URL.Query().Get("endpoint"))
 		label := request.URL.Query().Get("label")
 		_ = request.URL.Query().Get("version")
-		m, _ = New(endpoint.String(), label, "slo")
+		m, _ = New(endpoint.String(), label, "workload-php")
 		interval, _ := strconv.Atoi(request.URL.Query().Get("interval"))
 		workTime, _ := strconv.Atoi(request.URL.Query().Get("time"))
 		pushInterval := interval * int(time.Millisecond)
