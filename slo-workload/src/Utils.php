@@ -48,30 +48,42 @@ class Utils
 
     public static function metricInflight(string $job, int $process)
     {
-        file_get_contents('http://127.0.0.1:88/start?' .
-            http_build_query([
-                "job" => $job,
-                "process" => $process
-            ]));
+        try {
+            file_get_contents('http://127.0.0.1:88/start?' .
+                http_build_query([
+                    "job" => $job,
+                    "process" => $process
+                ]));
+        } catch (\Exception $exception) {
+            print_r($exception->getMessage());
+        }
     }
 
     public static function metricDone(string $job, int $process, int $attemps)
     {
-        file_get_contents('http://127.0.0.1:88/done?' .
-            http_build_query([
-                "job" => $job,
-                "process" => $process,
-                "attempts" => $attemps
-            ]));
+        try {
+            file_get_contents('http://127.0.0.1:88/done?' .
+                http_build_query([
+                    "job" => $job,
+                    "process" => $process,
+                    "attempts" => $attemps
+                ]));
+        } catch (\Exception $exception) {
+            print_r($exception->getMessage());
+        }
     }
 
     public static function metricFail(string $job, int $process, int $attemps)
     {
-        file_get_contents('http://127.0.0.1:88/fail?' .
-            http_build_query([
-                "job" => $job,
-                "process" => $process,
-                "attempts" => $attemps
-            ]));
+        try {
+            file_get_contents('http://127.0.0.1:88/fail?' .
+                http_build_query([
+                    "job" => $job,
+                    "process" => $process,
+                    "attempts" => $attemps
+                ]));
+        } catch (\Exception $exception) {
+            print_r($exception->getMessage());
+        }
     }
 }
