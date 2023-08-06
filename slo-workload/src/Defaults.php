@@ -4,7 +4,7 @@ namespace YdbPlatform\Ydb\Slo;
 
 class Defaults
 {
-    const TABLE_NAME = 'slo-test';
+    const TABLE_NAME = 'slo-php';
     const TABLE_MIN_PARTITION_COUNT = 6;
     const TABLE_MAX_PARTITION_COUNT = 1000;
     const TABLE_PARTITION_SIZE = 1;
