@@ -77,7 +77,7 @@ func New(url, label, jobName string) (*Metrics, error) {
 
 	m.p = push.New(url, jobName).
 		Grouping("sdk", sdk).
-		Grouping("sdkVersion", sdkVersion).
+		Grouping("sdkVersion", label).
 		Collector(m.oks).
 		Collector(m.notOks).
 		Collector(m.inflight).

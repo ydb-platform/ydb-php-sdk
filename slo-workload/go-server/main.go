@@ -17,9 +17,9 @@ func main() {
 	//spans["read"] = map[int]Span{} /**/
 	http.HandleFunc("/prepare", func(writer http.ResponseWriter, request *http.Request) {
 		endpoint, _ := url.Parse(request.URL.Query().Get("endpoint"))
-		label := request.URL.Query().Get("label")
-		_ = request.URL.Query().Get("version")
-		m, _ = New(endpoint.String(), label, "workload-php")
+		_ = request.URL.Query().Get("label")
+		version := request.URL.Query().Get("version")
+		m, _ = New(endpoint.String(), version, "workload-php")
 		interval, _ := strconv.Atoi(request.URL.Query().Get("interval"))
 		workTime, _ := strconv.Atoi(request.URL.Query().Get("time"))
 		pushInterval := interval * int(time.Millisecond)
