@@ -164,7 +164,7 @@ class RunCommand extends \YdbPlatform\Ydb\Slo\Command
                 Utils::metricDone("read", $process, $attemps);
             } catch (\Exception $e) {
                 print_r($e->getMessage());
-                if ($attemps == 0) $attemps++;
+//                if ($attemps == 0) $attemps++;
                 $table->getLogger()->error($e->getMessage());
                 Utils::metricFail("read", $process, $attemps, get_class($e));
             } finally {
@@ -203,7 +203,7 @@ class RunCommand extends \YdbPlatform\Ydb\Slo\Command
                 }, true, new \YdbPlatform\Ydb\Retry\RetryParams($writeTimeout));
                 Utils::metricDone("write", $process, $attemps);
             } catch (\Exception $e) {
-                if ($attemps == 0) $attemps++;
+//                if ($attemps == 0) $attemps++;
                 Utils::metricFail("write", $process, $attemps, get_class($e));
             } finally {
                 $delay = ($begin - microtime(true)) * 1e6 + 1e6 / Defaults::RPS_PER_FORK;
