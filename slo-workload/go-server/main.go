@@ -19,6 +19,8 @@ func main() {
 		endpoint, _ := url.Parse(request.URL.Query().Get("endpoint"))
 		_ = request.URL.Query().Get("label")
 		version := request.URL.Query().Get("version")
+        m, _ = New(endpoint.String(), "ydb-Version", "workload-php")
+        m.Reset()
 		m, _ = New(endpoint.String(), version, "workload-php")
 		m.Reset()
 		interval, _ := strconv.Atoi(request.URL.Query().Get("interval"))
