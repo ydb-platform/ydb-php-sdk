@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"github.com/shirou/gopsutil/v3/cpu"
+	"github.com/shirou/gopsutil/v3/mem"
 	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
@@ -20,6 +22,7 @@ type (
 		inflight  *prometheus.GaugeVec
 		errors    *prometheus.GaugeVec
 		latencies *prometheus.SummaryVec
+		stats     *prometheus.GaugeVec
 		attempts  *prometheus.HistogramVec
 
 		p *push.Pusher
@@ -74,6 +77,13 @@ func New(url, label, jobName string) (*Metrics, error) {
 		},
 		[]string{"status", "jobName"},
 	)
+	m.stats = prometheus.NewGaugeVec(
+		prometheus.GaugeOpts{
+			Name: "stats",
+			Help: "",
+		},
+		[]string{},
+	)
 	m.attempts = prometheus.NewHistogramVec(
 		prometheus.HistogramOpts{
 			Name:    "attempts",
@@ -112,6 +122,8 @@ func (m *Metrics) Reset() error {
 	m.inflight.WithLabelValues(JobWrite).Set(0)
 
 	m.latencies.Reset()
+
+	m.stats.Reset()
 
 	m.attempts.Reset()
 
@@ -158,6 +170,10 @@ func (j Span) Stop(err string, attempts int) {
 		j.m.errors.WithLabelValues(j.name, err).Inc()
 	}
 
+	v, _ := mem.VirtualMemory()
+	c, _ := cpu.Percent(time.Duration(1)*time.Millisecond, false)
+	j.m.stats.WithLabelValues("cpu").Set(c[0] * 100)
+	j.m.stats.WithLabelValues("memory").Set(float64(v.Free * 100))
 	j.m.latencies.WithLabelValues(successLabel, j.name).Observe(float64(latency.Milliseconds()))
 	j.m.attempts.WithLabelValues(successLabel, j.name).Observe(float64(attempts))
 	successCounter.WithLabelValues(j.name).Add(1)

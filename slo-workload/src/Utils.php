@@ -66,7 +66,8 @@ class Utils
                 http_build_query([
                     "job" => $job,
                     "process" => $process,
-                    "attempts" => $attemps
+                    "attempts" => $attemps,
+                    "cpu"       => (int)sys_getloadavg()[0]
                 ]));
         } catch (\Exception $exception) {
             print_r($exception->getMessage());
@@ -81,7 +82,8 @@ class Utils
                     "job"       => $job,
                     "process"   => $process,
                     "attempts"  => $attemps,
-                    "error"     => $error
+                    "error"     => $error,
+                    "cpu"       => (int)sys_getloadavg()[0]
                 ]));
         } catch (\Exception $exception) {
             print_r($exception->getMessage());
