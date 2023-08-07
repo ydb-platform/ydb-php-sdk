@@ -172,7 +172,7 @@ func (j Span) Stop(err string, attempts int) {
 	}
 
 	v, _ := mem.VirtualMemory()
-	c, _ := cpu.Percent(time.Second, true)
+	c, _ := cpu.Percent(0, true)
 	k := 0.
 	for i := 0; i < len(c); i++ {
 		k += c[i]
