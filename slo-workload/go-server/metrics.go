@@ -18,6 +18,7 @@ type (
 		oks       *prometheus.GaugeVec
 		notOks    *prometheus.GaugeVec
 		inflight  *prometheus.GaugeVec
+		errors    *prometheus.GaugeVec
 		latencies *prometheus.SummaryVec
 		attempts  *prometheus.HistogramVec
 
@@ -53,6 +54,13 @@ func New(url, label, jobName string) (*Metrics, error) {
 		},
 		[]string{"jobName"},
 	)
+	m.errors = prometheus.NewGaugeVec(
+		prometheus.GaugeOpts{
+			Name: "errors",
+			Help: "error",
+		},
+		[]string{"jobName", "class"},
+	)
 	m.latencies = prometheus.NewSummaryVec(
 		prometheus.SummaryOpts{
 			Name: "latency",
@@ -82,7 +90,8 @@ func New(url, label, jobName string) (*Metrics, error) {
 		Collector(m.notOks).
 		Collector(m.inflight).
 		Collector(m.latencies).
-		Collector(m.attempts)
+		Collector(m.attempts).
+		Collector(m.errors)
 
 	return m, m.Reset() //nolint:gocritic
 }
@@ -106,6 +115,8 @@ func (m *Metrics) Reset() error {
 
 	m.attempts.Reset()
 
+	m.errors.Reset()
+
 	return m.Push()
 }
 
@@ -121,7 +132,7 @@ func (m *Metrics) Start(name SpanName) Span {
 	return j
 }
 
-func (j Span) Stop(err bool, attempts int) {
+func (j Span) Stop(err string, attempts int) {
 	j.m.inflight.WithLabelValues(j.name).Sub(1)
 
 	latency := time.Since(j.start)
@@ -141,9 +152,10 @@ func (j Span) Stop(err bool, attempts int) {
 		successCounter = j.m.oks
 	)
 
-	if err {
+	if err != "" {
 		successLabel = JobStatusErr
 		successCounter = j.m.notOks
+		j.m.errors.WithLabelValues(j.name, err)
 	}
 
 	j.m.latencies.WithLabelValues(successLabel, j.name).Observe(float64(latency.Milliseconds()))
