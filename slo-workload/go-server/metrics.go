@@ -82,7 +82,7 @@ func New(url, label, jobName string) (*Metrics, error) {
 			Name: "stats",
 			Help: "",
 		},
-		[]string{},
+		[]string{"stats"},
 	)
 	m.attempts = prometheus.NewHistogramVec(
 		prometheus.HistogramOpts{
@@ -173,7 +173,7 @@ func (j Span) Stop(err string, attempts int) {
 	v, _ := mem.VirtualMemory()
 	c, _ := cpu.Percent(time.Duration(1)*time.Millisecond, false)
 	j.m.stats.WithLabelValues("cpu").Set(c[0] * 100)
-	j.m.stats.WithLabelValues("memory").Set(float64(v.Free * 100))
+	j.m.stats.WithLabelValues("memory").Set(float64(v.Free))
 	j.m.latencies.WithLabelValues(successLabel, j.name).Observe(float64(latency.Milliseconds()))
 	j.m.attempts.WithLabelValues(successLabel, j.name).Observe(float64(attempts))
 	successCounter.WithLabelValues(j.name).Add(1)
