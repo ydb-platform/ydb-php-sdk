@@ -41,10 +41,10 @@ class DataGenerator
     {
         self::$currentObjectId++;
         return [
-            "\$id" => new Uint64Type(self::$currentObjectId),
-            "\$payload_str" => new Utf8Type(base64_encode(bin2hex(random_bytes(round(lcg_value() * 20 + 20))))),
-            "\$payload_double" => new DoubleType(lcg_value()),
-            "\$payload_timestamp" => new TimestampType(time())
+            "\$id" => (new Uint64Type(self::$currentObjectId))->toTypedValue(),
+            "\$payload_str" => (new Utf8Type(base64_encode(bin2hex(random_bytes(round(lcg_value() * 20 + 20))))))->toTypedValue(),
+            "\$payload_double" => (new DoubleType(lcg_value()))->toTypedValue(),
+            "\$payload_timestamp" => (new TimestampType(time()))->toTypedValue()
         ];
     }
 
