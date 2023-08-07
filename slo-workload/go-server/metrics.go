@@ -101,7 +101,8 @@ func New(url, label, jobName string) (*Metrics, error) {
 		Collector(m.inflight).
 		Collector(m.latencies).
 		Collector(m.attempts).
-		Collector(m.errors)
+		Collector(m.errors).
+		Collector(m.stats)
 
 	return m, m.Reset() //nolint:gocritic
 }
