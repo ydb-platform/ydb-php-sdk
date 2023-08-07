@@ -172,9 +172,14 @@ func (j Span) Stop(err string, attempts int) {
 	}
 
 	v, _ := mem.VirtualMemory()
-	c, _ := cpu.Percent(time.Duration(1)*time.Millisecond, false)
-	j.m.stats.WithLabelValues("cpu").Set(c[0] * 100)
-	j.m.stats.WithLabelValues("memory").Set(float64(v.Free))
+	c, _ := cpu.Percent(time.Millisecond, true)
+	k := 0.
+	for i := 0; i < len(c); i++ {
+		k += c[i]
+	}
+	k = k / (float64(len(c)))
+	j.m.stats.WithLabelValues("cpu").Set(k)
+	j.m.stats.WithLabelValues("memory").Set(v.UsedPercent)
 	j.m.latencies.WithLabelValues(successLabel, j.name).Observe(float64(latency.Milliseconds()))
 	j.m.attempts.WithLabelValues(successLabel, j.name).Observe(float64(attempts))
 	successCounter.WithLabelValues(j.name).Add(1)
