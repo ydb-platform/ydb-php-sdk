@@ -100,7 +100,7 @@ class RunCommand extends \YdbPlatform\Ydb\Slo\Command
                 exit(0);
             } else {
                 $childs[] = $pid;
-                usleep($i * 1e5);
+//                usleep($i * 1e5);
             }
         }
         for ($i = 0; $i < $writeForks; $i++) {
@@ -117,7 +117,7 @@ class RunCommand extends \YdbPlatform\Ydb\Slo\Command
                 exit(0);
             } else {
                 $childs[] = $pid;
-                usleep($i * 1e5);
+//                usleep($i * 1e5);
             }
         }
         while(count($childs) > 0) {
@@ -137,7 +137,7 @@ class RunCommand extends \YdbPlatform\Ydb\Slo\Command
     protected function readJob(string $endpoint, string $path, string $tableName, int $initialDataCount,
                                int    $time, int $readTimeout, int $process, int $shutdownTime)
     {
-        usleep($process * 1e5);
+//        usleep($process * 1e5);
         try {
             $ydb = Utils::initDriver($endpoint, $path);
             $dataGenerator = new DataGenerator();
@@ -179,7 +179,7 @@ class RunCommand extends \YdbPlatform\Ydb\Slo\Command
     protected function writeJob(string $endpoint, string $path, $tableName, int $initialDataCount,
                                 int    $time, int $writeTimeout, int $process, int $shutdownTime)
     {
-        usleep($process * 1e5);
+//        usleep($process * 1e5);
         try {
             $ydb = Utils::initDriver($endpoint, $path);
             $dataGenerator = new DataGenerator();

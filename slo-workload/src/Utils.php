@@ -26,7 +26,7 @@ class Utils
             'iam_config' => [
                 'insecure' => $endpointData[0] != "grpcs",
             ],
-            "credentials" => new \YdbPlatform\Ydb\Auth\EnvironCredentials()
+            "credentials" => new \YdbPlatform\Ydb\Auth\Implement\AnonymousAuthentication()
         ];
         if (file_exists("./ca.pem")) {
             $config['iam_config']['root_cert_file'] = './ca.pem';
@@ -73,14 +73,15 @@ class Utils
         }
     }
 
-    public static function metricFail(string $job, int $process, int $attemps)
+    public static function metricFail(string $job, int $process, int $attemps, string $error)
     {
         try {
             file_get_contents('http://127.0.0.1:88/fail?' .
                 http_build_query([
-                    "job" => $job,
-                    "process" => $process,
-                    "attempts" => $attemps
+                    "job"       => $job,
+                    "process"   => $process,
+                    "attempts"  => $attemps,
+                    "error"     => $error
                 ]));
         } catch (\Exception $exception) {
             print_r($exception->getMessage());
