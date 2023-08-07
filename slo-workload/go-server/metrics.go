@@ -155,7 +155,7 @@ func (j Span) Stop(err string, attempts int) {
 	if err != "" {
 		successLabel = JobStatusErr
 		successCounter = j.m.notOks
-		j.m.errors.WithLabelValues(j.name, err)
+		j.m.errors.WithLabelValues(j.name, err).Inc()
 	}
 
 	j.m.latencies.WithLabelValues(successLabel, j.name).Observe(float64(latency.Milliseconds()))
