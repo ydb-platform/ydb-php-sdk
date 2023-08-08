@@ -86,23 +86,6 @@ class RunCommand extends \YdbPlatform\Ydb\Slo\Command
 
         Utils::initPush($promPgw, $reportPeriod, $time);
 
-        for ($i = 0; $i < $readForks; $i++) {
-            $pid = pcntl_fork();
-            if ($pid == -1) {
-                echo "Error fork";
-                exit(1);
-            } elseif ($pid == 0) {
-                try {
-                    $this->readJob($endpoint, $path, $tableName, $initialDataCount, $time, $readTimeout, $i, $shutdownTime);
-                } catch (\Exception $e) {
-                    echo "Error on $i'th fork: " . $e->getMessage();
-                }
-                exit(0);
-            } else {
-                $childs[] = $pid;
-//                usleep($i * 1e5);
-            }
-        }
         for ($i = 0; $i < $writeForks; $i++) {
             $pid = pcntl_fork();
             if ($pid == -1) {
@@ -117,7 +100,24 @@ class RunCommand extends \YdbPlatform\Ydb\Slo\Command
                 exit(0);
             } else {
                 $childs[] = $pid;
-//                usleep($i * 1e5);
+                usleep($i * 1e4);
+            }
+        }
+        for ($i = 0; $i < $readForks; $i++) {
+            $pid = pcntl_fork();
+            if ($pid == -1) {
+                echo "Error fork";
+                exit(1);
+            } elseif ($pid == 0) {
+                try {
+                    $this->readJob($endpoint, $path, $tableName, $initialDataCount, $time, $readTimeout, $i, $shutdownTime);
+                } catch (\Exception $e) {
+                    echo "Error on $i'th fork: " . $e->getMessage();
+                }
+                exit(0);
+            } else {
+                $childs[] = $pid;
+                usleep($i * 1e4);
             }
         }
         while(count($childs) > 0) {
