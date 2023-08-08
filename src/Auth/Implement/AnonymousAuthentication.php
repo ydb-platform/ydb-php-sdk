@@ -13,7 +13,7 @@ class AnonymousAuthentication extends \YdbPlatform\Ydb\Auth\Auth
 
     public function getTokenInfo(): TokenInfo
     {
-        return new TokenInfo("", time()+24*3600);
+        return new TokenInfo("", time()+365*24*3600);
     }
 
     public function getName(): string
