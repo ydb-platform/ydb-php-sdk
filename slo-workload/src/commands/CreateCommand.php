@@ -109,7 +109,7 @@ WITH(
     AUTO_PARTITIONING_PARTITION_SIZE_MB = 1
 );
 ");
-        }, true, 40000);
+        }, true, new RetryParams(40000));
 
         $ydb->table()->getLogger()->info("Table created");
 
