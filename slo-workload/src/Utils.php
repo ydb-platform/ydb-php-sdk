@@ -7,7 +7,7 @@ use YdbPlatform\Ydb\Ydb;
 
 class Utils
 {
-    public static function initDriver(string $endpoint, string $db)
+    public static function initDriver(string $endpoint, string $db, string $process)
     {
         $endpointData = explode("://", $endpoint);
         if (count($endpointData) != 2) throw new Exception("Invalid endpoint exception");
@@ -31,7 +31,8 @@ class Utils
         if (file_exists("./ca.pem")) {
             $config['iam_config']['root_cert_file'] = './ca.pem';
         }
-        return new Ydb($config, new \YdbPlatform\Ydb\Logger\SimpleStdLogger(6));
+        @mkdir("./logs");
+        return new Ydb($config, new \YdbPlatform\Ydb\Logger\SimpleFileLogger(6, "./logs/".$process.".log"));
     }
 
     public static function initPush(string $endpoint, string $interval, string $time)

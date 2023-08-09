@@ -129,7 +129,7 @@ class RunCommand extends \YdbPlatform\Ydb\Slo\Command
     {
 //        usleep($process * 1e5);
         try {
-            $ydb = Utils::initDriver($endpoint, $path);
+            $ydb = Utils::initDriver($endpoint, $path, "read-$process");
             $dataGenerator = new DataGenerator();
             $dataGenerator::setMaxId($initialDataCount);
             $query = sprintf(Defaults::READ_QUERY, $tableName);
@@ -171,7 +171,7 @@ class RunCommand extends \YdbPlatform\Ydb\Slo\Command
     {
 //        usleep($process * 1e5);
         try {
-            $ydb = Utils::initDriver($endpoint, $path);
+            $ydb = Utils::initDriver($endpoint, $path, "write-$process");
             $dataGenerator = new DataGenerator();
             $dataGenerator::setMaxId($initialDataCount);
             $query = sprintf(Defaults::WRITE_QUERY, $tableName);

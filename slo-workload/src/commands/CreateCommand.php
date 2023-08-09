@@ -53,7 +53,7 @@ class CreateCommand extends \YdbPlatform\Ydb\Slo\Command
         $partitionSize = (int)($options["partition-size"] ?? Defaults::TABLE_PARTITION_SIZE);
         $initialDataCount = (int)($options["initial-data-count"] ?? Defaults::GENERATOR_DATA_COUNT);
 
-        $ydb = Utils::initDriver($endpoint, $path);
+        $ydb = Utils::initDriver($endpoint, $path, "create");
 
         $dataGenerator = new DataGenerator();
         $dataGenerator::setMaxId(0);

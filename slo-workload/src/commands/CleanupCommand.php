@@ -30,7 +30,7 @@ class CleanupCommand extends \YdbPlatform\Ydb\Slo\Command
     {
         $tableName = $options["table-name"] ?? Defaults::TABLE_NAME;
 
-        $ydb = Utils::initDriver($endpoint, $path);
+        $ydb = Utils::initDriver($endpoint, $path, "cleanup");
 
         $table = $ydb->table();
 
