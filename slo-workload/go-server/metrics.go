@@ -114,8 +114,6 @@ func (m *Metrics) Reset() error {
 
 	m.latencies.Reset()
 
-	m.stats.Reset()
-
 	m.attempts.Reset()
 
 	m.errors.Reset()
