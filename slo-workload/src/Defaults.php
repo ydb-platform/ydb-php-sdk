@@ -11,7 +11,7 @@ class Defaults
 
     const GENERATOR_DATA_COUNT = 1000;
 
-    const RPS_PER_FORK = 10;
+    const RPS_PER_FORK = 1;
 
     const READ_RPS = 1000;
     const READ_TIMEOUT = 70; // milliseconds
