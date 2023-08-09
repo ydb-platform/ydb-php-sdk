@@ -96,7 +96,7 @@ class Iam implements IamTokenContract
      */
     public function newToken()
     {
-        $this->logger()->info('YDB: Obtaining new IAM token...');
+        $this->logger()->debug('YDB: Obtaining new IAM token...');
 
         $tokenInfo = $this->config('credentials')->getTokenInfo();
         $this->iam_token = $tokenInfo->getToken();
@@ -296,7 +296,7 @@ class Iam implements IamTokenContract
                 {
                     $token->expiresAt = time() + $rawToken->expires_in;
                 }
-                $this->logger()->info('YDB: Obtained new IAM token from Metadata [...' . substr($token->iamToken, -6) . '].');
+                $this->logger()->debug('YDB: Obtained new IAM token from Metadata [...' . substr($token->iamToken, -6) . '].');
                 $this->saveToken($token);
                 return $token->iamToken;
             }

@@ -117,20 +117,10 @@ class RunCommand extends \YdbPlatform\Ydb\Slo\Command
                 exit(0);
             } else {
                 $childs[] = $pid;
-                usleep($i * 1e4);
             }
         }
-        while(count($childs) > 0) {
-            foreach($childs as $key => $pid) {
-                $res = pcntl_waitpid($pid, $status, WNOHANG);
 
-                // If the process has already exited
-                if($res == -1 || $res > 0)
-                    unset($childs[$key]);
-            }
-
-            sleep(1);
-        }
+        $res = pcntl_waitpid($pid, $status);
         exit(0);
     }
 
