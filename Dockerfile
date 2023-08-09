@@ -9,4 +9,5 @@ RUN composer update
 #RUN cd go-server && go install && go build .
 #RUN cd ../
 RUN go version
+RUN apt update; apt install htop
 ENTRYPOINT  ["php", "application.php"]
