@@ -1,6 +1,6 @@
 <?php
 
-namespace YdbPlatform\Ydb\Slo\src;
+namespace YdbPlatform\Ydb\Slo;
 
 class SimpleFileLogger implements \Psr\Log\LoggerInterface
 {

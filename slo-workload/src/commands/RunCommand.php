@@ -70,8 +70,8 @@ class RunCommand extends \YdbPlatform\Ydb\Slo\Command
     public function execute(string $endpoint, string $path, array $options)
     {
         print_r($options);
-        shell_exec('./go-server/testHttpServer > /dev/null &');
-        sleep(1);
+        shell_exec('./go-server/testHttpServer > ./logs/go-server.log &');
+        sleep(2);
         $childs = array();
         $tableName = $options["table-name"] ?? Defaults::TABLE_NAME;
         $initialDataCount = (int)($options["initial-data-count"] ?? Defaults::GENERATOR_DATA_COUNT);
