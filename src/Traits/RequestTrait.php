@@ -236,19 +236,6 @@ trait RequestTrait
             $this->resetLastRequest();
 
             return $result;
-        } elseif ($statusCode == StatusCode::UNAVAILABLE){
-            if ($this->ydb->needDiscovery()){
-                try{
-                    $this->ydb->discover();
-                }catch (\Exception $e){}
-            }
-            $endpoint = $this->ydb->endpoint();
-            if ($this->ydb->needDiscovery() && count($this->ydb->cluster()->all()) > 0){
-                $endpoint = $this->ydb->cluster()->all()[array_rand($this->ydb->cluster()->all())]->endpoint();
-            }
-            $this->client = new $this->client($endpoint,[
-                'credentials' => $this->ydb->iam()->getCredentials()
-            ]);
         }
         $statusName = StatusCode::name($statusCode);
 
