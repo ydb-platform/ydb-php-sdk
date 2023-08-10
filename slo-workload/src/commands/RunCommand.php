@@ -122,16 +122,13 @@ class RunCommand extends \YdbPlatform\Ydb\Slo\Command
         }
 
         sleep($time-1);
-        for ($j = 0; $j < $readForks; $j++) {
-            echo "read-$j logs:\n";
-            echo file_get_contents("./logs/read-$j.log");
-            echo "\n\n";
+        $files = array_slice(scandir("./logs"),2);
+        $logs = "";
+        foreach ($files as $file) {
+            $logs .= $file."\n";
+            $logs .= $logs;
         }
-        for ($j = 0; $j < $writeForks; $j++) {
-            echo "write-$j logs:\n";
-            echo file_get_contents("./logs/write-$j.log");
-            echo "\n\n";
-        }
+        echo $logs;
         exit(0);
     }
 
