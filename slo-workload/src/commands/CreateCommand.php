@@ -121,6 +121,8 @@ WITH(
         }, false, new RetryParams(40e3));
 
         $ydb->table()->getLogger()->info("Data filled");
+
+        echo file_get_contents("./logs/create.log");
     }
 
     /**
