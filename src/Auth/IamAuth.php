@@ -13,7 +13,8 @@ abstract class IamAuth extends Auth
      */
     public function requestToken($request_data)
     {
-        $this->logger()->info('YDB: Obtaining new IAM token...');
+        $this->logger()->debug('YDB: Request new IAM token...');
+        $startTime = microtime(true);
 
         $curl = curl_init(Iam::IAM_TOKEN_API_URL);
 
@@ -32,6 +33,8 @@ abstract class IamAuth extends Auth
         $result = curl_exec($curl);
 
         $status = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+
+        $this->logger->debug("YDB: Received IAM response in ".((microtime(true)-$startTime)*1000)." miliseconds");
 
         if ($status === 200) {
             $token = json_decode($result);

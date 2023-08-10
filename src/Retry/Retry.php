@@ -77,22 +77,26 @@ class Retry
         $startTime = microtime(true);
         $retryCount = 0;
         $lastException = null;
-        while (microtime(true) < $startTime + $this->timeoutMs / 1000) {
+        $deadline = is_null($this->timeoutMs) ? PHP_INT_MAX : $startTime + $this->timeoutMs / 1000;
+        $this->logger->debug("YDB: begin retry function. Deadline: $deadline");
+        do {
             $this->logger->debug("YDB: Run user function. Retry count: $retryCount. s: ".(microtime(true) - $startTime));
             try {
                 return $closure();
-            } catch (Exception $e) {
-                $this->logger->warning("YDB: Received exception: ".$e->getMessage());
+            } catch (\Exception $e) {
+                $this->logger->debug("YDB: Received exception: ".$e->getMessage());
+                $lastException = $e;
                 if (!$this->canRetry($e, $idempotent)){
-                    $lastException = $e;
                     break;
                 }
                 $retryCount++;
-                $lastException = $e;
                 $delay = $this->retryDelay($retryCount, $this->backoffType(get_class($e)))*1000;
+                $this->logger->debug("YDB: Sleep $delay microseconds before retry");
                 usleep($delay);
             }
-        }
+        } while (microtime(true) < $deadline);
+        $this->logger->error("YDB: Timeout retry function. ms: "
+            .((microtime(true)-$startTime)*1000). "Retry count: $retryCount");
         throw $lastException;
     }
 
@@ -111,7 +115,7 @@ class Retry
         return in_array($exception, self::$alwaysRetry);
     }
 
-    protected function canRetry(Exception $e, bool $idempotent)
+    protected function canRetry(\Exception $e, bool $idempotent)
     {
         return is_a($e, RetryableException::class) && ($this->alwaysRetry(get_class($e)) || $idempotent);
     }
