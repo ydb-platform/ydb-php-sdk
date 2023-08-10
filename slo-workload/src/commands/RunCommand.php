@@ -86,6 +86,22 @@ class RunCommand extends \YdbPlatform\Ydb\Slo\Command
 
         Utils::initPush($promPgw, $reportPeriod, $time);
 
+        for ($i = 0; $i < $readForks; $i++) {
+            $pid = pcntl_fork();
+            if ($pid == -1) {
+                echo "Error fork";
+                exit(1);
+            } elseif ($pid == 0) {
+                try {
+                    $this->readJob($endpoint, $path, $tableName, $initialDataCount, $time-2, $readTimeout, $i, $shutdownTime);
+                } catch (\Exception $e) {
+                    echo "Error on $i'th fork: " . $e->getMessage();
+                }
+                exit(0);
+            } else {
+                $childs[] = $pid;
+            }
+        }
         for ($i = 0; $i < $writeForks; $i++) {
             $pid = pcntl_fork();
             if ($pid == -1) {
@@ -93,7 +109,7 @@ class RunCommand extends \YdbPlatform\Ydb\Slo\Command
                 exit(1);
             } elseif ($pid == 0) {
                 try {
-                    $this->writeJob($endpoint, $path, $tableName, $initialDataCount, $time, $writeTimeout, $i,$shutdownTime);
+                    $this->writeJob($endpoint, $path, $tableName, $initialDataCount, $time-2, $writeTimeout, $i,$shutdownTime);
                 } catch (\Exception $e) {
                     echo "Error on $i'th fork: " . $e->getMessage();
                 }
@@ -103,31 +119,25 @@ class RunCommand extends \YdbPlatform\Ydb\Slo\Command
                 usleep($i * 1e4);
             }
         }
-        for ($i = 0; $i < $readForks; $i++) {
-            $pid = pcntl_fork();
-            if ($pid == -1) {
-                echo "Error fork";
-                exit(1);
-            } elseif ($pid == 0) {
-                try {
-                    $this->readJob($endpoint, $path, $tableName, $initialDataCount, $time, $readTimeout, $i, $shutdownTime);
-                } catch (\Exception $e) {
-                    echo "Error on $i'th fork: " . $e->getMessage();
-                }
-                exit(0);
-            } else {
-                $childs[] = $pid;
-            }
-        }
 
-        $res = pcntl_waitpid($pid, $status);
+        sleep($time-1);
+        for ($j = 0; $j < $readForks; $j++) {
+            echo "read-$j logs:\n";
+            echo file_get_contents("./logs/read-$j.log");
+            echo "\n\n";
+        }
+        for ($j = 0; $j < $writeForks; $j++) {
+            echo "write-$j logs:\n";
+            echo file_get_contents("./logs/write-$j.log");
+            echo "\n\n";
+        }
         exit(0);
     }
 
     protected function readJob(string $endpoint, string $path, string $tableName, int $initialDataCount,
                                int    $time, int $readTimeout, int $process, int $shutdownTime)
     {
-//        usleep($process * 1e5);
+        usleep($process * 5e4);
         try {
             $ydb = Utils::initDriver($endpoint, $path, "read-$process");
             $dataGenerator = new DataGenerator();
@@ -141,22 +151,31 @@ class RunCommand extends \YdbPlatform\Ydb\Slo\Command
 
         while (microtime(true) <= $startTime + $time) {
             $begin = microtime(true);
-            Utils::metricInflight("read", $process);
+            $status = Utils::metricInflight("read", $process);
+            if ($status!=200){
+                $table->getLogger()->error("Error post inflight read process. Code $status");
+            }
             $attemps = 0;
             try {
-                $result = $table->retryTransaction(function (\YdbPlatform\Ydb\Session $session)
+                $table->retryTransaction(function (\YdbPlatform\Ydb\Session $session)
                 use ($query, $dataGenerator, $tableName, &$attemps) {
                     $attemps++;
                     return $session->query($query, [
                         "\$id" => (new \YdbPlatform\Ydb\Types\Uint64Type($dataGenerator->getRandomId()))->toTypedValue()
                     ]);
                 }, true, new \YdbPlatform\Ydb\Retry\RetryParams($readTimeout));
-                Utils::metricDone("read", $process, $attemps);
+                $status = Utils::metricDone("read", $process, $attemps);
+                if ($status!=200){
+                    $table->getLogger()->error("Error post done read process. Code $status");
+                }
             } catch (\Exception $e) {
                 print_r($e->getMessage());
 //                if ($attemps == 0) $attemps++;
                 $table->getLogger()->error($e->getMessage());
-                Utils::metricFail("read", $process, $attemps, get_class($e));
+                $status = Utils::metricFail("read", $process, $attemps, get_class($e));
+                if ($status!=200){
+                    $table->getLogger()->error("Error post fail read process. Code $status");
+                }
             } finally {
                 $delay = ($begin - microtime(true)) * 1e6 + 1e6 / Defaults::RPS_PER_FORK;
                 usleep($delay > 0 ? $delay : 1);
@@ -169,7 +188,7 @@ class RunCommand extends \YdbPlatform\Ydb\Slo\Command
     protected function writeJob(string $endpoint, string $path, $tableName, int $initialDataCount,
                                 int    $time, int $writeTimeout, int $process, int $shutdownTime)
     {
-//        usleep($process * 1e5);
+        usleep($process * 5e4);
         try {
             $ydb = Utils::initDriver($endpoint, $path, "write-$process");
             $dataGenerator = new DataGenerator();
@@ -183,18 +202,26 @@ class RunCommand extends \YdbPlatform\Ydb\Slo\Command
 
         while (microtime(true) <= $startTime + $time) {
             $begin = microtime(true);
-            Utils::metricInflight("write", $process);
+            $status = Utils::metricInflight("write", $process);
+            if ($status!=200){
+                $table->getLogger()->error("Error post done read process. Code $status");
+            }
             $attemps = 0;
             try {
-                $result = $table->retryTransaction(function (\YdbPlatform\Ydb\Session $session)
+                $table->retryTransaction(function (\YdbPlatform\Ydb\Session $session)
                 use ($query, $dataGenerator, $tableName, &$attemps) {
                     $attemps++;
                     return $session->query($query, $dataGenerator::getUpsertData());
                 }, true, new \YdbPlatform\Ydb\Retry\RetryParams($writeTimeout));
-                Utils::metricDone("write", $process, $attemps);
+                $status = Utils::metricDone("write", $process, $attemps);
+                if ($status!=200){
+                    $table->getLogger()->error("Error post done read process. Code $status");
+                }
             } catch (\Exception $e) {
-//                if ($attemps == 0) $attemps++;
-                Utils::metricFail("write", $process, $attemps, get_class($e));
+                $status = Utils::metricFail("write", $process, $attemps, get_class($e));
+                if ($status!=200){
+                    $table->getLogger()->error("Error post done read process. Code $status");
+                }
             } finally {
                 $delay = ($begin - microtime(true)) * 1e6 + 1e6 / Defaults::RPS_PER_FORK;
                 usleep($delay > 0 ? $delay : 1);

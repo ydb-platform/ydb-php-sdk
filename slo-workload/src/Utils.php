@@ -32,12 +32,12 @@ class Utils
             $config['iam_config']['root_cert_file'] = './ca.pem';
         }
         @mkdir("./logs");
-        return new Ydb($config, new \YdbPlatform\Ydb\Logger\SimpleFileLogger(6, "./logs/".$process.".log"));
+        return new Ydb($config, new src\SimpleFileLogger(6, "./logs/" . $process . ".log"));
     }
 
     public static function initPush(string $endpoint, string $interval, string $time)
     {
-        file_get_contents('http://127.0.0.1:88/prepare?' .
+        return static::postData('prepare',
             http_build_query([
                 "endpoint" => $endpoint,
                 "label" => "php",
@@ -49,43 +49,46 @@ class Utils
 
     public static function metricInflight(string $job, int $process)
     {
-        try {
-            file_get_contents('http://127.0.0.1:88/start?' .
-                http_build_query([
-                    "job" => $job,
-                    "process" => $process
-                ]));
-        } catch (\Exception $exception) {
-            print_r($exception->getMessage());
-        }
+        return static::postData('start',
+            http_build_query([
+                "job" => $job,
+                "process" => $process
+            ]));
     }
 
     public static function metricDone(string $job, int $process, int $attemps)
     {
-        try {
-            file_get_contents('http://127.0.0.1:88/done?' .
-                http_build_query([
-                    "job" => $job,
-                    "process" => $process,
-                    "attempts" => $attemps
-                ]));
-        } catch (\Exception $exception) {
-            print_r($exception->getMessage());
-        }
+        return static::postData('done',
+            http_build_query([
+                "job" => $job,
+                "process" => $process,
+                "attempts" => $attemps
+            ]));
     }
 
     public static function metricFail(string $job, int $process, int $attemps, string $error)
     {
-        try {
-            file_get_contents('http://127.0.0.1:88/fail?' .
-                http_build_query([
-                    "job"       => $job,
-                    "process"   => $process,
-                    "attempts"  => $attemps,
-                    "error"     => $error
-                ]));
-        } catch (\Exception $exception) {
-            print_r($exception->getMessage());
-        }
+        return static::postData('fail',
+            http_build_query([
+                "job" => $job,
+                "process" => $process,
+                "attempts" => $attemps,
+                "error" => $error
+            ]));
     }
+
+    public static function postData(string $path, string $data)
+    {
+        $curl = curl_init("http://localhost:88/$path?$data");
+
+        curl_setopt_array($curl, [
+            CURLOPT_RETURNTRANSFER => 1,
+            CURLOPT_SSL_VERIFYPEER => 0,
+            CURLOPT_SSL_VERIFYHOST => 0,
+            CURLOPT_HEADER => 0,
+        ]);
+
+        return curl_getinfo($curl, CURLINFO_HTTP_CODE);
+    }
+
 }
