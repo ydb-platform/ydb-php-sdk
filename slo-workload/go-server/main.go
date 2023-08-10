@@ -88,6 +88,7 @@ func main() {
 		println(err.Error())
 		return
 	}
+			println("Server started")
 }
 
 func pushGate(m *Metrics, workTime int, interval int) {
