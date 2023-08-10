@@ -77,27 +77,35 @@ class Retry
         $startTime = microtime(true);
         $retryCount = 0;
         $lastException = null;
-        $deadline = is_null($this->timeoutMs) ? PHP_INT_MAX : $startTime + $this->timeoutMs / 1000;
+        if (is_null($this->timeoutMs)) {
+            $deadline = PHP_INT_MAX;
+        } else {
+            $deadline = $startTime + $this->timeoutMs / 1000;
+        }
         $this->logger->debug("YDB: begin retry function. Deadline: $deadline");
         do {
-            $this->logger->debug("YDB: Run user function. Retry count: $retryCount. s: ".(microtime(true) - $startTime));
+            $this->logger->debug("YDB: Run user function. Retry count: $retryCount. s: " . (microtime(true) - $startTime));
             try {
                 return $closure();
             } catch (\Exception $e) {
-                $this->logger->debug("YDB: Received exception: ".$e->getMessage());
+                $this->logger->debug("YDB: Received exception: " . $e->getMessage());
                 $lastException = $e;
-                if (!$this->canRetry($e, $idempotent)){
-                    break;
+                if (!$this->canRetry($e, $idempotent)) {
+                    $this->logger->error("YDB: Received non-retryable exception in retry. ms: "
+                        . ((microtime(true) - $startTime) * 1000) . "Retry count: $retryCount");
+                    throw $lastException;
+                }
+                $delay = $this->retryDelay($retryCount, $this->backoffType(get_class($e))) * 1000;
+                if (microtime(true) + $delay / 1000000 > $deadline) {
+                    $this->logger->error("YDB: Timeout retry function. ms: "
+                        . ((microtime(true) - $startTime) * 1000) . "Retry count: $retryCount");
+                    throw $lastException;
                 }
                 $retryCount++;
-                $delay = $this->retryDelay($retryCount, $this->backoffType(get_class($e)))*1000;
                 $this->logger->debug("YDB: Sleep $delay microseconds before retry");
                 usleep($delay);
             }
-        } while (microtime(true) < $deadline);
-        $this->logger->error("YDB: Timeout retry function. ms: "
-            .((microtime(true)-$startTime)*1000). "Retry count: $retryCount");
-        throw $lastException;
+        } while (true);
     }
 
     /**
