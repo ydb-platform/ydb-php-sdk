@@ -126,7 +126,7 @@ class RunCommand extends \YdbPlatform\Ydb\Slo\Command
         $logs = "";
         foreach ($files as $file) {
             $logs .= $file."\n";
-            $logs .= $logs;
+            $logs .= file_get_contents('./logs/'.$file);
         }
         echo $logs;
         exit(0);
