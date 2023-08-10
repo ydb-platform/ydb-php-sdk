@@ -16,13 +16,23 @@ func main() {
 	//var spans = map[SpanName]map[int]Span{}
 	//spans["read"] = map[int]Span{} /**/
 	http.HandleFunc("/prepare", func(writer http.ResponseWriter, request *http.Request) {
-		endpoint, _ := url.Parse(request.URL.Query().Get("endpoint"))
-		_ = request.URL.Query().Get("label")
+		endpoint, err := url.Parse(request.URL.Query().Get("endpoint"))
+		if err != nil {
+			println("Error in prepare in parse endpoint")
+		}
 		version := request.URL.Query().Get("version")
-		m, _ = New(endpoint.String(), version, "workload-php")
-		m.Reset()
-		interval, _ := strconv.Atoi(request.URL.Query().Get("interval"))
-		workTime, _ := strconv.Atoi(request.URL.Query().Get("time"))
+		m, err = New(endpoint.String(), version, "workload-php")
+		if err != nil {
+			println("Error in prepare in create metrics")
+		}
+		interval, err := strconv.Atoi(request.URL.Query().Get("interval"))
+		if err != nil {
+			println("Error in prepare in parse interval")
+		}
+		workTime, err := strconv.Atoi(request.URL.Query().Get("time"))
+		if err != nil {
+			println("Error in prepare in parse time")
+		}
 		pushInterval := interval * int(time.Millisecond)
 		writer.Write([]byte(request.URL.Query().Encode()))
 		go pushGate(m, workTime, pushInterval)
@@ -44,8 +54,14 @@ func main() {
 		//println("done", request.URL.Query().Encode())
 		job := request.URL.Query().Get("job")
 		process := request.URL.Query().Get("process")
-		attempts, _ := strconv.Atoi(request.URL.Query().Get("attempts"))
-		s, _ := spans.Load(job + process)
+		attempts, err := strconv.Atoi(request.URL.Query().Get("attempts"))
+		if err != nil {
+			println("Error in done in parse attempts")
+		}
+		s, ok := spans.Load(job + process)
+		if !ok {
+			println("Error in done in find span")
+		}
 		s.(Span).Stop("", attempts)
 		//delete(spans[job], process)
 		writer.Write([]byte(request.URL.Query().Encode()))
@@ -55,8 +71,14 @@ func main() {
 		job := request.URL.Query().Get("job")
 		process := request.URL.Query().Get("process")
 		error := request.URL.Query().Get("error")
-		attempts, _ := strconv.Atoi(request.URL.Query().Get("attempts"))
-		s, _ := spans.Load(job + process)
+		attempts, err := strconv.Atoi(request.URL.Query().Get("attempts"))
+		if err != nil {
+			println("Error in done in parse attempts")
+		}
+		s, ok := spans.Load(job + process)
+		if !ok {
+			println("Error in done in find span")
+		}
 		s.(Span).Stop(error, attempts)
 		//delete(spans[job], process)
 		writer.Write([]byte(request.URL.Query().Encode()))
