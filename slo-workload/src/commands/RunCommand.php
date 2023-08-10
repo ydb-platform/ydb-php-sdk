@@ -70,7 +70,7 @@ class RunCommand extends \YdbPlatform\Ydb\Slo\Command
     public function execute(string $endpoint, string $path, array $options)
     {
         print_r($options);
-        @mkdir('./logs');
+        mkdir('./logs');
         shell_exec('./go-server/testHttpServer > ./logs/go-server.log &');
         sleep(2);
         $childs = array();
