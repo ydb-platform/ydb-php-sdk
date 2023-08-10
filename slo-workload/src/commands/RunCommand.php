@@ -71,7 +71,7 @@ class RunCommand extends \YdbPlatform\Ydb\Slo\Command
     {
         print_r($options);
         mkdir('./logs');
-        shell_exec('./go-server/testHttpServer > ./logs/go-server.log &');
+        shell_exec('./go-server/testHttpServer >  &');
         sleep(2);
         $childs = array();
         $tableName = $options["table-name"] ?? Defaults::TABLE_NAME;
