@@ -70,8 +70,8 @@ class RunCommand extends \YdbPlatform\Ydb\Slo\Command
     public function execute(string $endpoint, string $path, array $options)
     {
         print_r($options);
-            exec('./go-server/testHttpServer > /dev/null &');
-            sleep(2);
+        exec('./go-server/testHttpServer > /dev/null &');
+        sleep(1);
         $childs = array();
         $tableName = $options["table-name"] ?? Defaults::TABLE_NAME;
         $initialDataCount = (int)($options["initial-data-count"] ?? Defaults::GENERATOR_DATA_COUNT);
@@ -85,7 +85,7 @@ class RunCommand extends \YdbPlatform\Ydb\Slo\Command
         $shutdownTime = (int)($options["shutdown-time"] ?? Defaults::SHUTDOWN_TIME);
 
         echo Utils::initPush($promPgw, $reportPeriod, $time);
-
+        sleep(1);
         for ($i = 0; $i < $readForks; $i++) {
             $pid = pcntl_fork();
             if ($pid == -1) {
@@ -120,14 +120,16 @@ class RunCommand extends \YdbPlatform\Ydb\Slo\Command
                 usleep($i * 1e4);
             }
         }
-
+        foreach ($childs as $pid) {
+            pcntl_waitpid($pid, $status);
+            unset($childs[$pid]);
+        }
         exit(0);
     }
 
     protected function readJob(string $endpoint, string $path, string $tableName, int $initialDataCount,
                                int    $time, int $readTimeout, int $process, int $shutdownTime)
     {
-        usleep($process * 5e4);
         try {
             $ydb = Utils::initDriver($endpoint, $path, "read-$process");
             $dataGenerator = new DataGenerator();
@@ -178,7 +180,6 @@ class RunCommand extends \YdbPlatform\Ydb\Slo\Command
     protected function writeJob(string $endpoint, string $path, $tableName, int $initialDataCount,
                                 int    $time, int $writeTimeout, int $process, int $shutdownTime)
     {
-        usleep($process * 5e4);
         try {
             $ydb = Utils::initDriver($endpoint, $path, "write-$process");
             $dataGenerator = new DataGenerator();
