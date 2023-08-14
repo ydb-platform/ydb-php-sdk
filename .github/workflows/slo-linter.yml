@@ -22,4 +22,4 @@ jobs:
         uses: golangci/golangci-lint-action@v3
         with:
           version: v1.52.0
-          working-directory: slo-
+          working-directory: slo-workload/go-server
