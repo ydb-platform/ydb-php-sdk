@@ -32,7 +32,7 @@ class Utils
             $config['iam_config']['root_cert_file'] = './ca.pem';
         }
         @mkdir("./logs");
-        return new Ydb($config, new SimpleFileLogger(6, "./logs/" . $process . ".log"));
+        return new Ydb($config, new SimpleSloLogger(6, $process));
     }
 
     public static function initPush(string $endpoint, string $interval, string $time)

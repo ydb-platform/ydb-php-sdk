@@ -1,9 +1,9 @@
 package main
 
 import (
+	"context"
 	"net/http"
 	"net/url"
-	"os"
 	"strconv"
 	"sync"
 	"time"
@@ -18,27 +18,25 @@ func main() {
 	http.HandleFunc("/prepare", func(writer http.ResponseWriter, request *http.Request) {
 		endpoint, err := url.Parse(request.URL.Query().Get("endpoint"))
 		if err != nil {
-			println("Error in prepare in parse endpoint")
+			panic(err)
 		}
 		version := request.URL.Query().Get("version")
 		m, err = New(endpoint.String(), version, "workload-php")
 		if err != nil {
-			println("Error in prepare in create metrics")
+			panic(err)
 		}
 		interval, err := strconv.Atoi(request.URL.Query().Get("interval"))
 		if err != nil {
-			println("Error in prepare in parse interval")
+			panic(err)
 		}
 		workTime, err := strconv.Atoi(request.URL.Query().Get("time"))
 		if err != nil {
-			println("Error in prepare in parse time")
+			panic(err)
 		}
-		pushInterval := interval * int(time.Millisecond)
 		writer.Write([]byte(request.URL.Query().Encode()))
-		go pushGate(m, workTime, pushInterval)
+		go pushGate(m, time.Duration(workTime)*time.Second, time.Duration(interval)*time.Millisecond)
 	})
 	http.HandleFunc("/start", func(writer http.ResponseWriter, request *http.Request) {
-		//println("start", request.URL.Query().Encode())
 		job := request.URL.Query().Get("job")
 		process := request.URL.Query().Get("process")
 		var j SpanName
@@ -56,7 +54,7 @@ func main() {
 		process := request.URL.Query().Get("process")
 		attempts, err := strconv.Atoi(request.URL.Query().Get("attempts"))
 		if err != nil {
-			println("Error in done in parse attempts")
+			panic(err)
 		}
 		s, ok := spans.Load(job + process)
 		if !ok {
@@ -73,7 +71,7 @@ func main() {
 		error := request.URL.Query().Get("error")
 		attempts, err := strconv.Atoi(request.URL.Query().Get("attempts"))
 		if err != nil {
-			println("Error in done in parse attempts")
+			panic(err)
 		}
 		s, ok := spans.Load(job + process)
 		if !ok {
@@ -85,25 +83,24 @@ func main() {
 	})
 	err := http.ListenAndServe(":88", nil)
 	if err != nil {
-		println(err.Error())
+		panic(err)
 		return
 	} else {
 		println("Server started")
 	}
 }
 
-func pushGate(m *Metrics, workTime int, interval int) {
-	timer := time.NewTimer(time.Duration(1e9 * workTime))
-	finish := false
-	for !finish {
+func pushGate(m *Metrics, workTime, pushInterval time.Duration) {
+	ctx, cancel := context.WithTimeout(context.Background(), workTime)
+	defer cancel()
+
+	ticker := time.NewTicker(pushInterval)
+
+	for {
 		select {
-		case <-timer.C:
-			finish = true
-			m.Reset()
-			os.Exit(0)
-			break
-		default:
-			time.Sleep(time.Duration(interval))
+		case <-ctx.Done():
+			return
+		case <-ticker.C:
 			m.Push()
 		}
 	}

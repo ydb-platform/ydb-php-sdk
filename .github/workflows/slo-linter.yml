@@ -1,0 +1,25 @@
+name: lint
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  workflow_dispatch:
+jobs:
+  golangci-slo:
+    name: golangci-lint-slo
+    concurrency:
+      group: lint-golangci-slo-${{ github.ref }}
+      cancel-in-progress: true
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: generate slo golangci-lint config
+        run: sed 's/github.com\/ydb-platform\/ydb-go-sdk\/v3/slo/g' .golangci.yml > tests/slo/.golangci.yml
+
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v3
+        with:
+          version: v1.52.0
+          working-directory: slo-

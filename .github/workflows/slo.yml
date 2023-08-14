@@ -54,6 +54,8 @@ jobs:
           language_id0: 'php'
           workload_path0: './'
           language0: 'php'
+          workload_build_context0: ../..
+          workload_build_options0: -f Dockerfile
 
       - uses: actions/upload-artifact@v3
         if: always()
