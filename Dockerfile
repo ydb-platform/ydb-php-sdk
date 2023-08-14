@@ -10,5 +10,5 @@ COPY /slo-workload .
 RUN composer update
 RUN cd go-server && go install && go build .
 RUN cd ../
-RUN apt update; apt install htop
+#RUN apt update; apt install htop
 ENTRYPOINT  ["php", "application.php"]

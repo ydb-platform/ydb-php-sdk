@@ -89,14 +89,14 @@ class SimpleSloLogger implements \Psr\Log\LoggerInterface
     public function log($level, $message, array $context = []): void
     {
         if ($level>$this->level) return;
-        $lines = explode('\n', $message);
-        $log = '';
-        foreach ($lines as $line) {
-            $log .= $this->process.': '.$line.'\n';
+        $lines = explode("\n", $message);
+        $log = $this->process.': '.date('d/m/y H:i:s').' '.self::getLevelName($level). ' '.$lines[0]."\n";
+        for ($i = 1; $i < count($lines); $i++) {
+            $log .= $this->process.': '.$lines[$i]."\n";
         }
-        $log .= $this->process.': '.json_encode($context).'\n';
+        $log .= $this->process.': '.json_encode($context)."\n";
         fwrite(STDERR,
-            date('d/m/y H:i:s').' '.self::getLevelName($level). ' '.$log
+            $log
         );
     }
 }

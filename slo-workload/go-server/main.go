@@ -16,6 +16,7 @@ func main() {
 	//var spans = map[SpanName]map[int]Span{}
 	//spans["read"] = map[int]Span{} /**/
 	http.HandleFunc("/prepare", func(writer http.ResponseWriter, request *http.Request) {
+	println("prepare")
 		endpoint, err := url.Parse(request.URL.Query().Get("endpoint"))
 		if err != nil {
 			panic(err)

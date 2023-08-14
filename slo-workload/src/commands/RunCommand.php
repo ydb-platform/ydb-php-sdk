@@ -70,8 +70,7 @@ class RunCommand extends \YdbPlatform\Ydb\Slo\Command
     public function execute(string $endpoint, string $path, array $options)
     {
         print_r($options);
-        mkdir('./logs');
-        shell_exec('./go-server/testHttpServer &');
+        shell_exec('./go-server/testHttpServer > 2 &');
         sleep(2);
         $childs = array();
         $tableName = $options["table-name"] ?? Defaults::TABLE_NAME;
@@ -101,6 +100,7 @@ class RunCommand extends \YdbPlatform\Ydb\Slo\Command
                 exit(0);
             } else {
                 $childs[] = $pid;
+                usleep($i * 1e4);
             }
         }
         for ($i = 0; $i < $writeForks; $i++) {
@@ -121,14 +121,6 @@ class RunCommand extends \YdbPlatform\Ydb\Slo\Command
             }
         }
 
-        sleep($time-1);
-        $files = array_slice(scandir("./logs"),2);
-        $logs = "";
-        foreach ($files as $file) {
-            $logs .= $file."\n";
-            $logs .= file_get_contents('./logs/'.$file);
-        }
-        echo $logs;
         exit(0);
     }
 
