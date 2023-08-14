@@ -91,8 +91,6 @@ func main() {
 	if err != nil {
 		panic(err)
 		return
-	} else {
-		println("Server started")
 	}
 }
 

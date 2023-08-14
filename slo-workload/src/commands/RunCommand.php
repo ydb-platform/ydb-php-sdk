@@ -70,8 +70,16 @@ class RunCommand extends \YdbPlatform\Ydb\Slo\Command
     public function execute(string $endpoint, string $path, array $options)
     {
         print_r($options);
-        shell_exec('./go-server/testHttpServer > 2 &');
-        sleep(2);
+        $pid = pcntl_fork();
+        if ($pid == -1) {
+            echo "Error fork";
+            exit(1);
+        } elseif ($pid == 0) {
+            exec('./go-server/testHttpServer');
+            exit(0);
+        } else {
+            sleep(2);
+        }
         $childs = array();
         $tableName = $options["table-name"] ?? Defaults::TABLE_NAME;
         $initialDataCount = (int)($options["initial-data-count"] ?? Defaults::GENERATOR_DATA_COUNT);
@@ -84,7 +92,7 @@ class RunCommand extends \YdbPlatform\Ydb\Slo\Command
         $time = (int)($options["time"] ?? Defaults::READ_TIME);
         $shutdownTime = (int)($options["shutdown-time"] ?? Defaults::SHUTDOWN_TIME);
 
-        Utils::initPush($promPgw, $reportPeriod, $time);
+        echo Utils::initPush($promPgw, $reportPeriod, $time);
 
         for ($i = 0; $i < $readForks; $i++) {
             $pid = pcntl_fork();

@@ -26,12 +26,11 @@ class Utils
             'iam_config' => [
                 'insecure' => $endpointData[0] != "grpcs",
             ],
-            "credentials" => new \YdbPlatform\Ydb\Auth\Implement\AnonymousAuthentication()
+            "credentials" => new \YdbPlatform\Ydb\Auth\EnvironCredentials()
         ];
         if (file_exists("./ca.pem")) {
             $config['iam_config']['root_cert_file'] = './ca.pem';
         }
-        @mkdir("./logs");
         return new Ydb($config, new SimpleSloLogger(6, $process));
     }
 
@@ -87,6 +86,8 @@ class Utils
             CURLOPT_SSL_VERIFYHOST => 0,
             CURLOPT_HEADER => 0,
         ]);
+
+        curl_exec($curl);
 
         return curl_getinfo($curl, CURLINFO_HTTP_CODE);
     }
