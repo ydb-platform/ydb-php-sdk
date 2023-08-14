@@ -26,7 +26,7 @@ class Utils
             'iam_config' => [
                 'insecure' => $endpointData[0] != "grpcs",
             ],
-            "credentials" => new \YdbPlatform\Ydb\Auth\EnvironCredentials()
+            "credentials" => new \YdbPlatform\Ydb\Auth\Implement\AnonymousAuthentication()
         ];
         if (file_exists("./ca.pem")) {
             $config['iam_config']['root_cert_file'] = './ca.pem';

@@ -22,7 +22,8 @@ func main() {
 			panic(err)
 		}
 		version := request.URL.Query().Get("version")
-		m, err = New(endpoint.String(), "php-ydb.Version", "slo", "go")
+		// remove old from dashboard
+		m, err = New(endpoint.String(), "ydb.Version", "slo", "go-php")
 		if err != nil {
 			panic(err)
 		}
