@@ -104,6 +104,7 @@ func pushGate(m *Metrics, workTime, pushInterval time.Duration) {
 	for {
 		select {
 		case <-ctx.Done():
+		    m.Reset()
 			return
 		case <-ticker.C:
 			m.Push()

@@ -70,16 +70,8 @@ class RunCommand extends \YdbPlatform\Ydb\Slo\Command
     public function execute(string $endpoint, string $path, array $options)
     {
         print_r($options);
-        $pid = pcntl_fork();
-        if ($pid == -1) {
-            echo "Error fork";
-            exit(1);
-        } elseif ($pid == 0) {
-            exec('./go-server/testHttpServer');
-            exit(0);
-        } else {
+            exec('./go-server/testHttpServer &');
             sleep(2);
-        }
         $childs = array();
         $tableName = $options["table-name"] ?? Defaults::TABLE_NAME;
         $initialDataCount = (int)($options["initial-data-count"] ?? Defaults::GENERATOR_DATA_COUNT);
