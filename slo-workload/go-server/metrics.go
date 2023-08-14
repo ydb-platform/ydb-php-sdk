@@ -8,11 +8,6 @@ import (
 	"github.com/prometheus/client_golang/prometheus/push"
 )
 
-const (
-	sdk        = "php"
-	sdkVersion = "ydb.Version"
-)
-
 type (
 	Metrics struct {
 		oks       *prometheus.GaugeVec
@@ -29,7 +24,7 @@ type (
 	}
 )
 
-func New(url, label, jobName string) (*Metrics, error) {
+func New(url, label, jobName, sdk string) (*Metrics, error) {
 	m := &Metrics{
 		label: label,
 	}

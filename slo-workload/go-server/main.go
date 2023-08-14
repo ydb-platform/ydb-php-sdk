@@ -21,7 +21,12 @@ func main() {
 			panic(err)
 		}
 		version := request.URL.Query().Get("version")
-		m, err = New(endpoint.String(), version, "workload-php")
+		m, err = New(endpoint.String(), "php-ydb.Version", "slo", "go")
+		if err != nil {
+			panic(err)
+		}
+		m.Reset()
+		m, err = New(endpoint.String(), version, "workload-php", "php")
 		if err != nil {
 			panic(err)
 		}
