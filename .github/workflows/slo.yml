@@ -54,7 +54,7 @@ jobs:
           shutdownTime: 30
 
           language_id0: 'php'
-          workload_path0: './'
+          workload_path0: 'slo-workload'
           language0: 'php'
           workload_build_context0: ../..
           workload_build_options0: -f Dockerfile
