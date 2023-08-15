@@ -69,6 +69,7 @@ class RunCommand extends \YdbPlatform\Ydb\Slo\Command
 
     public function execute(string $endpoint, string $path, array $options)
     {
+        $startTime = microtime(true);
         print_r($options);
         exec('./go-server/testHttpServer > /dev/null &');
         sleep(1);
@@ -77,9 +78,9 @@ class RunCommand extends \YdbPlatform\Ydb\Slo\Command
         $initialDataCount = (int)($options["initial-data-count"] ?? Defaults::GENERATOR_DATA_COUNT);
         $promPgw = ($options["prom-pgw"] ?? Defaults::PROMETHEUS_PUSH_GATEWAY);
         $reportPeriod = (int)($options["report-period"] ?? Defaults::PROMETHEUS_PUSH_PERIOD);
-        $readForks = ((int)($options["read-rps"] ?? Defaults::READ_RPS)) / Defaults::RPS_PER_FORK;
+        $readForks = ((int)($options["read-rps"] ?? Defaults::READ_RPS)) / Defaults::RPS_PER_READ_FORK;
         $readTimeout = (int)($options["read-timeout"] ?? Defaults::READ_TIMEOUT);
-        $writeForks = ((int)($options["write-rps"] ?? Defaults::WRITE_RPS)) / Defaults::RPS_PER_FORK;
+        $writeForks = ((int)($options["write-rps"] ?? Defaults::WRITE_RPS)) / Defaults::RPS_PER_WRITE_FORK;
         $writeTimeout = (int)($options["write-timeout"] ?? Defaults::WRITE_TIMEOUT);
         $time = (int)($options["time"] ?? Defaults::READ_TIME);
         $shutdownTime = (int)($options["shutdown-time"] ?? Defaults::SHUTDOWN_TIME);
@@ -93,7 +94,7 @@ class RunCommand extends \YdbPlatform\Ydb\Slo\Command
                 exit(1);
             } elseif ($pid == 0) {
                 try {
-                    $this->readJob($endpoint, $path, $tableName, $initialDataCount, $time-2, $readTimeout, $i, $shutdownTime);
+                    $this->readJob($endpoint, $path, $tableName, $initialDataCount, $time, $readTimeout, $i, $shutdownTime, $startTime);
                 } catch (\Exception $e) {
                     echo "Error on $i'th fork: " . $e->getMessage();
                 }
@@ -110,7 +111,7 @@ class RunCommand extends \YdbPlatform\Ydb\Slo\Command
                 exit(1);
             } elseif ($pid == 0) {
                 try {
-                    $this->writeJob($endpoint, $path, $tableName, $initialDataCount, $time-2, $writeTimeout, $i,$shutdownTime);
+                    $this->writeJob($endpoint, $path, $tableName, $initialDataCount, $time, $writeTimeout, $i,$shutdownTime,$startTime);
                 } catch (\Exception $e) {
                     echo "Error on $i'th fork: " . $e->getMessage();
                 }
@@ -128,14 +129,13 @@ class RunCommand extends \YdbPlatform\Ydb\Slo\Command
     }
 
     protected function readJob(string $endpoint, string $path, string $tableName, int $initialDataCount,
-                               int    $time, int $readTimeout, int $process, int $shutdownTime)
+                               int    $time, int $readTimeout, int $process, int $shutdownTime, int $startTime)
     {
         try {
             $ydb = Utils::initDriver($endpoint, $path, "read-$process");
             $dataGenerator = new DataGenerator();
             $dataGenerator::setMaxId($initialDataCount);
             $query = sprintf(Defaults::READ_QUERY, $tableName);
-            $startTime = microtime(true);
             $table = $ydb->table();
         } catch (\Exception $e){
             echo $e->getMessage();
@@ -169,7 +169,7 @@ class RunCommand extends \YdbPlatform\Ydb\Slo\Command
                     $table->getLogger()->error("Error post fail read process. Code $status");
                 }
             } finally {
-                $delay = ($begin - microtime(true)) * 1e6 + 1e6 / Defaults::RPS_PER_FORK;
+                $delay = ($begin - microtime(true)) * 1e6 + 1e6 / Defaults::RPS_PER_READ_FORK;
                 usleep($delay > 0 ? $delay : 1);
             }
 
@@ -178,14 +178,13 @@ class RunCommand extends \YdbPlatform\Ydb\Slo\Command
     }
 
     protected function writeJob(string $endpoint, string $path, $tableName, int $initialDataCount,
-                                int    $time, int $writeTimeout, int $process, int $shutdownTime)
+                                int    $time, int $writeTimeout, int $process, int $shutdownTime, int $startTime)
     {
         try {
             $ydb = Utils::initDriver($endpoint, $path, "write-$process");
             $dataGenerator = new DataGenerator();
             $dataGenerator::setMaxId($initialDataCount);
             $query = sprintf(Defaults::WRITE_QUERY, $tableName);
-            $startTime = microtime(true);
             $table = $ydb->table();
         }catch (\Exception $e){
             echo $e->getMessage();
@@ -214,7 +213,7 @@ class RunCommand extends \YdbPlatform\Ydb\Slo\Command
                     $table->getLogger()->error("Error post done read process. Code $status");
                 }
             } finally {
-                $delay = ($begin - microtime(true)) * 1e6 + 1e6 / Defaults::RPS_PER_FORK;
+                $delay = ($begin - microtime(true)) * 1e6 + 1e6 / Defaults::RPS_PER_WRITE_FORK;
                 usleep($delay > 0 ? $delay : 1);
             }
         }
