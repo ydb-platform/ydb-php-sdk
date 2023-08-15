@@ -145,6 +145,7 @@ Options:
             pcntl_waitpid($pid, $status);
             unset($childs[$pid]);
         }
+        Utils::reset();
         exit(0);
     }
 

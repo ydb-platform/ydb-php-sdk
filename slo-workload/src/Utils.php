@@ -74,6 +74,8 @@ class Utils
             $e = 'YDB_'.StatusCode::name($ydbErr);
         } elseif ($grpcErr = array_search($error,RequestTrait::$grpcExceptions)){
             $e = 'GRPC_'.RequestTrait::$grpcNames[$grpcErr];
+        } else {
+            $e = substr(strrchr($error, '\\'), 1);
         }
         return static::postData('fail',
             http_build_query([
@@ -98,6 +100,11 @@ class Utils
         curl_exec($curl);
 
         return curl_getinfo($curl, CURLINFO_HTTP_CODE);
+    }
+
+    public static function reset()
+    {
+        self::postData("reset","");
     }
 
 }

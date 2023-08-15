@@ -91,6 +91,16 @@ func main() {
 			println(err)
 		}
 	})
+	http.HandleFunc("/reset", func(writer http.ResponseWriter, request *http.Request) {
+		err := m.Reset()
+		if err != nil {
+			println(err)
+		}
+		_, err = writer.Write([]byte(request.URL.Query().Encode()))
+		if err != nil {
+			println(err)
+		}
+	})
 	s := &http.Server{
 		Addr:           ":88",
 		Handler:        nil,
