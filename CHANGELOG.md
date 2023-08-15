@@ -1,4 +1,4 @@
-* update logs in iam and Retry
+* changed level of update token log record from info to debug
 
 ## 1.9.0
 
