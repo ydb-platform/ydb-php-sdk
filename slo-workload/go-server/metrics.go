@@ -157,5 +157,4 @@ func (j Span) Stop(err string, attempts int) {
 	j.m.latencies.WithLabelValues(successLabel, j.name).Observe(float64(latency.Milliseconds()))
 	j.m.attempts.WithLabelValues(successLabel, j.name).Observe(float64(attempts))
 	successCounter.WithLabelValues(j.name).Add(1)
-	//println("stop", j.name)
 }

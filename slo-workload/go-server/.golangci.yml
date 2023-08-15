@@ -245,7 +245,7 @@ linters:
     #    - godot
     - godox
     - gofmt # On why gofmt when goimports is enabled - https://github.com/golang/go/issues/21476
-    - gofumpt
+    #   - gofumpt
     - goheader
     - goimports
     #    - gomnd

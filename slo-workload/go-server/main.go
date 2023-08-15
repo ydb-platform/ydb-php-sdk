@@ -13,21 +13,12 @@ func main() {
 
 	var m *Metrics
 	var spans = sync.Map{}
-	//var spans = map[SpanName]map[int]Span{}
-	//spans["read"] = map[int]Span{} /**/
 	http.HandleFunc("/prepare", func(writer http.ResponseWriter, request *http.Request) {
-	println("prepare")
 		endpoint, err := url.Parse(request.URL.Query().Get("endpoint"))
 		if err != nil {
 			panic(err)
 		}
 		version := request.URL.Query().Get("version")
-		// remove old from dashboard
-		m, err = New(endpoint.String(), "ydb.Version", "slo", "go-php")
-		if err != nil {
-			panic(err)
-		}
-		m.Reset()
 		m, err = New(endpoint.String(), version, "workload-php", "php")
 		if err != nil {
 			panic(err)
@@ -40,7 +31,10 @@ func main() {
 		if err != nil {
 			panic(err)
 		}
-		writer.Write([]byte(request.URL.Query().Encode()))
+		_, err = writer.Write([]byte(request.URL.Query().Encode()))
+		if err != nil {
+			println(err)
+		}
 		go pushGate(m, time.Duration(workTime)*time.Second, time.Duration(interval)*time.Millisecond)
 	})
 	http.HandleFunc("/start", func(writer http.ResponseWriter, request *http.Request) {
@@ -53,10 +47,12 @@ func main() {
 			j = JobWrite
 		}
 		spans.Store(job+process, m.Start(j))
-		writer.Write([]byte(request.URL.Query().Encode()))
+		_, err := writer.Write([]byte(request.URL.Query().Encode()))
+		if err != nil {
+			println(err)
+		}
 	})
 	http.HandleFunc("/done", func(writer http.ResponseWriter, request *http.Request) {
-		//println("done", request.URL.Query().Encode())
 		job := request.URL.Query().Get("job")
 		process := request.URL.Query().Get("process")
 		attempts, err := strconv.Atoi(request.URL.Query().Get("attempts"))
@@ -68,14 +64,15 @@ func main() {
 			println("Error in done in find span")
 		}
 		s.(Span).Stop("", attempts)
-		//delete(spans[job], process)
-		writer.Write([]byte(request.URL.Query().Encode()))
+		_, err = writer.Write([]byte(request.URL.Query().Encode()))
+		if err != nil {
+			println(err)
+		}
 	})
 	http.HandleFunc("/fail", func(writer http.ResponseWriter, request *http.Request) {
-		//println("fail", request.URL.Query().Encode())
 		job := request.URL.Query().Get("job")
 		process := request.URL.Query().Get("process")
-		error := request.URL.Query().Get("error")
+		errorClass := request.URL.Query().Get("error")
 		attempts, err := strconv.Atoi(request.URL.Query().Get("attempts"))
 		if err != nil {
 			panic(err)
@@ -84,9 +81,11 @@ func main() {
 		if !ok {
 			println("Error in done in find span")
 		}
-		s.(Span).Stop(error, attempts)
-		//delete(spans[job], process)
-		writer.Write([]byte(request.URL.Query().Encode()))
+		s.(Span).Stop(errorClass, attempts)
+		_, err = writer.Write([]byte(request.URL.Query().Encode()))
+		if err != nil {
+			println(err)
+		}
 	})
 	err := http.ListenAndServe(":88", nil)
 	if err != nil {
@@ -104,10 +103,16 @@ func pushGate(m *Metrics, workTime, pushInterval time.Duration) {
 	for {
 		select {
 		case <-ctx.Done():
-		    m.Reset()
+			err := m.Reset()
+			if err != nil {
+				return
+			}
 			return
 		case <-ticker.C:
-			m.Push()
+			err := m.Push()
+			if err != nil {
+				println(err)
+			}
 		}
 	}
 }
