@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"log"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -10,7 +11,6 @@ import (
 )
 
 func main() {
-
 	var m *Metrics
 	var spans = sync.Map{}
 	http.HandleFunc("/prepare", func(writer http.ResponseWriter, request *http.Request) {
@@ -87,11 +87,15 @@ func main() {
 			println(err)
 		}
 	})
-	err := http.ListenAndServe(":88", nil)
-	if err != nil {
-		panic(err)
-		return
+	s := &http.Server{
+		Addr:           ":8080",
+		Handler:        nil,
+		ReadTimeout:    10 * time.Second,
+		WriteTimeout:   10 * time.Second,
+		MaxHeaderBytes: 1 << 20,
 	}
+	log.Fatal(s.ListenAndServe())
+
 }
 
 func pushGate(m *Metrics, workTime, pushInterval time.Duration) {
