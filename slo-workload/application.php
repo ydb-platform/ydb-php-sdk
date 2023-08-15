@@ -1,9 +1,9 @@
 <?php
 require_once './vendor/autoload.php';
 $commands = [
-    "create"    =>new \YdbPlatform\Ydb\Slo\commands\CreateCommand(),
-    "run"       =>new \YdbPlatform\Ydb\Slo\commands\RunCommand(),
-    "cleanup"   =>new \YdbPlatform\Ydb\Slo\commands\CleanupCommand()
+    "create"    =>new \YdbPlatform\Ydb\Slo\Commands\CreateCommand(),
+    "run"       =>new \YdbPlatform\Ydb\Slo\Commands\RunCommand(),
+    "cleanup"   =>new \YdbPlatform\Ydb\Slo\Commands\CleanupCommand()
 ];
 
 if ($argc == 1 || !isset($commands[$argv[1]])){
