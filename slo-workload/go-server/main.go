@@ -95,7 +95,6 @@ func main() {
 		MaxHeaderBytes: 1 << 20,
 	}
 	log.Fatal(s.ListenAndServe())
-
 }
 
 func pushGate(m *Metrics, workTime, pushInterval time.Duration) {

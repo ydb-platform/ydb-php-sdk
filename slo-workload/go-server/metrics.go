@@ -15,7 +15,6 @@ type (
 		inflight  *prometheus.GaugeVec
 		errors    *prometheus.GaugeVec
 		latencies *prometheus.SummaryVec
-		stats     *prometheus.GaugeVec
 		attempts  *prometheus.HistogramVec
 
 		p *push.Pusher
@@ -124,7 +123,6 @@ func (m *Metrics) Start(name SpanName) Span {
 	}
 
 	m.inflight.WithLabelValues(name).Add(1)
-	//println("start", j.name)
 	return j
 }
 
