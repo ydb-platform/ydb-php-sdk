@@ -3,6 +3,8 @@
 namespace YdbPlatform\Ydb\Slo;
 
 use Exception;
+use Ydb\StatusIds\StatusCode;
+use YdbPlatform\Ydb\Traits\RequestTrait;
 use YdbPlatform\Ydb\Ydb;
 
 class Utils
@@ -68,6 +70,11 @@ class Utils
     public static function metricFail(string $job, int $process, int $attemps, string $error)
     {
         $e = substr(strrchr($error, '\\'), 1);
+        if($ydbErr = array_search($error,RequestTrait::$ydbExceptions)){
+            $e = 'YDB_'.StatusCode::name($ydbErr);
+        } elseif ($grpcErr = array_search($error,RequestTrait::$grpcExceptions)){
+            $e = 'GRPC_'.RequestTrait::$grpcNames[$grpcErr];
+        }
         return static::postData('fail',
             http_build_query([
                 "job" => $job,

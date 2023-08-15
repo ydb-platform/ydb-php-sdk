@@ -35,6 +35,10 @@ func main() {
 		if err != nil {
 			println(err)
 		}
+		for _, sdkError := range sdkErrors {
+			m.errors.WithLabelValues("read", sdkError).Set(0)
+			m.errors.WithLabelValues("write", sdkError).Set(0)
+		}
 		go pushGate(m, time.Duration(workTime)*time.Second, time.Duration(interval)*time.Millisecond)
 	})
 	http.HandleFunc("/start", func(writer http.ResponseWriter, request *http.Request) {
@@ -119,3 +123,41 @@ func pushGate(m *Metrics, workTime, pushInterval time.Duration) {
 		}
 	}
 }
+
+var sdkErrors = []string{
+	"GRPC_CANCELLED",
+	"GRPC_UNKNOWN",
+	"GRPC_INVALID_ARGUMENT",
+	"GRPC_DEADLINE_EXCEEDED",
+	"GRPC_NOT_FOUND",
+	"GRPC_ALREADY_EXISTS",
+	"GRPC_PERMISSION_DENIED",
+	"GRPC_RESOURCE_EXHAUSTED",
+	"GRPC_FAILED_PRECONDITION",
+	"GRPC_ABORTED",
+	"GRPC_OUT_OF_RANGE",
+	"GRPC_UNIMPLEMENTED",
+	"GRPC_INTERNAL",
+	"GRPC_UNAVAILABLE",
+	"GRPC_DATA_LOSS",
+	"GRPC_UNAUTHENTICATED",
+	"YDB_STATUS_CODE_UNSPECIFIED",
+	"YDB_SUCCESS",
+	"YDB_BAD_REQUEST",
+	"YDB_UNAUTHORIZED",
+	"YDB_INTERNAL_ERROR",
+	"YDB_ABORTED",
+	"YDB_UNAVAILABLE",
+	"YDB_OVERLOADED",
+	"YDB_SCHEME_ERROR",
+	"YDB_GENERIC_ERROR",
+	"YDB_TIMEOUT",
+	"YDB_BAD_SESSION",
+	"YDB_PRECONDITION_FAILED",
+	"YDB_ALREADY_EXISTS",
+	"YDB_NOT_FOUND",
+	"YDB_SESSION_EXPIRED",
+	"YDB_CANCELLED",
+	"YDB_UNDETERMINED",
+	"YDB_UNSUPPORTED",
+	"YDB_SESSION_BUSY"}
