@@ -11,7 +11,7 @@
     "repositories": [
         {
             "type": "path",
-            "url": "./ydb"
+            "url": "./../"
         }
     ],
     "require": {
