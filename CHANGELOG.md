@@ -1,3 +1,5 @@
+* added SLO test
+
 ## 1.9.0
 
 * added microseconds in Timestamp type
