@@ -32,7 +32,8 @@
     "autoload-dev": {
         "psr-4": {
             "YdbPlatform\\Ydb\\Test\\": "tests",
-            "App\\": "examples/"
+            "App\\": "examples/",
+            "YdbPlatform\\Ydb\\Slo\\": "slo-workload"
         }
     }
 }
