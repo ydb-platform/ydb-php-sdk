@@ -67,12 +67,13 @@ class Utils
 
     public static function metricFail(string $job, int $process, int $attemps, string $error)
     {
+        $e = substr(strrchr($error, '\\'), 1);
         return static::postData('fail',
             http_build_query([
                 "job" => $job,
                 "process" => $process,
                 "attempts" => $attemps,
-                "error" => $error
+                "error" => $e
             ]));
     }
 
