@@ -107,12 +107,26 @@ Options:
         $readTimeout = (int)($options["-read-timeout"] ?? Defaults::READ_TIMEOUT);
         $writeForks = ((int)($options["-write-rps"] ?? Defaults::WRITE_RPS)) / Defaults::RPS_PER_WRITE_FORK;
         $writeTimeout = (int)($options["-write-timeout"] ?? Defaults::WRITE_TIMEOUT);
-        $time = (int)($options["-time"] ?? Defaults::READ_TIME);
+        $time = (int)($options["-time"] ?? Defaults::READ_TIME) - 5;
         $shutdownTime = (int)($options["-shutdown-time"] ?? Defaults::SHUTDOWN_TIME);
 
         $this->queueId = ftok(__FILE__, 'm');
         $msgQueue = msg_get_queue($this->queueId);
 
+
+        $pid = pcntl_fork();
+        if ($pid == -1) {
+            echo "Error fork";
+            exit(1);
+        } elseif ($pid == 0) {
+            try {
+                $this->metricsJob($reportPeriod, $time, $startTime, $promPgw, $this->queueId);
+            } catch (\Exception $e) {
+                echo "Error in metrics " . $e->getMessage();
+            }
+        } else {
+            $childs[] = $pid;
+        }
         for ($i = 0; $i < $readForks; $i++) {
             $pid = pcntl_fork();
             if ($pid == -1) {
@@ -127,7 +141,7 @@ Options:
                 exit(0);
             } else {
                 $childs[] = $pid;
-                usleep($i * 1e4);
+                usleep($i * 1e5);
             }
         }
         for ($i = 0; $i < $writeForks; $i++) {
@@ -144,22 +158,8 @@ Options:
                 exit(0);
             } else {
                 $childs[] = $pid;
-                usleep($i * 1e4);
+                usleep($i * 1e5);
             }
-        }
-
-        $pid = pcntl_fork();
-        if ($pid == -1) {
-            echo "Error fork";
-            exit(1);
-        } elseif ($pid == 0) {
-            try {
-                $this->metricsJob($reportPeriod, $time, $startTime, $promPgw, $this->queueId);
-            } catch (\Exception $e) {
-                echo "Error in metrics " . $e->getMessage();
-            }
-        } else {
-            $childs[] = $pid;
         }
         foreach ($childs as $pid) {
             pcntl_waitpid($pid, $status);
@@ -312,13 +312,13 @@ Options:
             if(microtime(true) + 0.01 <= $startTime + $time) {
                 usleep(1e3);
             } else {
+                $pushGateway->delete('workload-php', [
+                    'sdk' => 'php',
+                    'sdkVersion' => Ydb::VERSION
+                ]);
                 return;
             }
         }
-        $pushGateway->delete('workload-php', [
-            'sdk' => 'php',
-            'sdkVersion' => Ydb::VERSION
-        ]);
         exit(0);
     }
 
