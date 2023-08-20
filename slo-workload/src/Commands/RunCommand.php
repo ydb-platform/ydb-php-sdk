@@ -158,7 +158,7 @@ Options:
             try {
                 $this->metricsJob($reportPeriod, $time, $startTime, $promPgw);
             } catch (\Exception $e) {
-                echo "Error on $i'th fork: " . $e->getMessage();
+                echo "Error in metrics " . $e->getMessage();
             }
             exit(0);
         } else {
@@ -231,9 +231,7 @@ Options:
                 $table->retryTransaction(function (\YdbPlatform\Ydb\Session $session)
                 use ($query, $dataGenerator, $tableName, &$attemps) {
                     $attemps++;
-                    return $session->query($query, [
-                        "\$id" => DataGenerator::getUpsertData()
-                    ]);
+                    return $session->query($query, DataGenerator::getUpsertData());
                 }, true, new \YdbPlatform\Ydb\Retry\RetryParams($writeTimeout));
                 Utils::metricDone("read", $this->queueId, $attemps, (microtime(true)-$begin)*1000);
             } catch (\Exception $e) {
@@ -247,7 +245,7 @@ Options:
         }
     }
 
-    protected function metricsJob(int $reportPeriod, int $time, float $startTime, string $url)
+    protected function metricsJob(int $reportPeriod, int $time, float $startTime, string $url, int $queueId)
     {
         $registry = new CollectorRegistry(new InMemory);
         $pushGateway = new \PrometheusPushGateway\PushGateway($url);
@@ -258,7 +256,7 @@ Options:
         $inflight = $registry->getOrRegisterGauge('', 'inflight', 'amount of requests in flight', ['jobName']);
         $errors = $registry->getOrRegisterGauge('', 'errors', 'amount of errors', ['jobName', 'class']);
         $attempts = $registry->getOrRegisterHistogram('', 'attempts', 'summary of amount for request', ['jobName', 'status'], range(1,10,1));
-        $msgQueue = msg_get_queue($this->queueId);
+        $msgQueue = msg_get_queue($queueId);
 
         $pushGateway->delete('workload-php', [
             'sdk'       => 'php',
@@ -271,6 +269,8 @@ Options:
             $errors->inc(['read', $error]);
             $errors->inc(['write', $error]);
         }
+
+        echo "Started metrics job\n";
 
         while (microtime(true)<$startTime+$time){
             while (msg_receive($msgQueue, 1, $msgType, 1024, $message)){
@@ -313,6 +313,7 @@ Options:
             'sdk'       => 'php',
             'version'   => Ydb::VERSION
         ]);
+        return;
     }
 
     protected $errors = [
