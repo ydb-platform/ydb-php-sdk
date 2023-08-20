@@ -259,6 +259,12 @@ Options:
         $errors = $registry->getOrRegisterGauge('', 'errors', 'amount of errors', ['jobName', 'class']);
         $attempts = $registry->getOrRegisterHistogram('', 'attempts', 'summary of amount for request', ['jobName', 'status'], range(1,10,1));
         $msgQueue = msg_get_queue($this->queueId);
+
+        $pushGateway->delete('workload-php', [
+            'sdk'       => 'php',
+            'version'   => Ydb::VERSION
+        ]);
+
         $lastPushTime = microtime(true);
 
         foreach ($this->errors as $error){
@@ -270,7 +276,10 @@ Options:
             while (msg_receive($msgQueue, 1, $msgType, 1024, $message)){
                 switch ($message['type']){
                     case 'reset':
-                        $pushGateway->delete('workload-php');
+                        $pushGateway->delete('workload-php', [
+                            'sdk'       => 'php',
+                            'version'   => Ydb::VERSION
+                        ]);
                         return;
                     case  'start':
                         $inflight->inc([$message['job']]);
