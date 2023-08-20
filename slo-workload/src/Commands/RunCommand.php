@@ -98,8 +98,6 @@ Options:
     {
         $startTime = microtime(true);
         print_r($options);
-        exec('./go-server/testHttpServer > /dev/null &');
-        sleep(1);
         $childs = array();
         $tableName = $options["table-name"] ?? Defaults::TABLE_NAME;
         $initialDataCount = (int)($options["initial-data-count"] ?? Defaults::GENERATOR_DATA_COUNT);
@@ -156,7 +154,7 @@ Options:
             exit(1);
         } elseif ($pid == 0) {
             try {
-                $this->metricsJob($reportPeriod, $time, $startTime, $promPgw);
+                $this->metricsJob($reportPeriod, $time, $startTime, $promPgw, $this->queueId);
             } catch (\Exception $e) {
                 echo "Error in metrics " . $e->getMessage();
             }
