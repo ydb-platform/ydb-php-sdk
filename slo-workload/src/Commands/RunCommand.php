@@ -141,7 +141,7 @@ Options:
                 exit(0);
             } else {
                 $childs[] = $pid;
-                usleep($i * 1e5);
+                usleep($i * 1e3);
             }
         }
         for ($i = 0; $i < $writeForks; $i++) {
@@ -158,7 +158,7 @@ Options:
                 exit(0);
             } else {
                 $childs[] = $pid;
-                usleep($i * 1e5);
+                usleep($i * 1e3);
             }
         }
         foreach ($childs as $pid) {
