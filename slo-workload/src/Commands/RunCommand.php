@@ -247,7 +247,7 @@ Options:
         $registry = new CollectorRegistry(new InMemory);
         $pushGateway = new \PrometheusPushGateway\PushGateway($url);
 
-        $latencies = $registry->getOrRegisterSummary('', 'latency', 'summary of latencies in ms', ['jobName', 'status'], 600, [0.5, 0.99, 0.999]);
+        $latencies = $registry->getOrRegisterSummary('', 'latency', 'summary of latencies in ms', ['jobName', 'status'], 15, [0.5, 0.99, 0.999]);
         $oks = $registry->getOrRegisterGauge('', 'oks', 'amount of OK requests', ['jobName']);
         $notOks = $registry->getOrRegisterGauge('', 'not_oks', 'amount of not OK requests', ['jobName']);
         $inflight = $registry->getOrRegisterGauge('', 'inflight', 'amount of requests in flight', ['jobName']);
