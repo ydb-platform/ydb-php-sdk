@@ -156,7 +156,7 @@ Options:
             exit(1);
         } elseif ($pid == 0) {
             try {
-                $this->metricsJob($reportPeriod);
+                $this->metricsJob($reportPeriod, $time, $startTime, $promPgw);
             } catch (\Exception $e) {
                 echo "Error on $i'th fork: " . $e->getMessage();
             }
