@@ -165,6 +165,17 @@ Options:
             pcntl_waitpid($pid, $status);
             unset($childs[$pid]);
         }
+        $registry = new CollectorRegistry(new InMemory);
+        $pushGateway = new \PrometheusPushGateway\PushGateway($promPgw);
+        $registry->wipeStorage();
+        $pushGateway->push($registry, 'workload-php', [
+            'sdk' => 'php',
+            'sdkVersion' => Ydb::VERSION
+        ]);
+        $pushGateway->delete('workload-php', [
+            'sdk' => 'php',
+            'sdkVersion' => Ydb::VERSION
+        ]);
         exit(0);
     }
 
@@ -255,6 +266,11 @@ Options:
         $attempts = $registry->getOrRegisterHistogram('', 'attempts', 'summary of amount for request', ['jobName', 'status'], range(1, 10, 1));
         $msgQueue = msg_get_queue($queueId);
 
+        $registry->wipeStorage();
+        $pushGateway->push('workload-php', [
+            'sdk' => 'php',
+            'sdkVersion' => Ydb::VERSION
+        ]);
         $pushGateway->delete('workload-php', [
             'sdk' => 'php',
             'sdkVersion' => Ydb::VERSION
@@ -312,6 +328,11 @@ Options:
             if(microtime(true) + 0.01 <= $startTime + $time) {
                 usleep(1e3);
             } else {
+                $registry->wipeStorage();
+                $pushGateway->push('workload-php', [
+                    'sdk' => 'php',
+                    'sdkVersion' => Ydb::VERSION
+                ]);
                 $pushGateway->delete('workload-php', [
                     'sdk' => 'php',
                     'sdkVersion' => Ydb::VERSION
