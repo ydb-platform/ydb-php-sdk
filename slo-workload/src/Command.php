@@ -13,7 +13,6 @@ abstract class Command
 
     public function generateOptions(array $args): array
     {
-        print_r($args);
         $result = [];
         for ($i = 0; $i < count($args) - 1; $i++) {
             if (substr($args[$i], 0, 1) != "-") continue;

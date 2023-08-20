@@ -158,7 +158,6 @@ Options:
             } catch (\Exception $e) {
                 echo "Error in metrics " . $e->getMessage();
             }
-            exit(0);
         } else {
             $childs[] = $pid;
         }
@@ -229,7 +228,7 @@ Options:
 
         while (microtime(true) <= $startTime + $time) {
             $begin = microtime(true);
-            Utils::metricInflight("read", $this->queueId);
+            Utils::metricInflight("write", $this->queueId);
             $attemps = 0;
             try {
                 $table->retryTransaction(function (\YdbPlatform\Ydb\Session $session)
@@ -237,11 +236,11 @@ Options:
                     $attemps++;
                     return $session->query($query, DataGenerator::getUpsertData());
                 }, true, new \YdbPlatform\Ydb\Retry\RetryParams($writeTimeout));
-                Utils::metricDone("read", $this->queueId, $attemps, (microtime(true) - $begin) * 1000);
+                Utils::metricDone("write", $this->queueId, $attemps, (microtime(true) - $begin) * 1000);
             } catch (\Exception $e) {
 //                if ($attemps == 0) $attemps++;
                 $table->getLogger()->error($e->getMessage());
-                Utils::metricFail("read", $this->queueId, $attemps, get_class($e), (microtime(true) - $begin) * 1000);
+                Utils::metricFail("write", $this->queueId, $attemps, get_class($e), (microtime(true) - $begin) * 1000);
             } finally {
                 $delay = ($begin - microtime(true)) * 1e6 + 1e6 / Defaults::RPS_PER_READ_FORK;
                 usleep($delay > 0 ? $delay : 1);
@@ -316,15 +315,13 @@ Options:
                     $lastPushTime = microtime(true);
                 }
             }
+            usleep(1e3);
         }
-        usleep(1e3);
-
-
         $pushGateway->delete('workload-php', [
             'sdk' => 'php',
             'version' => Ydb::VERSION
         ]);
-        return;
+        exit(0);
     }
 
     protected
