@@ -166,6 +166,12 @@ Options:
             pcntl_waitpid($pid, $status);
             unset($childs[$pid]);
         }
+        $pushGateway = new \PrometheusPushGateway\PushGateway($promPgw);
+
+        $pushGateway->delete('workload-php', [
+            'sdk' => 'php',
+            'sdkVersion' => Ydb::VERSION
+        ]);
         exit(0);
     }
 
@@ -258,7 +264,7 @@ Options:
 
         $pushGateway->delete('workload-php', [
             'sdk' => 'php',
-            'version' => Ydb::VERSION
+            'sdkVersion' => Ydb::VERSION
         ]);
 
         $lastPushTime = microtime(true);
@@ -281,7 +287,7 @@ Options:
                     case 'reset':
                         $pushGateway->delete('workload-php', [
                             'sdk' => 'php',
-                            'version' => Ydb::VERSION
+                            'sdkVersion' => Ydb::VERSION
                         ]);
                         return;
                     case  'start':
@@ -305,7 +311,7 @@ Options:
                 if ((microtime(true) - $lastPushTime) * 1000 > $reportPeriod) {
                     $pushGateway->push($registry, "workload-php", [
                         'sdk' => 'php',
-                        'version' => Ydb::VERSION
+                        'sdkVersion' => Ydb::VERSION
                     ]);
                     $lastPushTime = microtime(true);
                 }
