@@ -2,10 +2,13 @@
 
 namespace YdbPlatform\Ydb\Slo\Commands;
 
+use Prometheus\CollectorRegistry;
+use Prometheus\Storage\InMemory;
 use YdbPlatform\Ydb\Slo\DataGenerator;
 use YdbPlatform\Ydb\Slo\Defaults;
 use YdbPlatform\Ydb\Slo\Utils;
 use YdbPlatform\Ydb\Traits\TypeHelpersTrait;
+use YdbPlatform\Ydb\Ydb;
 
 class RunCommand extends \YdbPlatform\Ydb\Slo\Command
 {
@@ -86,6 +89,10 @@ Options:
 
   -time                  <int>    run time in seconds
   -shutdown-time         <int>    graceful shutdown time in seconds";
+    /**
+     * @var int
+     */
+    protected $queueId;
 
     public function execute(string $endpoint, string $path, array $options)
     {
@@ -105,8 +112,9 @@ Options:
         $time = (int)($options["time"] ?? Defaults::READ_TIME);
         $shutdownTime = (int)($options["shutdown-time"] ?? Defaults::SHUTDOWN_TIME);
 
-        echo Utils::initPush($promPgw, $reportPeriod, $time);
-        sleep(1);
+        $this->queueId = ftok(__FILE__, 'm');
+        $msgQueue = msg_get_queue($this->queueId);
+
         for ($i = 0; $i < $readForks; $i++) {
             $pid = pcntl_fork();
             if ($pid == -1) {
@@ -141,11 +149,25 @@ Options:
                 usleep($i * 1e4);
             }
         }
+
+        $pid = pcntl_fork();
+        if ($pid == -1) {
+            echo "Error fork";
+            exit(1);
+        } elseif ($pid == 0) {
+            try {
+                $this->metricsJob($reportPeriod);
+            } catch (\Exception $e) {
+                echo "Error on $i'th fork: " . $e->getMessage();
+            }
+            exit(0);
+        }
+
         foreach ($childs as $pid) {
             pcntl_waitpid($pid, $status);
             unset($childs[$pid]);
         }
-        Utils::reset();
+        Utils::reset($this->queueId);
         exit(0);
     }
 
@@ -164,10 +186,7 @@ Options:
 
         while (microtime(true) <= $startTime + $time) {
             $begin = microtime(true);
-            $status = Utils::metricInflight("read", $process);
-            if ($status!=200){
-                $table->getLogger()->error("Error post inflight read process. Code $status");
-            }
+            Utils::metricInflight("read", $this->queueId);
             $attemps = 0;
             try {
                 $table->retryTransaction(function (\YdbPlatform\Ydb\Session $session)
@@ -177,18 +196,11 @@ Options:
                         "\$id" => (new \YdbPlatform\Ydb\Types\Uint64Type($dataGenerator->getRandomId()))->toTypedValue()
                     ]);
                 }, true, new \YdbPlatform\Ydb\Retry\RetryParams($readTimeout));
-                $status = Utils::metricDone("read", $process, $attemps);
-                if ($status!=200){
-                    $table->getLogger()->error("Error post done read process. Code $status");
-                }
+                Utils::metricDone("read", $this->queueId, $attemps, (microtime(true)-$begin)*1000);
             } catch (\Exception $e) {
-                print_r($e->getMessage());
 //                if ($attemps == 0) $attemps++;
                 $table->getLogger()->error($e->getMessage());
-                $status = Utils::metricFail("read", $process, $attemps, get_class($e));
-                if ($status!=200){
-                    $table->getLogger()->error("Error post fail read process. Code $status");
-                }
+                Utils::metricFail("read", $this->queueId, $attemps, get_class($e), (microtime(true)-$begin)*1000);
             } finally {
                 $delay = ($begin - microtime(true)) * 1e6 + 1e6 / Defaults::RPS_PER_READ_FORK;
                 usleep($delay > 0 ? $delay : 1);
@@ -213,30 +225,120 @@ Options:
 
         while (microtime(true) <= $startTime + $time) {
             $begin = microtime(true);
-            $status = Utils::metricInflight("write", $process);
-            if ($status!=200){
-                $table->getLogger()->error("Error post done read process. Code $status");
-            }
+            Utils::metricInflight("read", $this->queueId);
             $attemps = 0;
             try {
                 $table->retryTransaction(function (\YdbPlatform\Ydb\Session $session)
                 use ($query, $dataGenerator, $tableName, &$attemps) {
                     $attemps++;
-                    return $session->query($query, $dataGenerator::getUpsertData());
+                    return $session->query($query, [
+                        "\$id" => DataGenerator::getUpsertData()
+                    ]);
                 }, true, new \YdbPlatform\Ydb\Retry\RetryParams($writeTimeout));
-                $status = Utils::metricDone("write", $process, $attemps);
-                if ($status!=200){
-                    $table->getLogger()->error("Error post done read process. Code $status");
-                }
+                Utils::metricDone("read", $this->queueId, $attemps, (microtime(true)-$begin)*1000);
             } catch (\Exception $e) {
-                $status = Utils::metricFail("write", $process, $attemps, get_class($e));
-                if ($status!=200){
-                    $table->getLogger()->error("Error post done read process. Code $status");
-                }
+//                if ($attemps == 0) $attemps++;
+                $table->getLogger()->error($e->getMessage());
+                Utils::metricFail("read", $this->queueId, $attemps, get_class($e), (microtime(true)-$begin)*1000);
             } finally {
-                $delay = ($begin - microtime(true)) * 1e6 + 1e6 / Defaults::RPS_PER_WRITE_FORK;
+                $delay = ($begin - microtime(true)) * 1e6 + 1e6 / Defaults::RPS_PER_READ_FORK;
                 usleep($delay > 0 ? $delay : 1);
             }
         }
     }
+
+    protected function metricsJob(int $reportPeriod, int $time, int $startTime, string $url)
+    {
+        $registry = new CollectorRegistry(new InMemory);
+        $pushGateway = new \PrometheusPushGateway\PushGateway($url);
+
+        $latencies = $registry->getOrRegisterSummary('', 'latency', 'summary of latencies in ms', ['jobName', 'status'], 600, [0.5, 0.99, 0.999]);
+        $oks = $registry->getOrRegisterGauge('', 'oks', 'amount of OK requests', ['jobName']);
+        $notOks = $registry->getOrRegisterGauge('', 'not_oks', 'amount of not OK requests', ['jobName']);
+        $inflight = $registry->getOrRegisterGauge('', 'inflight', 'amount of requests in flight', ['jobName']);
+        $errors = $registry->getOrRegisterGauge('', 'errors', 'amount of errors', ['jobName', 'class']);
+        $attempts = $registry->getOrRegisterHistogram('', 'attempts', 'summary of amount for request', ['jobName', 'status'], range(1,10,1));
+        $msgQueue = msg_get_queue($this->queueId);
+        $lastPushTime = microtime(true);
+
+        foreach ($this->errors as $error){
+            $errors->inc(['read', $error]);
+            $errors->inc(['write', $error]);
+        }
+
+        while (true){
+            while (msg_receive($msgQueue, 1, $msgType, 1024, $message)){
+                switch ($message['type']){
+                    case 'reset':
+                        $pushGateway->delete('workload-php');
+                        return;
+                    case  'start':
+                        $inflight->inc([$message['job']]);
+                        break;
+                    case 'ok':
+                        $inflight->dec([$message['job']]);
+                        $latencies->observe($message['latency'], [$message['job'], $message['type']]);
+                        $attempts->observe($message['attempts'], [$message['job'], $message['type']]);
+                        $oks->inc([$message['job']]);
+                        break;
+                    case 'err':
+                        $inflight->dec([$message['job']]);
+                        $latencies->observe($message['latency'], [$message['job'], $message['type']]);
+                        $attempts->observe($message['attempts'], [$message['job'], $message['type']]);
+                        $notOks->inc([$message['job']]);
+                        $errors->inc([$message['job'], $message['error']]);
+                        break;
+
+                }
+            }
+            if((microtime(true)-$lastPushTime)*1000>$reportPeriod){
+                $pushGateway->push($registry, "workload-php", [
+                    'sdk'       => 'php',
+                    'version'   => Ydb::VERSION
+                ]);
+                $lastPushTime = microtime(true);
+            }
+            usleep(1e3);
+        }
+    }
+
+    protected $errors = [
+        "GRPC_CANCELLED",
+        "GRPC_UNKNOWN",
+        "GRPC_INVALID_ARGUMENT",
+        "GRPC_DEADLINE_EXCEEDED",
+        "GRPC_NOT_FOUND",
+        "GRPC_ALREADY_EXISTS",
+        "GRPC_PERMISSION_DENIED",
+        "GRPC_RESOURCE_EXHAUSTED",
+        "GRPC_FAILED_PRECONDITION",
+        "GRPC_ABORTED",
+        "GRPC_OUT_OF_RANGE",
+        "GRPC_UNIMPLEMENTED",
+        "GRPC_INTERNAL",
+        "GRPC_UNAVAILABLE",
+        "GRPC_DATA_LOSS",
+        "GRPC_UNAUTHENTICATED",
+        "YDB_STATUS_CODE_UNSPECIFIED",
+        "YDB_SUCCESS",
+        "YDB_BAD_REQUEST",
+        "YDB_UNAUTHORIZED",
+        "YDB_INTERNAL_ERROR",
+        "YDB_ABORTED",
+        "YDB_UNAVAILABLE",
+        "YDB_OVERLOADED",
+        "YDB_SCHEME_ERROR",
+        "YDB_GENERIC_ERROR",
+        "YDB_TIMEOUT",
+        "YDB_BAD_SESSION",
+        "YDB_PRECONDITION_FAILED",
+        "YDB_ALREADY_EXISTS",
+        "YDB_NOT_FOUND",
+        "YDB_SESSION_EXPIRED",
+        "YDB_CANCELLED",
+        "YDB_UNDETERMINED",
+        "YDB_UNSUPPORTED",
+        "YDB_SESSION_BUSY"
+    ];
+
 }

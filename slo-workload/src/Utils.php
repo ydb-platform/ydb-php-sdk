@@ -9,6 +9,7 @@ use YdbPlatform\Ydb\Ydb;
 
 class Utils
 {
+    const MSG_TYPE = 1;
     public static function initDriver(string $endpoint, string $db, string $process)
     {
         $endpointData = explode("://", $endpoint);
@@ -36,40 +37,27 @@ class Utils
         return new Ydb($config, new SimpleSloLogger(6, $process));
     }
 
-    public static function initPush(string $endpoint, string $interval, string $time)
+
+    public static function metricInflight(string $job, int $queueId)
     {
-        return static::postData('prepare',
-            http_build_query([
-                "endpoint" => $endpoint,
-                "label" => "php",
-                "version" => Ydb::VERSION,
-                "interval" => $interval,
-                "time" => $time
-            ]));
+        static::postData($queueId,[
+            "type"  => "start",
+            "job"   => $job
+        ]);
     }
 
-    public static function metricInflight(string $job, int $process)
+    public static function metricDone(string $job, int $queueId, int $attemps, float $latency)
     {
-        return static::postData('start',
-            http_build_query([
-                "job" => $job,
-                "process" => $process
-            ]));
+        static::postData($queueId, [
+            "type"  => "ok",
+            "job" => $job,
+            "attempts" => $attemps,
+            "latency" => $latency,
+        ]);
     }
 
-    public static function metricDone(string $job, int $process, int $attemps)
+    public static function metricFail(string $job, int $queueId, int $attemps, string $error, float $latency)
     {
-        return static::postData('done',
-            http_build_query([
-                "job" => $job,
-                "process" => $process,
-                "attempts" => $attemps
-            ]));
-    }
-
-    public static function metricFail(string $job, int $process, int $attemps, string $error)
-    {
-        $e = substr(strrchr($error, '\\'), 1);
         if($ydbErr = array_search($error,RequestTrait::$ydbExceptions)){
             $e = 'YDB_'.StatusCode::name($ydbErr);
         } elseif ($grpcErr = array_search($error,RequestTrait::$grpcExceptions)){
@@ -77,34 +65,26 @@ class Utils
         } else {
             $e = substr(strrchr($error, '\\'), 1);
         }
-        return static::postData('fail',
-            http_build_query([
-                "job" => $job,
-                "process" => $process,
-                "attempts" => $attemps,
-                "error" => $e
-            ]));
-    }
-
-    public static function postData(string $path, string $data)
-    {
-        $curl = curl_init("http://localhost:88/$path?$data");
-
-        curl_setopt_array($curl, [
-            CURLOPT_RETURNTRANSFER => 1,
-            CURLOPT_SSL_VERIFYPEER => 0,
-            CURLOPT_SSL_VERIFYHOST => 0,
-            CURLOPT_HEADER => 0,
+        static::postData($queueId, [
+            "type"  => "err",
+            "job" => $job,
+            "attempts" => $attemps,
+            "error" => $e,
+            "latency" => $latency,
         ]);
-
-        curl_exec($curl);
-
-        return curl_getinfo($curl, CURLINFO_HTTP_CODE);
     }
 
-    public static function reset()
+    public static function postData(int $queueId, array $data)
     {
-        self::postData("reset","");
+        $msgQueue = msg_get_queue($queueId);
+        msg_send($msgQueue, static::MSG_TYPE, $data);
+    }
+
+    public static function reset(int $queueId)
+    {
+        self::postData("reset",[
+            "type"  => "reset"
+        ]);
     }
 
 }
