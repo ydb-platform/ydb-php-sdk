@@ -272,7 +272,7 @@ Options:
             $errors->inc(['write', $error]);
         }
 
-        while (microtime(true)>$startTime+$time){
+        while (microtime(true)<$startTime+$time){
             while (msg_receive($msgQueue, 1, $msgType, 1024, $message)){
                 switch ($message['type']){
                     case 'reset':
