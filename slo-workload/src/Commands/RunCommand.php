@@ -329,7 +329,7 @@ Options:
                 usleep(1e3);
             } else {
                 $registry->wipeStorage();
-                $pushGateway->push('workload-php', [
+                $pushGateway->push($registry, [
                     'sdk' => 'php',
                     'sdkVersion' => Ydb::VERSION
                 ]);
