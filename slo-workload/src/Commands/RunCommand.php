@@ -161,13 +161,13 @@ Options:
                 echo "Error on $i'th fork: " . $e->getMessage();
             }
             exit(0);
+        } else {
+            $childs[] = $pid;
         }
-
         foreach ($childs as $pid) {
             pcntl_waitpid($pid, $status);
             unset($childs[$pid]);
         }
-        Utils::reset($this->queueId);
         exit(0);
     }
 
@@ -247,7 +247,7 @@ Options:
         }
     }
 
-    protected function metricsJob(int $reportPeriod, int $time, int $startTime, string $url)
+    protected function metricsJob(int $reportPeriod, int $time, float $startTime, string $url)
     {
         $registry = new CollectorRegistry(new InMemory);
         $pushGateway = new \PrometheusPushGateway\PushGateway($url);
@@ -272,7 +272,7 @@ Options:
             $errors->inc(['write', $error]);
         }
 
-        while (true){
+        while (microtime(true)>$startTime+$time){
             while (msg_receive($msgQueue, 1, $msgType, 1024, $message)){
                 switch ($message['type']){
                     case 'reset':
@@ -309,6 +309,10 @@ Options:
             }
             usleep(1e3);
         }
+        $pushGateway->delete('workload-php', [
+            'sdk'       => 'php',
+            'version'   => Ydb::VERSION
+        ]);
     }
 
     protected $errors = [
