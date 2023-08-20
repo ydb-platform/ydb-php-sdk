@@ -165,12 +165,6 @@ Options:
             pcntl_waitpid($pid, $status);
             unset($childs[$pid]);
         }
-        $pushGateway = new \PrometheusPushGateway\PushGateway($promPgw);
-
-        $pushGateway->delete('workload-php', [
-            'sdk' => 'php',
-            'sdkVersion' => Ydb::VERSION
-        ]);
         exit(0);
     }
 
@@ -275,12 +269,12 @@ Options:
 
         $pushGateway->push($registry, "workload-php", [
             'sdk' => 'php',
-            'version' => Ydb::VERSION
+            'sdkVersion' => Ydb::VERSION
         ]);
 
         echo "Started metrics job\n";
 
-        while (microtime(true) < $startTime + $time) {
+        while (microtime(true) <= $startTime + $time) {
             while (msg_receive($msgQueue, 1, $msgType, 1024, $message)) {
                 switch ($message['type']) {
                     case 'reset':
@@ -315,11 +309,15 @@ Options:
                     $lastPushTime = microtime(true);
                 }
             }
-            usleep(1e3);
+            if(microtime(true) + 0.01 <= $startTime + $time) {
+                usleep(1e3);
+            } else {
+                return;
+            }
         }
         $pushGateway->delete('workload-php', [
             'sdk' => 'php',
-            'version' => Ydb::VERSION
+            'sdkVersion' => Ydb::VERSION
         ]);
         exit(0);
     }
