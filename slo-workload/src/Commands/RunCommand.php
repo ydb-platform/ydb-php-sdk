@@ -205,7 +205,7 @@ Options:
                 $table->getLogger()->error($e->getMessage());
                 Utils::metricFail("read", $this->queueId, $attemps, get_class($e), (microtime(true) - $begin) * 1000);
             } finally {
-                $delay = ($begin - microtime(true)) * 1e6 + 1e6 / Defaults::RPS_PER_READ_FORK;
+                $delay = ($begin - microtime(true)) * 1e6 + 1e6 / Defaults::RPS_PER_WRITE_FORK;
                 usleep($delay > 0 ? $delay : 1);
             }
 
