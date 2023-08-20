@@ -52,11 +52,11 @@ Options:
 
     public function execute(string $endpoint, string $path, array $options)
     {
-        $tableName = $options["table-name"] ?? Defaults::TABLE_NAME;
-        $minPartitionsCount = (int)($options["min-partitions-count"] ?? Defaults::TABLE_MIN_PARTITION_COUNT);
-        $maxPartitionsCount = (int)($options["max-partitions-count"] ?? Defaults::TABLE_MAX_PARTITION_COUNT);
-        $partitionSize = (int)($options["partition-size"] ?? Defaults::TABLE_PARTITION_SIZE);
-        $initialDataCount = (int)($options["initial-data-count"] ?? Defaults::GENERATOR_DATA_COUNT);
+        $tableName = $options["-table-name"] ?? Defaults::TABLE_NAME;
+        $minPartitionsCount = (int)($options["-min-partitions-count"] ?? Defaults::TABLE_MIN_PARTITION_COUNT);
+        $maxPartitionsCount = (int)($options["-max-partitions-count"] ?? Defaults::TABLE_MAX_PARTITION_COUNT);
+        $partitionSize = (int)($options["-partition-size"] ?? Defaults::TABLE_PARTITION_SIZE);
+        $initialDataCount = (int)($options["-initial-data-count"] ?? Defaults::GENERATOR_DATA_COUNT);
 
         $ydb = Utils::initDriver($endpoint, $path, "create");
 

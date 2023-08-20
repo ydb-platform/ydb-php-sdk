@@ -1,5 +1,8 @@
 <?php
 require_once './vendor/autoload.php';
+/**
+ * @var \YdbPlatform\Ydb\Slo\Command[] $commands
+ */
 $commands = [
     "create"    =>new \YdbPlatform\Ydb\Slo\Commands\CreateCommand(),
     "run"       =>new \YdbPlatform\Ydb\Slo\Commands\RunCommand(),

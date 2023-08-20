@@ -99,16 +99,16 @@ Options:
         $startTime = microtime(true);
         print_r($options);
         $childs = array();
-        $tableName = $options["table-name"] ?? Defaults::TABLE_NAME;
-        $initialDataCount = (int)($options["initial-data-count"] ?? Defaults::GENERATOR_DATA_COUNT);
-        $promPgw = ($options["prom-pgw"] ?? Defaults::PROMETHEUS_PUSH_GATEWAY);
-        $reportPeriod = (int)($options["report-period"] ?? Defaults::PROMETHEUS_PUSH_PERIOD);
-        $readForks = ((int)($options["read-rps"] ?? Defaults::READ_RPS)) / Defaults::RPS_PER_READ_FORK;
-        $readTimeout = (int)($options["read-timeout"] ?? Defaults::READ_TIMEOUT);
-        $writeForks = ((int)($options["write-rps"] ?? Defaults::WRITE_RPS)) / Defaults::RPS_PER_WRITE_FORK;
-        $writeTimeout = (int)($options["write-timeout"] ?? Defaults::WRITE_TIMEOUT);
-        $time = (int)($options["time"] ?? Defaults::READ_TIME);
-        $shutdownTime = (int)($options["shutdown-time"] ?? Defaults::SHUTDOWN_TIME);
+        $tableName = $options["-table-name"] ?? Defaults::TABLE_NAME;
+        $initialDataCount = (int)($options["-initial-data-count"] ?? Defaults::GENERATOR_DATA_COUNT);
+        $promPgw = ($options["-prom-pgw"] ?? Defaults::PROMETHEUS_PUSH_GATEWAY);
+        $reportPeriod = (int)($options["-report-period"] ?? Defaults::PROMETHEUS_PUSH_PERIOD);
+        $readForks = ((int)($options["-read-rps"] ?? Defaults::READ_RPS)) / Defaults::RPS_PER_READ_FORK;
+        $readTimeout = (int)($options["-read-timeout"] ?? Defaults::READ_TIMEOUT);
+        $writeForks = ((int)($options["-write-rps"] ?? Defaults::WRITE_RPS)) / Defaults::RPS_PER_WRITE_FORK;
+        $writeTimeout = (int)($options["-write-timeout"] ?? Defaults::WRITE_TIMEOUT);
+        $time = (int)($options["-time"] ?? Defaults::READ_TIME);
+        $shutdownTime = (int)($options["-shutdown-time"] ?? Defaults::SHUTDOWN_TIME);
 
         $this->queueId = ftok(__FILE__, 'm');
         $msgQueue = msg_get_queue($this->queueId);
@@ -137,7 +137,7 @@ Options:
                 exit(1);
             } elseif ($pid == 0) {
                 try {
-                    $this->writeJob($endpoint, $path, $tableName, $initialDataCount, $time, $writeTimeout, $i,$shutdownTime,$startTime);
+                    $this->writeJob($endpoint, $path, $tableName, $initialDataCount, $time, $writeTimeout, $i, $shutdownTime, $startTime);
                 } catch (\Exception $e) {
                     echo "Error on $i'th fork: " . $e->getMessage();
                 }
@@ -178,7 +178,7 @@ Options:
             $dataGenerator::setMaxId($initialDataCount);
             $query = sprintf(Defaults::READ_QUERY, $tableName);
             $table = $ydb->table();
-        } catch (\Exception $e){
+        } catch (\Exception $e) {
             echo $e->getMessage();
         }
 
@@ -194,11 +194,11 @@ Options:
                         "\$id" => (new \YdbPlatform\Ydb\Types\Uint64Type($dataGenerator->getRandomId()))->toTypedValue()
                     ]);
                 }, true, new \YdbPlatform\Ydb\Retry\RetryParams($readTimeout));
-                Utils::metricDone("read", $this->queueId, $attemps, (microtime(true)-$begin)*1000);
+                Utils::metricDone("read", $this->queueId, $attemps, (microtime(true) - $begin) * 1000);
             } catch (\Exception $e) {
 //                if ($attemps == 0) $attemps++;
                 $table->getLogger()->error($e->getMessage());
-                Utils::metricFail("read", $this->queueId, $attemps, get_class($e), (microtime(true)-$begin)*1000);
+                Utils::metricFail("read", $this->queueId, $attemps, get_class($e), (microtime(true) - $begin) * 1000);
             } finally {
                 $delay = ($begin - microtime(true)) * 1e6 + 1e6 / Defaults::RPS_PER_READ_FORK;
                 usleep($delay > 0 ? $delay : 1);
@@ -217,7 +217,7 @@ Options:
             $dataGenerator::setMaxId($initialDataCount);
             $query = sprintf(Defaults::WRITE_QUERY, $tableName);
             $table = $ydb->table();
-        }catch (\Exception $e){
+        } catch (\Exception $e) {
             echo $e->getMessage();
         }
 
@@ -231,11 +231,11 @@ Options:
                     $attemps++;
                     return $session->query($query, DataGenerator::getUpsertData());
                 }, true, new \YdbPlatform\Ydb\Retry\RetryParams($writeTimeout));
-                Utils::metricDone("read", $this->queueId, $attemps, (microtime(true)-$begin)*1000);
+                Utils::metricDone("read", $this->queueId, $attemps, (microtime(true) - $begin) * 1000);
             } catch (\Exception $e) {
 //                if ($attemps == 0) $attemps++;
                 $table->getLogger()->error($e->getMessage());
-                Utils::metricFail("read", $this->queueId, $attemps, get_class($e), (microtime(true)-$begin)*1000);
+                Utils::metricFail("read", $this->queueId, $attemps, get_class($e), (microtime(true) - $begin) * 1000);
             } finally {
                 $delay = ($begin - microtime(true)) * 1e6 + 1e6 / Defaults::RPS_PER_READ_FORK;
                 usleep($delay > 0 ? $delay : 1);
@@ -253,30 +253,35 @@ Options:
         $notOks = $registry->getOrRegisterGauge('', 'not_oks', 'amount of not OK requests', ['jobName']);
         $inflight = $registry->getOrRegisterGauge('', 'inflight', 'amount of requests in flight', ['jobName']);
         $errors = $registry->getOrRegisterGauge('', 'errors', 'amount of errors', ['jobName', 'class']);
-        $attempts = $registry->getOrRegisterHistogram('', 'attempts', 'summary of amount for request', ['jobName', 'status'], range(1,10,1));
+        $attempts = $registry->getOrRegisterHistogram('', 'attempts', 'summary of amount for request', ['jobName', 'status'], range(1, 10, 1));
         $msgQueue = msg_get_queue($queueId);
 
         $pushGateway->delete('workload-php', [
-            'sdk'       => 'php',
-            'version'   => Ydb::VERSION
+            'sdk' => 'php',
+            'version' => Ydb::VERSION
         ]);
 
         $lastPushTime = microtime(true);
 
-        foreach ($this->errors as $error){
-            $errors->inc(['read', $error]);
-            $errors->inc(['write', $error]);
+        foreach ($this->errors as $error) {
+            $errors->incBy(0, ['read', $error]);
+            $errors->incBy(0, ['write', $error]);
         }
+
+        $pushGateway->push($registry, "workload-php", [
+            'sdk' => 'php',
+            'version' => Ydb::VERSION
+        ]);
 
         echo "Started metrics job\n";
 
-        while (microtime(true)<$startTime+$time){
-            while (msg_receive($msgQueue, 1, $msgType, 1024, $message)){
-                switch ($message['type']){
+        while (microtime(true) < $startTime + $time) {
+            while (msg_receive($msgQueue, 1, $msgType, 1024, $message)) {
+                switch ($message['type']) {
                     case 'reset':
                         $pushGateway->delete('workload-php', [
-                            'sdk'       => 'php',
-                            'version'   => Ydb::VERSION
+                            'sdk' => 'php',
+                            'version' => Ydb::VERSION
                         ]);
                         return;
                     case  'start':
@@ -295,26 +300,29 @@ Options:
                         $notOks->inc([$message['job']]);
                         $errors->inc([$message['job'], $message['error']]);
                         break;
+                }
 
+                if ((microtime(true) - $lastPushTime) * 1000 > $reportPeriod) {
+                    $pushGateway->push($registry, "workload-php", [
+                        'sdk' => 'php',
+                        'version' => Ydb::VERSION
+                    ]);
+                    $lastPushTime = microtime(true);
                 }
             }
-            if((microtime(true)-$lastPushTime)*1000>$reportPeriod){
-                $pushGateway->push($registry, "workload-php", [
-                    'sdk'       => 'php',
-                    'version'   => Ydb::VERSION
-                ]);
-                $lastPushTime = microtime(true);
-            }
-            usleep(1e3);
         }
+        usleep(1e3);
+
+
         $pushGateway->delete('workload-php', [
-            'sdk'       => 'php',
-            'version'   => Ydb::VERSION
+            'sdk' => 'php',
+            'version' => Ydb::VERSION
         ]);
         return;
     }
 
-    protected $errors = [
+    protected
+        $errors = [
         "GRPC_CANCELLED",
         "GRPC_UNKNOWN",
         "GRPC_INVALID_ARGUMENT",
