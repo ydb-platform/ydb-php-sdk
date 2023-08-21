@@ -124,8 +124,9 @@ Options:
             } catch (\Exception $e) {
                 echo "Error in metrics " . $e->getMessage();
             }
+            exit(0);
         } else {
-            $childs[] = $pid;
+            $promPgwPid = $pid;
         }
         for ($i = 0; $i < $readForks; $i++) {
             $pid = pcntl_fork();
@@ -165,17 +166,23 @@ Options:
             pcntl_waitpid($pid, $status);
             unset($childs[$pid]);
         }
-        $registry = new CollectorRegistry(new InMemory);
-        $pushGateway = new \PrometheusPushGateway\PushGateway($promPgw);
-        $registry->wipeStorage();
-        $pushGateway->push($registry, 'workload-php', [
-            'sdk' => 'php',
-            'sdkVersion' => Ydb::VERSION
-        ]);
-        $pushGateway->delete('workload-php', [
-            'sdk' => 'php',
-            'sdkVersion' => Ydb::VERSION
-        ]);
+        posix_kill($promPgwPid, SIGKILL);
+        $curl = curl_init();
+
+        curl_setopt_array($curl, array(
+            CURLOPT_URL => $promPgw.'/metrics/job/workload-php/sdk/php/sdkVersion/1.9.0',
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_ENCODING => '',
+            CURLOPT_MAXREDIRS => 10,
+            CURLOPT_TIMEOUT => 0,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+            CURLOPT_CUSTOMREQUEST => 'DELETE',
+        ));
+
+        $response = curl_exec($curl);
+
+        curl_close($curl);
         exit(0);
     }
 
@@ -267,7 +274,7 @@ Options:
         $msgQueue = msg_get_queue($queueId);
 
         $registry->wipeStorage();
-        $pushGateway->push('workload-php', [
+        $pushGateway->push($registry, 'workload-php',  [
             'sdk' => 'php',
             'sdkVersion' => Ydb::VERSION
         ]);
@@ -288,7 +295,6 @@ Options:
             'sdkVersion' => Ydb::VERSION
         ]);
 
-        echo "Started metrics job\n";
 
         while (microtime(true) <= $startTime + $time) {
             while (msg_receive($msgQueue, 1, $msgType, 1024, $message)) {
@@ -324,12 +330,24 @@ Options:
                     ]);
                     $lastPushTime = microtime(true);
                 }
+                if(microtime(true) + 0.01 >= $startTime + $time) {
+                    $registry->wipeStorage();
+                    $pushGateway->push($registry, 'workload-php', [
+                        'sdk' => 'php',
+                        'sdkVersion' => Ydb::VERSION
+                    ]);
+                    $pushGateway->delete('workload-php', [
+                        'sdk' => 'php',
+                        'sdkVersion' => Ydb::VERSION
+                    ]);
+                    die(0);
+                }
             }
             if(microtime(true) + 0.01 <= $startTime + $time) {
                 usleep(1e3);
             } else {
                 $registry->wipeStorage();
-                $pushGateway->push($registry, [
+                $pushGateway->push($registry, 'workload-php', [
                     'sdk' => 'php',
                     'sdkVersion' => Ydb::VERSION
                 ]);
@@ -337,10 +355,10 @@ Options:
                     'sdk' => 'php',
                     'sdkVersion' => Ydb::VERSION
                 ]);
-                return;
+                die();
             }
         }
-        exit(0);
+        die(0);
     }
 
     protected
