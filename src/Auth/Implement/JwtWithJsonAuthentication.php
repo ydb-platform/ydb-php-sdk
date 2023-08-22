@@ -35,7 +35,7 @@ class JwtWithJsonAuthentication extends \YdbPlatform\Ydb\Auth\JwtAuth
             'jwt' => $jwt_token,
         ];
         $token = $this->requestToken($request_data);
-        return new TokenInfo($token->iamToken, $this->convertExpiresAt($token->expiresAt));
+        return new TokenInfo($token->iamToken, $this->convertExpiresAt($token->expiresAt), $this->refreshTokenRatio);
     }
 
     public function getName(): string

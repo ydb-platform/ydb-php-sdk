@@ -13,12 +13,33 @@ abstract class Auth
 
     protected $logger;
 
+    protected $refreshTokenRatio;
+
     public function logger(){
         return $this->logger;
     }
 
     public function setLogger($logger){
         $this->logger = $logger;
+    }
+
+    /**
+     * @return float
+     */
+    public function getRefreshTokenRatio(): float
+    {
+        return $this->refreshTokenRatio;
+    }
+
+    /**
+     * @param float $refreshTokenRatio
+     */
+    public function setRefreshTokenRatio($refreshTokenRatio): void
+    {
+        if($refreshTokenRatio<=0||$refreshTokenRatio>=1){
+            throw new \Exception("Refresh token ratio. Expected number between 0 and 1.");
+        }
+        $this->refreshTokenRatio = $refreshTokenRatio;
     }
 
     /**
