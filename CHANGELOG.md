@@ -1,3 +1,5 @@
+* created refresh token ratio parameter
+
 ## 1.9.0
 
 * added microseconds in Timestamp type

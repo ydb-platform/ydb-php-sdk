@@ -18,7 +18,7 @@ class AccessTokenAuthentication extends \YdbPlatform\Ydb\Auth\Auth
 
     public function getTokenInfo(): TokenInfo
     {
-        return new TokenInfo($this->access_token, time()+24*60*60);
+        return new TokenInfo($this->access_token, time()+24*60*60, $this->refreshTokenRatio);
     }
 
     public function getName(): string

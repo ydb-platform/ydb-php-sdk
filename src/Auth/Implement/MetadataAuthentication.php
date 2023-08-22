@@ -12,7 +12,7 @@ class MetadataAuthentication extends \YdbPlatform\Ydb\Auth\Auth
     public function getTokenInfo(): TokenInfo
     {
         $token = $this->requestTokenFromMetadata();
-        return new TokenInfo($token->iamToken, $this->convertExpiresAt($token->expiresAt));
+        return new TokenInfo($token->iamToken, $this->convertExpiresAt($token->expiresAt), $this->refreshTokenRatio);
     }
 
     public function getName(): string
