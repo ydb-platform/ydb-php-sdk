@@ -1,3 +1,4 @@
+* changed level of update token log record from info to debug
 * created refresh token ratio parameter
 
 ## 1.9.0
