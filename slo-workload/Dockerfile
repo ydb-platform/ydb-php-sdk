@@ -1,4 +1,4 @@
-FROM ilyakharev/php-grpc-and-go:7.2
+FROM ilyakharev/php-grpc:7.2
 
 COPY . /src
 WORKDIR /src/slo-workload
