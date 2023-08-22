@@ -10,6 +10,7 @@ use YdbPlatform\Ydb\Auth\Implement\AccessTokenAuthentication;
 use YdbPlatform\Ydb\Auth\Implement\AnonymousAuthentication;
 use YdbPlatform\Ydb\Auth\Implement\JwtWithJsonAuthentication;
 use YdbPlatform\Ydb\Auth\Implement\JwtWithPrivateKeyAuthentication;
+use YdbPlatform\Ydb\Auth\Implement\MetadataAuthentication;
 use YdbPlatform\Ydb\Auth\Implement\OAuthTokenAuthentication;
 use YdbPlatform\Ydb\Contracts\IamTokenContract;
 
@@ -96,7 +97,7 @@ class Iam implements IamTokenContract
      */
     public function newToken()
     {
-        $this->logger()->info('YDB: Obtaining new IAM token...');
+        $this->logger()->debug('YDB: Obtaining new token...');
 
         $tokenInfo = $this->config('credentials')->getTokenInfo();
         $this->iam_token = $tokenInfo->getToken();
@@ -153,6 +154,10 @@ class Iam implements IamTokenContract
             $parsedConfig["credentials"] = $config["credentials"];
         }
 
+        if (isset($config["refresh_token_ratio"])){
+            $parsedConfig["refresh_token_ratio"] = $config["refresh_token_ratio"];
+        }
+
         foreach ($stringParams as $param)
         {
             $parsedConfig[$param] = (string)($config[$param] ?? '');
@@ -197,6 +202,8 @@ class Iam implements IamTokenContract
         else if ($this->config('use_metadata'))
         {
             $this->logger()->info('YDB: Authentication method: Metadata URL');
+            $this->config['credentials'] = new MetadataAuthentication();
+            $this->config['credentials']->setLogger($this->logger());
         }
         else if ($serviceFile = $this->config('service_file'))
         {
@@ -236,6 +243,10 @@ class Iam implements IamTokenContract
             $this->logger()->info('YDB: Authentication method: OAuth token');
             $this->config['credentials'] = new OAuthTokenAuthentication($oauthToken);
             $this->config['credentials']->setLogger($this->logger());
+        }
+
+        if ($this->config('credentials') !== null){
+            $this->config['credentials']->setRefreshTokenRatio($this->config('refresh_token_ratio', 0.1));
         }
         else
         {
@@ -383,7 +394,7 @@ class Iam implements IamTokenContract
                 $this->iam_token = $token->iamToken;
                 $this->expires_at = $token->expiresAt;
                 $this->refresh_at = $token->refreshAt ?? time();
-                $this->logger()->info('YDB: Reused IAM token [...' . substr($this->iam_token, -6) . '].');
+                $this->logger()->debug('YDB: Reused token [...' . substr($this->iam_token, -6) . '].');
                 return $token->iamToken;
             }
         }

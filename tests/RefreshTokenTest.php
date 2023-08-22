@@ -88,7 +88,7 @@ class RefreshTokenTest extends TestCase
             MetaGetter::getMeta($session)["x-ydb-auth-ticket"][0]
         );
         // Check that sdk used old token when failed refreshing
-        usleep(TokenInfo::_PRIVATE_REFRESH_RATIO*$TOKEN_LIVE_TIME*1000*1000); // waiting 10% from token live time
+        usleep($ydb->iam()->config('credentials')->getRefreshTokenRatio()*$TOKEN_LIVE_TIME*1000*1000); // waiting 10% from token live time
         $session->query('select 1 as res');
         self::assertEquals(
             2,
