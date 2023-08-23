@@ -58,12 +58,11 @@ class Utils
 
     public static function metricFail(string $job, int $queueId, int $attemps, string $error, float $latency)
     {
-        static::getErrorName($error);
         static::postData($queueId, [
             "type"  => "err",
             "job" => $job,
             "attempts" => $attemps,
-            "error" => $e,
+            "error" => static::getErrorName($error),
             "latency" => $latency,
         ]);
     }
@@ -82,9 +81,9 @@ class Utils
     }
 
     public static function retriedError(int $queueId, string $job, string $error){
-        self::postData("reset",[
+        self::postData($queueId,[
             "type"  => "retried",
-            "job" => self::getErrorName($job),
+            "job" => $job,
             "error" => self::getErrorName($error)
         ]);
     }
