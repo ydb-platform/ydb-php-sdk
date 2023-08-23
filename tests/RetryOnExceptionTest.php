@@ -77,7 +77,7 @@ class RetryOnExceptionTest extends TestCase
                 throw new RetryableException('Test exception');
             }
             self::assertEquals(5, $i);
-        }, [
+        }, null, null, [
             'idempotent' => true,
             'callback_on_error' => function (\Exception $exception) use (&$i) {$i=5;}
         ]);
