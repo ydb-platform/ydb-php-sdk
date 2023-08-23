@@ -214,7 +214,7 @@ Options:
                     } catch (\Exception $exception) {
                         Utils::retriedError($this->queueId, 'write', get_class($exception));
                     }
-                }, true, new \YdbPlatform\Ydb\Retry\RetryParams($readTimeout));
+                }, true);
                 Utils::metricDone("read", $this->queueId, $attemps, (microtime(true) - $begin) * 1000);
             } catch (\Exception $e) {
                 if ($attemps == 0) $attemps++;
@@ -255,7 +255,7 @@ Options:
                     } catch (\Exception $exception) {
                         Utils::retriedError($this->queueId, 'write', get_class($exception));
                     }
-                }, true, new \YdbPlatform\Ydb\Retry\RetryParams($writeTimeout));
+                }, true);
                 Utils::metricDone("write", $this->queueId, $attemps, (microtime(true) - $begin) * 1000);
             } catch (\Exception $e) {
                 if ($attemps == 0) $attemps++;
