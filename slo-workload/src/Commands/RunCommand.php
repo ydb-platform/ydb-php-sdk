@@ -170,7 +170,7 @@ Options:
         $curl = curl_init();
 
         curl_setopt_array($curl, array(
-            CURLOPT_URL => $promPgw.'/metrics/job/workload-php/sdk/php/sdkVersion/1.9.0',
+            CURLOPT_URL => $promPgw . '/metrics/job/workload-php/sdk/php/sdkVersion/'.Ydb::VERSION,
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_ENCODING => '',
             CURLOPT_MAXREDIRS => 10,
@@ -206,14 +206,18 @@ Options:
             try {
                 $table->retryTransaction(function (\YdbPlatform\Ydb\Session $session)
                 use ($query, $dataGenerator, $tableName, &$attemps) {
-                    $attemps++;
-                    return $session->query($query, [
-                        "\$id" => (new \YdbPlatform\Ydb\Types\Uint64Type($dataGenerator->getRandomId()))->toTypedValue()
-                    ]);
+                    try {
+                        $attemps++;
+                        return $session->query($query, [
+                            "\$id" => (new \YdbPlatform\Ydb\Types\Uint64Type($dataGenerator->getRandomId()))->toTypedValue()
+                        ]);
+                    } catch (\Exception $exception) {
+                        Utils::retriedError($this->queueId, 'write', get_class($exception));
+                    }
                 }, true, new \YdbPlatform\Ydb\Retry\RetryParams($readTimeout));
                 Utils::metricDone("read", $this->queueId, $attemps, (microtime(true) - $begin) * 1000);
             } catch (\Exception $e) {
-//                if ($attemps == 0) $attemps++;
+                if ($attemps == 0) $attemps++;
                 $table->getLogger()->error($e->getMessage());
                 Utils::metricFail("read", $this->queueId, $attemps, get_class($e), (microtime(true) - $begin) * 1000);
             } finally {
@@ -245,12 +249,16 @@ Options:
             try {
                 $table->retryTransaction(function (\YdbPlatform\Ydb\Session $session)
                 use ($query, $dataGenerator, $tableName, &$attemps) {
-                    $attemps++;
-                    return $session->query($query, DataGenerator::getUpsertData());
+                    try {
+                        $attemps++;
+                        return $session->query($query, DataGenerator::getUpsertData());
+                    } catch (\Exception $exception) {
+                        Utils::retriedError($this->queueId, 'write', get_class($exception));
+                    }
                 }, true, new \YdbPlatform\Ydb\Retry\RetryParams($writeTimeout));
                 Utils::metricDone("write", $this->queueId, $attemps, (microtime(true) - $begin) * 1000);
             } catch (\Exception $e) {
-//                if ($attemps == 0) $attemps++;
+                if ($attemps == 0) $attemps++;
                 $table->getLogger()->error($e->getMessage());
                 Utils::metricFail("write", $this->queueId, $attemps, get_class($e), (microtime(true) - $begin) * 1000);
             } finally {
@@ -269,12 +277,12 @@ Options:
         $oks = $registry->getOrRegisterGauge('', 'oks', 'amount of OK requests', ['jobName']);
         $notOks = $registry->getOrRegisterGauge('', 'not_oks', 'amount of not OK requests', ['jobName']);
         $inflight = $registry->getOrRegisterGauge('', 'inflight', 'amount of requests in flight', ['jobName']);
-        $errors = $registry->getOrRegisterGauge('', 'errors', 'amount of errors', ['jobName', 'class']);
+        $errors = $registry->getOrRegisterGauge('', 'errors', 'amount of errors', ['jobName', 'class', 'in']);
         $attempts = $registry->getOrRegisterHistogram('', 'attempts', 'summary of amount for request', ['jobName', 'status'], range(1, 10, 1));
         $msgQueue = msg_get_queue($queueId);
 
         $registry->wipeStorage();
-        $pushGateway->push($registry, 'workload-php',  [
+        $pushGateway->push($registry, 'workload-php', [
             'sdk' => 'php',
             'sdkVersion' => Ydb::VERSION
         ]);
@@ -286,8 +294,10 @@ Options:
         $lastPushTime = microtime(true);
 
         foreach ($this->errors as $error) {
-            $errors->incBy(0, ['read', $error]);
-            $errors->incBy(0, ['write', $error]);
+            $errors->incBy(0, ['read', $error, 'finally']);
+            $errors->incBy(0, ['write', $error, 'finally']);
+            $errors->incBy(0, ['read', $error, 'retried']);
+            $errors->incBy(0, ['write', $error, 'retried']);
         }
 
         $pushGateway->push($registry, "workload-php", [
@@ -319,7 +329,10 @@ Options:
                         $latencies->observe($message['latency'], [$message['job'], $message['type']]);
                         $attempts->observe($message['attempts'], [$message['job'], $message['type']]);
                         $notOks->inc([$message['job']]);
-                        $errors->inc([$message['job'], $message['error']]);
+                        $errors->inc([$message['job'], $message['error'], 'finally']);
+                        break;
+                    case 'retried':
+                        $errors->inc([$message['job'], $message['error'], 'retried']);
                         break;
                 }
 
@@ -330,7 +343,7 @@ Options:
                     ]);
                     $lastPushTime = microtime(true);
                 }
-                if(microtime(true) + 0.01 >= $startTime + $time) {
+                if (microtime(true) + 0.01 >= $startTime + $time) {
                     $registry->wipeStorage();
                     $pushGateway->push($registry, 'workload-php', [
                         'sdk' => 'php',
@@ -343,7 +356,7 @@ Options:
                     die(0);
                 }
             }
-            if(microtime(true) + 0.01 <= $startTime + $time) {
+            if (microtime(true) + 0.01 <= $startTime + $time) {
                 usleep(1e3);
             } else {
                 $registry->wipeStorage();

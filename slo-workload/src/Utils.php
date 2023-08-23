@@ -58,13 +58,7 @@ class Utils
 
     public static function metricFail(string $job, int $queueId, int $attemps, string $error, float $latency)
     {
-        if($ydbErr = array_search($error,RequestTrait::$ydbExceptions)){
-            $e = 'YDB_'.StatusCode::name($ydbErr);
-        } elseif ($grpcErr = array_search($error,RequestTrait::$grpcExceptions)){
-            $e = 'GRPC_'.RequestTrait::$grpcNames[$grpcErr];
-        } else {
-            $e = substr(strrchr($error, '\\'), 1);
-        }
+        static::getErrorName($error);
         static::postData($queueId, [
             "type"  => "err",
             "job" => $job,
@@ -82,9 +76,28 @@ class Utils
 
     public static function reset(int $queueId)
     {
-        self::postData("reset",[
+        self::postData($queueId,[
             "type"  => "reset"
         ]);
+    }
+
+    public static function retriedError(int $queueId, string $job, string $error){
+        self::postData("reset",[
+            "type"  => "retried",
+            "job" => self::getErrorName($job),
+            "error" => self::getErrorName($error)
+        ]);
+    }
+
+    protected static function getErrorName(string $error)
+    {
+        if($ydbErr = array_search($error,RequestTrait::$ydbExceptions)){
+            return 'YDB_'.StatusCode::name($ydbErr);
+        } elseif ($grpcErr = array_search($error,RequestTrait::$grpcExceptions)){
+            return 'GRPC_'.RequestTrait::$grpcNames[$grpcErr];
+        } else {
+            return substr(strrchr($error, '\\'), 1);
+        }
     }
 
 }
