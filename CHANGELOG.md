@@ -1,3 +1,5 @@
+* added lambda on exception in retryTransaction
+
 ## 1.10.0
 * changed level of update token log record from info to debug
 * created refresh token ratio parameter
