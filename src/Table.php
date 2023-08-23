@@ -487,14 +487,16 @@ class Table
         }
 
         if (isset($options['idempotent']) && !is_null($idempotent)){
-            throw new Exception('...');
+            throw new \YdbPlatform\Ydb\Exception('Idempotent flag set in 2 params');
         }
-        else if (!isset($options['idempotent'])) {
+        else if (!is_null($idempotent)) {
             $options['idempotent'] = $idempotent;
+        } else {
+            $options['idempotent'] = false;
         }
 
         if (isset($options['retryParams']) && !is_null($params)){
-            throw new Exception('...');
+            throw new \YdbPlatform\Ydb\Exception('RetryParams set in 2 params');
         }
         else if (!isset($options['retryParams'])) {
             $options['retryParams'] = $params;
