@@ -212,7 +212,7 @@ Options:
                             "\$id" => (new \YdbPlatform\Ydb\Types\Uint64Type($dataGenerator->getRandomId()))->toTypedValue()
                         ]);
                     } catch (\Exception $exception) {
-                        Utils::retriedError($this->queueId, 'write', get_class($exception));
+                        Utils::retriedError($this->queueId, 'read', get_class($exception));
                     }
                 }, true);
                 Utils::metricDone("read", $this->queueId, $attemps, (microtime(true) - $begin) * 1000);
