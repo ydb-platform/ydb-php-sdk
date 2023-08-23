@@ -24,13 +24,13 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
-        if: env.DOCKER_REPO != null
+        if: env.DOCKER_REPO != null # check permissions
         env:
           DOCKER_REPO: ${{ secrets.SLO_DOCKER_REPO }}
 
       - name: Run SLO
         uses: ydb-platform/slo-tests@php-version
-        if: env.DOCKER_REPO != null
+        if: env.DOCKER_REPO != null # check permissions
         env:
           DOCKER_REPO: ${{ secrets.SLO_DOCKER_REPO }}
         with:
@@ -59,7 +59,7 @@ jobs:
           workload_build_options0: -f Dockerfile
 
       - uses: actions/upload-artifact@v3
-        if: always() && env.DOCKER_REPO != null
+        if: always() && env.DOCKER_REPO != null # check permissions and execute, even if the previous stage was failed
         env:
           DOCKER_REPO: ${{ secrets.SLO_DOCKER_REPO }}
         with:
