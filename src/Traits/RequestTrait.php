@@ -2,9 +2,12 @@
 
 namespace YdbPlatform\Ydb\Traits;
 
+use Ydb\FeatureFlag\Status;
 use Ydb\Operations\OperationParams;
 use Ydb\StatusIds\StatusCode;
 
+use Ydb\Table\QueryStatsCollection\Mode;
+use Ydb\TableStats\QueryStats;
 use YdbPlatform\Ydb\Issue;
 use YdbPlatform\Ydb\Exception;
 use YdbPlatform\Ydb\QueryResult;
@@ -42,6 +45,10 @@ trait RequestTrait
      */
     protected $lastDiscovery = 0;
 
+    protected $collectStats = Mode::STATS_COLLECTION_UNSPECIFIED;
+
+    protected $reportCostInfo = Status::STATUS_UNSPECIFIED;
+
     /**
      * Make a request to the service with the given method.
      *
@@ -53,12 +60,6 @@ trait RequestTrait
      */
     protected function doRequest($service, $method, array $data = [])
     {
-
-        $data['operation_params'] = new OperationParams([
-            'report_cost_info' => 1
-        ]);
-        if($method==='ExecuteDataQuery')
-        $data['collect_stats'] = 10;
 
         $this->checkDiscovery();
 
@@ -91,7 +92,15 @@ trait RequestTrait
                 $resultClass = '\\Ydb\\' . $service . '\\' . $method . 'Result';
         }
 
+        $data['operation_params'] = new OperationParams([
+            'report_cost_info' => $this->reportCostInfo
+        ]);
+
         $request = new $requestClass($data);
+
+        if (method_exists($request, 'setCollectStats')){
+            $request->setCollectStats($this->collectStats);
+        }
 
         $this->logger()->debug(
             'YDB: Sending API request [' . $requestClass . '].',
@@ -382,4 +391,21 @@ trait RequestTrait
         15 => "DATA_LOSS",
         16 => "UNAUTHENTICATED"
     ];
+
+    /**
+     * @param int $collectStats \Ydb\Table\QueryStatsCollection\Mode
+     */
+    public function setCollectStats(int $collectStats): void
+    {
+        $this->collectStats = $collectStats;
+    }
+
+    /**
+     * @param int $reportCostInfo Ydb.FeatureFlag.Status
+     */
+    public function setReportCostInfo(int $reportCostInfo): void
+    {
+        $this->reportCostInfo = $reportCostInfo;
+    }
+
 }
