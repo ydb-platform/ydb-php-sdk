@@ -3,12 +3,24 @@
 namespace YdbPlatform\Ydb;
 
 use DateTime;
+use Ydb\CostInfo;
+use Ydb\TableStats\QueryStats;
 
 class QueryResult
 {
     protected $columns = [];
     protected $rows = [];
     protected $truncated = false;
+
+    /**
+     * @var CostInfo|null
+     */
+    protected $costInfo = null;
+
+    /**
+     * @var QueryStats|null
+     */
+    protected $queryStats = null;
 
     public function __construct($result)
     {
@@ -41,6 +53,14 @@ class QueryResult
         else
         {
             throw new Exception('Unknown result');
+        }
+
+        if(isset($result->costInfo)){
+            $this->costInfo = $result->costInfo;
+        }
+        if (method_exists($result, 'getQueryStats'))
+        {
+            $this->queryStats = $result->getQueryStats();
         }
     }
 
@@ -233,4 +253,13 @@ class QueryResult
             $this->rows[] = $_row;
         }
     }
+
+    /**
+     * @return CostInfo|null
+     */
+    public function costInfo()
+    {
+        return $this->costInfo;
+    }
+
 }

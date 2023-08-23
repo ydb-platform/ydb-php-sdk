@@ -2,6 +2,7 @@
 
 namespace YdbPlatform\Ydb\Traits;
 
+use Ydb\Operations\OperationParams;
 use Ydb\StatusIds\StatusCode;
 
 use YdbPlatform\Ydb\Issue;
@@ -52,6 +53,13 @@ trait RequestTrait
      */
     protected function doRequest($service, $method, array $data = [])
     {
+
+        $data['operation_params'] = new OperationParams([
+            'report_cost_info' => 1
+        ]);
+        if($method==='ExecuteDataQuery')
+        $data['collect_stats'] = 10;
+
         $this->checkDiscovery();
 
         $this->meta['x-ydb-auth-ticket'] = [$this->credentials->token()];
@@ -234,7 +242,7 @@ trait RequestTrait
             }
 
             $this->resetLastRequest();
-
+            $result->costInfo = $response->getCostInfo();
             return $result;
         }
         $statusName = StatusCode::name($statusCode);
