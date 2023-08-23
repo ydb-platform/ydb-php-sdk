@@ -4,7 +4,7 @@ namespace YdbPlatform\Ydb\Test;
 
 use PHPUnit\Framework\TestCase;
 use YdbPlatform\Ydb\Auth\Implement\AnonymousAuthentication;
-use YdbPlatform\Ydb\Exceptions\RetryableException;
+use YdbPlatform\Ydb\Exceptions\Grpc\ResourceExhaustedException;
 use YdbPlatform\Ydb\Retry\RetryParams;
 use YdbPlatform\Ydb\Session;
 use YdbPlatform\Ydb\Table;
@@ -74,7 +74,7 @@ class RetryOnExceptionTest extends TestCase
         $i = 0;
         $table->retryTransaction(function (Session $session) use (&$i) {
             if($i == 0){
-                throw new RetryableException('Test exception');
+                throw new ResourceExhaustedException('Test exception');
             }
             self::assertEquals(5, $i);
         }, null, null, [
