@@ -481,37 +481,43 @@ class Table
 
     }
 
-    public function retryTransaction(Closure $userFunc, array|bool $idempotentOrParams = false, RetryParams $params = null){
-
-        if (is_array($idempotentOrParams)){
-            if (isset($idempotentOrParams['idempotent'])){
-                $idempotentFlag = $idempotentOrParams['idempotent'];
-            }
-            if (isset($idempotentOrParams['retry_params'])){
-                $params = $idempotentOrParams['retry_params'];
-            }
-            if (isset($idempotentOrParams['callback_on_error'])){
-                $callbackOnError = $idempotentOrParams['callback_on_error'];
-            }
-        } else {
-            $idempotentFlag = $idempotentOrParams;
-            $callbackOnError = function (\Exception $exception){};
+    public function retryTransaction(Closure $userFunc, bool $idempotent = null, RetryParams $params = null, array $options){
+        if ($options == null) {
+            $options = [];
         }
-        return $this->retrySession(function (Session $session) use ($callbackOnError, $userFunc) {
-                try{
-                        $session->beginTransaction();
-                        $result = $userFunc($session);
-                        $session->commitTransaction();
-                        return $result;
-                } catch (\Exception $exception){
-                    $callbackOnError($exception);
-                    try {
-                        $session->rollbackTransaction();
-                    } catch (Exception $e){}
-                    throw $exception;
-                }
-            }, $idempotentFlag, $params);
 
+        if (isset($options['idempotent']) && !is_null($idempotent)){
+            throw new Exception('...');
+        }
+        else if (!isset($options['idempotent'])) {
+            $options['idempotent'] = $idempotent;
+        }
+
+        if (isset($options['retryParams']) && !is_null($params)){
+            throw new Exception('...');
+        }
+        else if (!isset($options['retryParams'])) {
+            $options['retryParams'] = $params;
+        }
+
+        if (!isset($options['callback_on_error'])) {
+            $options['callback_on_error'] = function (\Exception $exception) {};
+        }
+        return $this->retrySession(function (Session $session) use ($options, $userFunc) {
+            try {
+                $session->beginTransaction();
+                $result = $userFunc($session);
+                $session->commitTransaction();
+                return $result;
+            } catch (\Exception $exception) {
+                $options['callback_on_error']($exception);
+                try {
+                    $session->rollbackTransaction();
+                } catch (Exception $e) {
+                }
+                throw $exception;
+            }
+        }, $options['idempotent'], $options['retryParams']);
     }
 
     protected function deleteSession(string $exception): bool
