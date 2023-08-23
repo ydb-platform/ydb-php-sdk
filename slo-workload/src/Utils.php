@@ -34,7 +34,7 @@ class Utils
         if (file_exists("./ca.pem")) {
             $config['iam_config']['root_cert_file'] = './ca.pem';
         }
-        return new Ydb($config, new SimpleSloLogger(5, $process));
+        return new Ydb($config, new SimpleSloLogger(SimpleSloLogger::INFO, $process));
     }
 
 
