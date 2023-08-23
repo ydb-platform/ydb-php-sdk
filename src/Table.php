@@ -481,21 +481,36 @@ class Table
 
     }
 
-    public function retryTransaction(Closure $userFunc, bool $idempotent = false, RetryParams $params = null){
+    public function retryTransaction(Closure $userFunc, array|bool $idempotentOrParams = false, RetryParams $params = null){
 
-        return $this->retrySession(function (Session $session) use ($userFunc) {
+        if (is_array($idempotentOrParams)){
+            if (isset($idempotentOrParams['idempotent'])){
+                $idempotentFlag = $idempotentOrParams['idempotent'];
+            }
+            if (isset($idempotentOrParams['retry_params'])){
+                $params = $idempotentOrParams['retry_params'];
+            }
+            if (isset($idempotentOrParams['callback_on_error'])){
+                $callbackOnError = $idempotentOrParams['callback_on_error'];
+            }
+        } else {
+            $idempotentFlag = $idempotentOrParams;
+            $callbackOnError = function (\Exception $exception){};
+        }
+        return $this->retrySession(function (Session $session) use ($callbackOnError, $userFunc) {
                 try{
                         $session->beginTransaction();
                         $result = $userFunc($session);
                         $session->commitTransaction();
                         return $result;
-                } catch (Exception $exception){
+                } catch (\Exception $exception){
+                    $callbackOnError($exception);
                     try {
                         $session->rollbackTransaction();
                     } catch (Exception $e){}
                     throw $exception;
                 }
-            }, $idempotent, $params);
+            }, $idempotentFlag, $params);
 
     }
 

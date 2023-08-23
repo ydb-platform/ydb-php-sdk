@@ -4,6 +4,7 @@ namespace YdbPlatform\Ydb\Test;
 
 use PHPUnit\Framework\TestCase;
 use YdbPlatform\Ydb\Auth\Implement\AnonymousAuthentication;
+use YdbPlatform\Ydb\Exceptions\RetryableException;
 use YdbPlatform\Ydb\Retry\RetryParams;
 use YdbPlatform\Ydb\Session;
 use YdbPlatform\Ydb\Table;
@@ -70,5 +71,15 @@ class RetryOnExceptionTest extends TestCase
                 $tres
             );
         }, true, new RetryParams(2000));
+        $i = 0;
+        $table->retryTransaction(function (Session $session) use (&$i) {
+            if($i == 0){
+                throw new RetryableException('Test exception');
+            }
+            self::assertEquals(5, $i);
+        }, [
+            'idempotent' => true,
+            'callback_on_error' => function (\Exception $exception) use (&$i) {$i=5;}
+        ]);
     }
 }
