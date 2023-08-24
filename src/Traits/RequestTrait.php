@@ -2,12 +2,9 @@
 
 namespace YdbPlatform\Ydb\Traits;
 
-use Ydb\FeatureFlag\Status;
-use Ydb\Operations\OperationParams;
 use Ydb\StatusIds\StatusCode;
 
-use Ydb\Table\QueryStatsCollection\Mode;
-use Ydb\TableStats\QueryStats;
+use YdbPlatform\Ydb\Enums\CollectQueryStatsMode;
 use YdbPlatform\Ydb\Issue;
 use YdbPlatform\Ydb\Exception;
 use YdbPlatform\Ydb\QueryResult;
@@ -45,9 +42,8 @@ trait RequestTrait
      */
     protected $lastDiscovery = 0;
 
-    protected $collectStats = Mode::STATS_COLLECTION_UNSPECIFIED;
+    protected $collectStats = CollectQueryStatsMode::STATS_COLLECTION_UNSPECIFIED;
 
-    protected $reportCostInfo = Status::STATUS_UNSPECIFIED;
 
     /**
      * Make a request to the service with the given method.
@@ -91,10 +87,6 @@ trait RequestTrait
             default:
                 $resultClass = '\\Ydb\\' . $service . '\\' . $method . 'Result';
         }
-
-        $data['operation_params'] = new OperationParams([
-            'report_cost_info' => $this->reportCostInfo
-        ]);
 
         $request = new $requestClass($data);
 
@@ -251,7 +243,6 @@ trait RequestTrait
             }
 
             $this->resetLastRequest();
-            $result->costInfo = $response->getCostInfo();
             return $result;
         }
         $statusName = StatusCode::name($statusCode);
@@ -393,19 +384,11 @@ trait RequestTrait
     ];
 
     /**
-     * @param int $collectStats \Ydb\Table\QueryStatsCollection\Mode
+     * @param int $collectStats YdbPlatform\Ydb\Enums\CollectQueryStatsMode
      */
     public function setCollectStats(int $collectStats): void
     {
         $this->collectStats = $collectStats;
-    }
-
-    /**
-     * @param int $reportCostInfo Ydb.FeatureFlag.Status
-     */
-    public function setReportCostInfo(int $reportCostInfo): void
-    {
-        $this->reportCostInfo = $reportCostInfo;
     }
 
 }
