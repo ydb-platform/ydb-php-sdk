@@ -481,22 +481,45 @@ class Table
 
     }
 
-    public function retryTransaction(Closure $userFunc, bool $idempotent = false, RetryParams $params = null){
+    public function retryTransaction(Closure $userFunc, bool $idempotent = null, RetryParams $params = null, array $options){
+        if ($options == null) {
+            $options = [];
+        }
 
-        return $this->retrySession(function (Session $session) use ($userFunc) {
-                try{
-                        $session->beginTransaction();
-                        $result = $userFunc($session);
-                        $session->commitTransaction();
-                        return $result;
-                } catch (Exception $exception){
-                    try {
-                        $session->rollbackTransaction();
-                    } catch (Exception $e){}
-                    throw $exception;
+        if (isset($options['idempotent']) && !is_null($idempotent)){
+            throw new \YdbPlatform\Ydb\Exception('Idempotent flag set in 2 params');
+        }
+        else if (!is_null($idempotent)) {
+            $options['idempotent'] = $idempotent;
+        } else {
+            $options['idempotent'] = false;
+        }
+
+        if (isset($options['retryParams']) && !is_null($params)){
+            throw new \YdbPlatform\Ydb\Exception('RetryParams set in 2 params');
+        }
+        else if (!isset($options['retryParams'])) {
+            $options['retryParams'] = $params;
+        }
+
+        if (!isset($options['callback_on_error'])) {
+            $options['callback_on_error'] = function (\Exception $exception) {};
+        }
+        return $this->retrySession(function (Session $session) use ($options, $userFunc) {
+            try {
+                $session->beginTransaction();
+                $result = $userFunc($session);
+                $session->commitTransaction();
+                return $result;
+            } catch (\Exception $exception) {
+                $options['callback_on_error']($exception);
+                try {
+                    $session->rollbackTransaction();
+                } catch (Exception $e) {
                 }
-            }, $idempotent, $params);
-
+                throw $exception;
+            }
+        }, $options['idempotent'], $options['retryParams']);
     }
 
     protected function deleteSession(string $exception): bool
