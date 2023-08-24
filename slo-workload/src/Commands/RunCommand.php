@@ -170,7 +170,7 @@ Options:
         $curl = curl_init();
 
         curl_setopt_array($curl, array(
-            CURLOPT_URL => $promPgw . '/metrics/job/workload-php/sdk/php/sdkVersion/'.Ydb::VERSION,
+            CURLOPT_URL => $promPgw . '/metrics/job/workload-php/sdk/php/sdkVersion/' . Ydb::VERSION,
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_ENCODING => '',
             CURLOPT_MAXREDIRS => 10,
@@ -214,7 +214,11 @@ Options:
                     } catch (\Exception $exception) {
                         Utils::retriedError($this->queueId, 'read', get_class($exception));
                     }
-                }, true);
+                }, true, null, [
+                    'callback_on_error' => function (\Exception $e) {
+                        Utils::retriedError($this->queueId, 'write', get_class($e));
+                    }
+                ]);
                 Utils::metricDone("read", $this->queueId, $attemps, (microtime(true) - $begin) * 1000);
             } catch (\Exception $e) {
                 if ($attemps == 0) $attemps++;
@@ -249,13 +253,13 @@ Options:
             try {
                 $table->retryTransaction(function (\YdbPlatform\Ydb\Session $session)
                 use ($query, $dataGenerator, $tableName, &$attemps) {
-                    try {
-                        $attemps++;
-                        return $session->query($query, DataGenerator::getUpsertData());
-                    } catch (\Exception $exception) {
-                        Utils::retriedError($this->queueId, 'write', get_class($exception));
+                    $attemps++;
+                    return $session->query($query, DataGenerator::getUpsertData());
+                }, true, null, [
+                    'callback_on_error' => function (\Exception $e) {
+                        Utils::retriedError($this->queueId, 'write', get_class($e));
                     }
-                }, true);
+                ]);
                 Utils::metricDone("write", $this->queueId, $attemps, (microtime(true) - $begin) * 1000);
             } catch (\Exception $e) {
                 if ($attemps == 0) $attemps++;
