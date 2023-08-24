@@ -1,4 +1,5 @@
 * added SLO test
+* added lambda on exception in retryTransaction
 
 ## 1.10.0
 
