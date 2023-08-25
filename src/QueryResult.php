@@ -55,9 +55,6 @@ class QueryResult
             throw new Exception('Unknown result');
         }
 
-        if(isset($result->costInfo)){
-            $this->costInfo = $result->costInfo;
-        }
         if (method_exists($result, 'getQueryStats'))
         {
             $this->queryStats = $result->getQueryStats();
@@ -255,11 +252,11 @@ class QueryResult
     }
 
     /**
-     * @return CostInfo|null
+     * @return QueryStats|null
      */
-    public function costInfo()
+    public function getQueryStats(): ?QueryStats
     {
-        return $this->costInfo;
+        return $this->queryStats;
     }
 
 }
