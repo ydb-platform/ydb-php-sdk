@@ -8,7 +8,7 @@ use YdbPlatform\Ydb\Ydb;
 
 class PreparedQueryTest extends TestCase
 {
-    public function test(){
+    public function testPreparedQuery(){
         $config = [
 
             // Database path

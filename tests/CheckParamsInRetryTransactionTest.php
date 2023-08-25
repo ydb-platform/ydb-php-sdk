@@ -11,7 +11,7 @@ use YdbPlatform\Ydb\YdbTable;
 
 class CheckParamsInRetryTransactionTest extends TestCase
 {
-    public function testRun()
+    public function testCheckThrowExceptionsInRetryTransaction()
     {
         $config = [
 
@@ -48,6 +48,8 @@ class CheckParamsInRetryTransactionTest extends TestCase
         } catch (\YdbPlatform\Ydb\Exception $e){
             self::assertEquals(1,1);
         }
+
+        $table->retryTransaction(function (Session $session){});
 
     }
 }

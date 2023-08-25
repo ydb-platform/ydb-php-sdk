@@ -61,5 +61,5 @@ jobs:
         run: ./vendor/bin/phpunit \
           --coverage-text \
           --whitelist src \
-          --colors=never  \
+          --testdox \
           tests

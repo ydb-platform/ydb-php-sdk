@@ -9,7 +9,7 @@ use YdbPlatform\Ydb\YdbTable;
 
 class CheckRefreshTokenRatioTest extends TestCase
 {
-    public function testAnonymousConnection()
+    public function testRefreshTokenRatio()
     {
         $awaitException = [0, 1];
         $awaitNormal = [0.05, 0.9];
