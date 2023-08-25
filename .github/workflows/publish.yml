@@ -17,13 +17,15 @@ jobs:
   publish:
     runs-on: ubuntu-latest
     env:
-      GH_TOKEN: ${{ github.token }}
+      GITHUB_TOKEN: ${{ secrets.YDB_PLATFORM_BOT_TOKEN_REPO }}
       VERSION_CHANGE: ${{ github.event.inputs.version-change }}
       RELEASE_CANDIDATE: ${{ github.event.inputs.release-candidate }}
       VERSION_FILE: src/Version.php
       CHANGELOG_FILE: CHANGELOG.md
     steps:
       - uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.YDB_PLATFORM_BOT_TOKEN_REPO }}
       - run: |
           CHANGELOG=$(cat $CHANGELOG_FILE | sed -e '/^## */,$d');
           MAJOR=$(cat $VERSION_FILE | grep "const MAJOR" | sed -e 's/^.*\ \(=\ \)*\(\"\)*\([0-9]*\)\(\"\)*.*/\3/g');
