@@ -481,7 +481,7 @@ class Table
 
     }
 
-    public function retryTransaction(Closure $userFunc, bool $idempotent = null, RetryParams $params = null, array $options){
+    public function retryTransaction(Closure $userFunc, bool $idempotent = null, RetryParams $params = null, array $options = null){
         if ($options == null) {
             $options = [];
         }

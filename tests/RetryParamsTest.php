@@ -30,7 +30,7 @@ use YdbPlatform\Ydb\Ydb;
 use YdbPlatform\Ydb\Retry\Retry;
 
 class RetrySubclass extends Retry{
-    public function canRetry(Exception $e, bool $idempotent)
+    public function canRetry(\Exception $e, bool $idempotent)
     {
         return parent::canRetry($e, $idempotent);
     }
