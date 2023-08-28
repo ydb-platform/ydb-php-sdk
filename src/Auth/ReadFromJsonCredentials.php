@@ -26,11 +26,8 @@ class ReadFromJsonCredentials extends Auth
         if(!file_exists($this->fileName)){
             throw new \Exception("File $this->fileName is not exists");
         }
-        $data = json_decode(file_get_contents($this->fileName), true);
-        if(!isset($data["token"])){
-            throw new \Exception("File $this->fileName does not contain a token");
-        }
-        return new TokenInfo($data["token"], $this->readInterval, 1);
+        $token = preg_filter('/\s+|\n/', "", file_get_contents($this->fileName));
+        return new TokenInfo($token, $this->readInterval, 1);
     }
 
     public function getName(): string
