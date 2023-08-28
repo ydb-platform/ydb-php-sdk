@@ -2,7 +2,7 @@
 
 namespace YdbPlatform\Ydb\Auth;
 
-class ReadFromJsonCredentials extends Auth
+class ReadFromTextCredentials extends Auth
 {
 
     protected $fileName;
