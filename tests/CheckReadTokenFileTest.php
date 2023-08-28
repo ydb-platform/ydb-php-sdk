@@ -19,7 +19,7 @@ class CheckReadTokenFileTest extends TestCase{
             // Auto discovery (dedicated server only)
             'discovery'   => false,
 
-            'credentials'  => new ReadFromTextCredentials("./tests/token.txt")
+            'credentials'  => new ReadFromTextFileCredentials("./tests/token.txt")
         ];
 
         $ydb = new Ydb($config);
