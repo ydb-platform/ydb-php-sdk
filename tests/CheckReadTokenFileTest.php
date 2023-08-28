@@ -2,7 +2,7 @@
 namespace YdbPlatform\Ydb\Test;
 
 use PHPUnit\Framework\TestCase;
-use YdbPlatform\Ydb\Auth\ReadFromTextCredentials;
+use YdbPlatform\Ydb\Auth\ReadFromTextFileCredentials;
 use YdbPlatform\Ydb\Ydb;
 use YdbPlatform\Ydb\YdbTable;
 
