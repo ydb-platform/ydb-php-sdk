@@ -3,19 +3,12 @@
 namespace YdbPlatform\Ydb;
 
 use DateTime;
-use Ydb\CostInfo;
-use Ydb\TableStats\QueryStats;
 
 class QueryResult
 {
     protected $columns = [];
     protected $rows = [];
     protected $truncated = false;
-
-    /**
-     * @var CostInfo|null
-     */
-    protected $costInfo = null;
 
     /**
      * @var QueryStats|null
@@ -55,9 +48,9 @@ class QueryResult
             throw new Exception('Unknown result');
         }
 
-        if (method_exists($result, 'getQueryStats'))
+        if (method_exists($result, 'getQueryStats') && $result->getQueryStats())
         {
-            $this->queryStats = $result->getQueryStats();
+            $this->queryStats = new QueryStats($result->getQueryStats());
         }
     }
 

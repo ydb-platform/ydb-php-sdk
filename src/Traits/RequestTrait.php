@@ -42,7 +42,6 @@ trait RequestTrait
      */
     protected $lastDiscovery = 0;
 
-    protected $collectStats = CollectQueryStatsMode::STATS_COLLECTION_UNSPECIFIED;
 
 
     /**
@@ -89,10 +88,6 @@ trait RequestTrait
         }
 
         $request = new $requestClass($data);
-
-        if (method_exists($request, 'setCollectStats')){
-            $request->setCollectStats($this->collectStats);
-        }
 
         $this->logger()->debug(
             'YDB: Sending API request [' . $requestClass . '].',
@@ -382,13 +377,5 @@ trait RequestTrait
         15 => "DATA_LOSS",
         16 => "UNAUTHENTICATED"
     ];
-
-    /**
-     * @param int $collectStats YdbPlatform\Ydb\Enums\CollectQueryStatsMode
-     */
-    public function setCollectStats(int $collectStats): void
-    {
-        $this->collectStats = $collectStats;
-    }
 
 }
