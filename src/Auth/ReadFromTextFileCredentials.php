@@ -12,10 +12,10 @@ class ReadFromTextFileCredentials extends Auth
      * @param string $fileName
      * @param int $readInterval
      */
-    public function __construct(string $fileName = "token.json", int $readInterval = 600)
+    public function __construct(string $fileName = "token.txt", int $readInterval = 60)
     {
-        if(!file_exists($fileName)){
-            throw new \Exception("File $fileName is not exists");
+        if(file_get_contents($fileName)===false){
+            throw new \Exception("Error reading the file '$fileName'");
         }
         $this->fileName = $fileName;
         $this->readInterval = $readInterval;
@@ -23,10 +23,11 @@ class ReadFromTextFileCredentials extends Auth
 
     public function getTokenInfo(): TokenInfo
     {
-        if(!file_exists($this->fileName)){
-            throw new \Exception("File $this->fileName is not exists");
+        $token = file_get_contents($this->fileName);
+        if($token===false){
+            throw new \Exception("Error reading the file '$this->fileName'");
         }
-        $token = preg_filter('/\s+|\n/', "", file_get_contents($this->fileName));
+        $token = trim($token);
         return new TokenInfo($token, $this->readInterval, 1);
     }
 
