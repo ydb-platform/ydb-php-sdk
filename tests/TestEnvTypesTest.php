@@ -6,15 +6,15 @@ use YdbPlatform\Ydb\Auth\EnvironCredentials;
 use YdbPlatform\Ydb\Ydb;
 use YdbPlatform\Ydb\YdbTable;
 
-class TestEnvTypes extends TestCase{
+class TestEnvTypesTest extends TestCase{
 
-    public function testEnvTypes(){
+    public function testEnvironCredentials(){
 
         $dataset = [
             [
                 "env"   => [
                     "name"  => "YDB_SERVICE_ACCOUNT_KEY_FILE_CREDENTIALS",
-                    "value" => "./some.json"
+                    "value" => "./tests/some.json"
                 ],
                 "wait"  => "SA JSON key"
             ],

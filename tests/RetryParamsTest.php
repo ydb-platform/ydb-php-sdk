@@ -30,7 +30,7 @@ use YdbPlatform\Ydb\Ydb;
 use YdbPlatform\Ydb\Retry\Retry;
 
 class RetrySubclass extends Retry{
-    public function canRetry(Exception $e, bool $idempotent)
+    public function canRetry(\Exception $e, bool $idempotent)
     {
         return parent::canRetry($e, $idempotent);
     }
@@ -364,7 +364,7 @@ class RetryParamsTest extends \PHPUnit\Framework\TestCase
             ]
         ],
     ];
-    public function test(){
+    public function testBackoffTypesAndDeleteSessionOnException(){
 
         $retryParams = new RetryParams(1000, new Backoff(6,self::FAST),
             new Backoff(6,self::SLOW));

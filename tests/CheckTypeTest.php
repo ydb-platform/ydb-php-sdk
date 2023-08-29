@@ -24,7 +24,7 @@ use YdbPlatform\Ydb\Types\Utf8Type;
 use YdbPlatform\Ydb\Ydb;
 
 class CheckTypeTest  extends TestCase{
-    public function test(){
+    public function testCheckTypesInDeclare(){
         $config = [
 
             // Database path
@@ -146,7 +146,7 @@ class CheckTypeTest  extends TestCase{
             "Timestamp" => [
                 "class"     => TimestampType::class,
                 "values"    => [
-                    "2023-06-14 17:12:15.023476", 
+                    "2023-06-14 17:12:15.023476",
                     "2023-06-14 17:12:15.000000"
                 ]
             ]
