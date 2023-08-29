@@ -8,7 +8,7 @@ use YdbPlatform\Ydb\YdbTable;
 
 class TestEnvTypesTest extends TestCase{
 
-    public function testEnvTypes(){
+    public function testEnvironCredentials(){
 
         $dataset = [
             [

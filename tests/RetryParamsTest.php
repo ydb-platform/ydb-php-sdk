@@ -364,7 +364,7 @@ class RetryParamsTest extends \PHPUnit\Framework\TestCase
             ]
         ],
     ];
-    public function test(){
+    public function testBackoffTypesAndDeleteSessionOnException(){
 
         $retryParams = new RetryParams(1000, new Backoff(6,self::FAST),
             new Backoff(6,self::SLOW));
