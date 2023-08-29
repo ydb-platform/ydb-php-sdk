@@ -4,7 +4,6 @@ namespace YdbPlatform\Ydb\Traits;
 
 use Ydb\StatusIds\StatusCode;
 
-use YdbPlatform\Ydb\Enums\CollectQueryStatsMode;
 use YdbPlatform\Ydb\Issue;
 use YdbPlatform\Ydb\Exception;
 use YdbPlatform\Ydb\QueryResult;
