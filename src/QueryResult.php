@@ -3,6 +3,7 @@
 namespace YdbPlatform\Ydb;
 
 use DateTime;
+use YdbPlatform\Ydb\QueryStats\QueryStats;
 
 class QueryResult
 {
