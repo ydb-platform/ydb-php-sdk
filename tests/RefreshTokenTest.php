@@ -45,7 +45,7 @@ class MetaGetter extends \YdbPlatform\Ydb\Session{
 
 class RefreshTokenTest extends TestCase
 {
-    public function test(){
+    public function testRefreshToken(){
 
         $counter = 0;
 

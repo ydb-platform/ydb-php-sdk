@@ -27,7 +27,7 @@ class RetryOnExceptionTest extends TestCase
      */
     private $oldSessionId;
 
-    public function test(){
+    public function testRetryOnExceptionInRetry(){
 
         $config = [
 
