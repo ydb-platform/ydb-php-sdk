@@ -242,6 +242,7 @@ Options:
         $pushGateway = new PushGateway($promPgw);
 
         $latencies = $registry->getOrRegisterSummary('', 'latency', 'summary of latencies in ms', ['jobName', 'status'], 15, [0.5, 0.99, 0.999]);
+        $queryLatencies = $registry->getOrRegisterSummary('', 'query_latency', 'summary of latencies in ms in query',[], 15, [0.5, 0.99, 0.999]);
         $oks = $registry->getOrRegisterGauge('', 'oks', 'amount of OK requests', ['jobName']);
         $notOks = $registry->getOrRegisterGauge('', 'not_oks', 'amount of not OK requests', ['jobName']);
         $inflight = $registry->getOrRegisterGauge('', 'inflight', 'amount of requests in flight', ['jobName']);
@@ -269,6 +270,7 @@ Options:
 
         while (microtime(true) <= $startTime + $time) {
             msg_receive($msgQueue, Utils::MSG_TYPE, $msgType, PHP_INT_MAX, $message);
+            $queryLatencies->observe($this->getLatency($message["sent"]));
             switch ($message['type']) {
                 case 'reset':
                     $pushGateway->delete('workload-php', [

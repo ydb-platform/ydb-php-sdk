@@ -71,6 +71,7 @@ class Utils
 
     public static function postData(int $queueId, array $data)
     {
+        $data["sent"] = microtime(true);
         $msgQueue = msg_get_queue($queueId);
         msg_send($msgQueue, static::MSG_TYPE, $data);
     }
