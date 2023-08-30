@@ -267,9 +267,8 @@ Options:
             'sdkVersion' => Ydb::VERSION
         ]);
 
-
         while (microtime(true) <= $startTime + $time) {
-            msg_receive($msgQueue, Utils::MSG_TYPE, $msgType, PHP_INT_MAX, $message);
+            msg_receive($msgQueue, Utils::MSG_TYPE, $msgType, 1024, $message);
             $queryLatencies->observe($this->getLatency($message["sent"]));
             switch ($message['type']) {
                 case 'reset':
