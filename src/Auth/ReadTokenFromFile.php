@@ -2,7 +2,7 @@
 
 namespace YdbPlatform\Ydb\Auth;
 
-class ReadFromTextFileCredentials extends Auth
+class ReadTokenFromFile extends Auth
 {
 
     protected $fileName;

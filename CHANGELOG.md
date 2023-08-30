@@ -1,4 +1,4 @@
-* added ReadFromTextFileCredentials
+* added ReadTokenFromFile
 * added lambda on exception in retryTransaction
 
 ## 1.10.0

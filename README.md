@@ -423,7 +423,7 @@ The following algorithm that is the same for YDB-PHP-SDK applies:
 <?php
 
 use YdbPlatform\Ydb\Ydb;
-use YdbPlatform\Ydb\Auth\ReadFromTextFileCredentials;
+use YdbPlatform\Ydb\Auth\ReadTokenFromFile;
 
 $config = [
 
@@ -441,7 +441,7 @@ $config = [
         'insecure' => true,
     ],
     
-    'credentials' => new ReadFromTextFileCredentials($tokenPath, $refreshTime)
+    'credentials' => new ReadTokenFromFile($tokenPath, $refreshTime)
 ];
 
 $ydb = new Ydb($config);

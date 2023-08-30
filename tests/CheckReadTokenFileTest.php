@@ -2,7 +2,7 @@
 namespace YdbPlatform\Ydb\Test;
 
 use PHPUnit\Framework\TestCase;
-use YdbPlatform\Ydb\Auth\ReadFromTextFileCredentials;
+use YdbPlatform\Ydb\Auth\ReadTokenFromFile;
 use YdbPlatform\Ydb\Ydb;
 use YdbPlatform\Ydb\YdbTable;
 
@@ -19,7 +19,7 @@ class CheckReadTokenFileTest extends TestCase{
             // Auto discovery (dedicated server only)
             'discovery'   => false,
 
-            'credentials'  => new ReadFromTextFileCredentials("./tests/token.txt")
+            'credentials'  => new ReadTokenFromFile("./tests/token.txt")
         ];
 
         $ydb = new Ydb($config);
