@@ -1,3 +1,4 @@
+* added query stats
 * added ReadTokenFromFile
 * added lambda on exception in retryTransaction
 

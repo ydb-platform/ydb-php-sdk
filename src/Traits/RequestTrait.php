@@ -41,6 +41,8 @@ trait RequestTrait
      */
     protected $lastDiscovery = 0;
 
+
+
     /**
      * Make a request to the service with the given method.
      *
@@ -52,6 +54,7 @@ trait RequestTrait
      */
     protected function doRequest($service, $method, array $data = [])
     {
+
         $this->checkDiscovery();
 
         $this->meta['x-ydb-auth-ticket'] = [$this->credentials->token()];
@@ -234,7 +237,6 @@ trait RequestTrait
             }
 
             $this->resetLastRequest();
-
             return $result;
         }
         $statusName = StatusCode::name($statusCode);
@@ -374,4 +376,5 @@ trait RequestTrait
         15 => "DATA_LOSS",
         16 => "UNAUTHENTICATED"
     ];
+
 }
