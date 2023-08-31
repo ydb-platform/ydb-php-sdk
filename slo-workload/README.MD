@@ -105,22 +105,23 @@ When running `run` command, the program creates three jobs: `readJob`, `writeJob
 - `metricsJob` periodically sends metrics to Prometheus
 
 Table have these fields:
-- `id Uint64`
 - `hash Uint64 Digest::NumericHash(id)`
-- `payload_str UTF8`
+- `id Uint64`
 - `payload_double Double`
-- `payload_timestamp Timestamp`
 - `payload_hash Uint64`
+- `payload_str UTF8`
+- `payload_timestamp Timestamp`
 
 Primary key: `("hash", "id")`
 
 ## Collected metrics
-- `oks`      - amount of OK requests
-- `not_oks`  - amount of not OK requests
-- `inflight` - amount of requests in flight
-- `latency`  - summary of latencies in ms
-- `attempts` - summary of amount for request
-- `error`    - amount of errors
+- `oks`           - amount of OK requests
+- `not_oks`       - amount of not OK requests
+- `inflight`      - amount of requests in flight
+- `latency`       - summary of latencies in ms
+- `attempts`      - summary of amount for request
+- `error`         - amount of errors
+- `query_latency` - summary of latencies in ms in query
 
 > You must reset metrics to keep them `0` in prometheus and grafana before beginning and after ending of jobs
 
