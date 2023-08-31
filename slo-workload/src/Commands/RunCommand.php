@@ -222,8 +222,7 @@ Options:
     protected function writeJob(string $endpoint, string $path, $tableName, int $initialDataCount, int $time, int $readTimeout, int $process, int $shutdownTime, $startTime)
     {
         $ydb = Utils::initDriver($endpoint, $path, "write-$process");
-        $first = (11+$process)*100000 + $initialDataCount;
-        $dataGenerator = new DataGenerator($first);
+        $dataGenerator = new DataGenerator($initialDataCount);
         $query = sprintf(Defaults::WRITE_QUERY, $tableName);
         $table = $ydb->table();
         while (microtime(true) <= $startTime + $time) {
