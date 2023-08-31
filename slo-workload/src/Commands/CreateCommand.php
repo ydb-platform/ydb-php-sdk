@@ -80,25 +80,6 @@ Options:
             "partitionSize" => $partitionSize,
         ]);
 
-        /*$table = new YdbTable();
-        $partitionSettings = [];
-        $partitionSettings['partitioning_by_size'] = $partitionSize;
-        $partitionSettings['min_partitions_count'] = $minPartitionsCount;
-        $partitionSettings['max_partitions_count'] = $maxPartitionsCount;
-        $table->partitionSettings($partitionSettings);
-        $table->addColumn('hash', 'UINT64');
-        $table->addColumn('id', 'UINT64');
-        $table->addColumn('payload_str', 'UTF8');
-        $table->addColumn('payload_double', 'DOUBLE');
-        $table->addColumn('payload_timestamp', 'TIMESTAMP');
-        $table->addColumn('payload_hash', 'UINT64');
-        $table->primaryKey(['hash', 'id']);
-        $table->compactionPolicy('small_table');
-
-        $ydb->table()->retrySession(function (Session $session) use ($table, $tableName) {
-            $session->createTable($tableName, $table, ['hash', 'id']);
-        });*/
-
         $yql = "CREATE TABLE `$tableName`
 (
     `hash` Uint64,
