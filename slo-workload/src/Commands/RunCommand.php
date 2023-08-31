@@ -213,7 +213,7 @@ Options:
                 $table->getLogger()->error($e->getMessage());
                 Utils::metricFail("read", $this->queueId, $attemps, get_class($e), $this->getLatency($begin));
             } finally {
-                $delay = $begin * 1e6 + 1e6 / Defaults::RPS_PER_WRITE_FORK - microtime(true);
+                $delay = $begin * 1e6 + 1e6 / Defaults::RPS_PER_WRITE_FORK - microtime(true) * 1e6;
                 usleep($delay > 0 ? $delay : 1);
             }
         }
@@ -246,7 +246,7 @@ Options:
                 $table->getLogger()->error($e->getMessage());
                 Utils::metricFail("write", $this->queueId, $attemps, get_class($e), $this->getLatency($begin));
             } finally {
-                $delay = $begin * 1e6 + 1e6 / Defaults::RPS_PER_READ_FORK - microtime(true);
+                $delay = $begin * 1e6 + 1e6 / Defaults::RPS_PER_READ_FORK - microtime(true)* 1e6;
                 usleep($delay > 0 ? $delay : 1);
             }
         }
