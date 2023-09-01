@@ -345,7 +345,7 @@ class Session
      * @return bool|QueryResult
      * @throws \YdbPlatform\Ydb\Exception
      */
-    public function query($yql, array $parameters = null)
+    public function query($yql, array $parameters = null, array $options = [])
     {
         $tx_id = $this->tx_id;
 
@@ -362,6 +362,10 @@ class Session
             ->parameters($parameters)
             ->txControl($tx_control)
             ->keepInCache($this->keep_query_in_cache ?? ($parameters&&count($parameters)>0));
+
+        if(isset($options['collectStats'])){
+            $query->collectStats($options['collectStats']);
+        }
 
         return $this->executeQuery($query);
     }
