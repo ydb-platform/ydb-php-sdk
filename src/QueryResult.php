@@ -3,12 +3,18 @@
 namespace YdbPlatform\Ydb;
 
 use DateTime;
+use YdbPlatform\Ydb\QueryStats\QueryStats;
 
 class QueryResult
 {
     protected $columns = [];
     protected $rows = [];
     protected $truncated = false;
+
+    /**
+     * @var QueryStats|null
+     */
+    protected $queryStats = null;
 
     public function __construct($result)
     {
@@ -41,6 +47,11 @@ class QueryResult
         else
         {
             throw new Exception('Unknown result');
+        }
+
+        if (method_exists($result, 'getQueryStats') && $result->getQueryStats())
+        {
+            $this->queryStats = new QueryStats($result->getQueryStats());
         }
     }
 
@@ -233,4 +244,13 @@ class QueryResult
             $this->rows[] = $_row;
         }
     }
+
+    /**
+     * @return QueryStats|null
+     */
+    public function getQueryStats(): ?QueryStats
+    {
+        return $this->queryStats;
+    }
+
 }
