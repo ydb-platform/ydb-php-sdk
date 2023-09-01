@@ -185,6 +185,7 @@ Options:
         $dataGenerator = new DataGenerator($initialDataCount);
         $query = sprintf(Defaults::READ_QUERY, $tableName);
         $table = $ydb->table();
+        $i = 0;
 
         while (microtime(true) <= $startTime + $time) {
             $begin = microtime(true);
@@ -213,7 +214,8 @@ Options:
                 $table->getLogger()->error($e->getMessage());
                 Utils::metricFail("read", $this->queueId, $attemps, get_class($e), $this->getLatency($begin));
             } finally {
-                $delay = $begin * 1e6 + 1e6 / Defaults::RPS_PER_WRITE_FORK - microtime(true) * 1e6;
+                $i++;
+                $delay = $this->getDelay($startTime, Defaults::RPS_PER_READ_FORK, $i);
                 usleep($delay > 0 ? $delay : 1);
             }
         }
@@ -225,6 +227,7 @@ Options:
         $dataGenerator = new DataGenerator($initialDataCount);
         $query = sprintf(Defaults::WRITE_QUERY, $tableName);
         $table = $ydb->table();
+        $i=0;
         while (microtime(true) <= $startTime + $time) {
             $begin = microtime(true);
             Utils::metricsStart("write", $this->queueId);
@@ -246,7 +249,8 @@ Options:
                 $table->getLogger()->error($e->getMessage());
                 Utils::metricFail("write", $this->queueId, $attemps, get_class($e), $this->getLatency($begin));
             } finally {
-                $delay = $begin * 1e6 + 1e6 / Defaults::RPS_PER_READ_FORK - microtime(true)* 1e6;
+                $i++;
+                $delay = $this->getDelay($startTime, Defaults::RPS_PER_WRITE_FORK, $i);
                 usleep($delay > 0 ? $delay : 1);
             }
         }
@@ -323,6 +327,16 @@ Options:
         }
     }
 
+    protected function getLatency($begin)
+    {
+        return (microtime(true) - $begin) * 1000;
+    }
+
+    protected function getDelay(float $startTime, int $rps, int $i)
+    {
+        return $startTime * 1000000 + $i * 1000000 / $rps - microtime(true) * 1000000;
+    }
+
     protected $errors = [
         "GRPC_CANCELLED",
         "GRPC_UNKNOWN",
@@ -361,10 +375,5 @@ Options:
         "YDB_UNSUPPORTED",
         "YDB_SESSION_BUSY"
     ];
-
-    protected function getLatency($begin)
-    {
-        return (microtime(true) - $begin) * 1000;
-    }
 
 }
