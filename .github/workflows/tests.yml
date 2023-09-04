@@ -57,6 +57,9 @@ jobs:
       - name: Install dependencies
         run: composer install --prefer-dist --no-progress
 
+      - name: Create YDB User
+        run: docker exec ydb /ydb -e grpc://localhost:2136 -d /local scripting yql -s "CREATE USER user PASSWORD '1'"
+
       - name: Run tests
         run: ./vendor/bin/phpunit \
           --coverage-text \
