@@ -42,6 +42,11 @@ class Ydb
     protected $iam;
 
     /**
+     * @var AuthService
+     */
+    protected $auth;
+
+    /**
      * @var Discovery
      */
     protected $discovery;
@@ -111,7 +116,10 @@ class Ydb
 
         if(isset($config['credentials'])){
             $this->iam_config['credentials'] = $config['credentials'];
-            $config['credentials']->setLogger($this->logger());
+            $this->iam_config['credentials']->setLogger($this->logger());
+            if (method_exists($this->iam_config['credentials'], "setAuthService")){
+                $this->iam_config['credentials']->setAuthService($this->auth());
+            }
         }
 
         if (!empty($config['discovery']))
@@ -234,6 +242,19 @@ class Ydb
         }
 
         return $this->discovery;
+    }
+
+    /**
+     * @return AuthService
+     */
+    public function auth()
+    {
+        if (!isset($this->auth))
+        {
+            $this->auth = new AuthService($this, $this->logger);
+        }
+
+        return $this->auth;
     }
 
     /**

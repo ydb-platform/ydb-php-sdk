@@ -57,7 +57,11 @@ trait RequestTrait
 
         $this->checkDiscovery();
 
-        $this->meta['x-ydb-auth-ticket'] = [$this->credentials->token()];
+        if(isset($data["skip_get_token"])){
+            unset($data["skip_get_token"]);
+        } else {
+            $this->meta['x-ydb-auth-ticket'] = [$this->credentials->token()];
+        }
 
         $this->saveLastRequest($service, $method, $data);
 

@@ -1,3 +1,5 @@
+* added StaticAuthentication
+
 ## 1.11.0
 * added query stats
 * added ReadTokenFromFile
