@@ -27,7 +27,7 @@ class StaticCredentialsTest extends TestCase
             'iam_config' => [
                 'insecure' => true,
             ],
-            'credentials' => new StaticAuthentication('root', '1')
+            'credentials' => new StaticAuthentication('user', '1')
         ];
         $ydb = new Ydb($config, new SimpleStdLogger(7));
         $ydb->table()->query("SELECT 1;");
