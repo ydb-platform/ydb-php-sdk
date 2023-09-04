@@ -24,6 +24,13 @@ jobs:
         with:
           grpc-version: 1.51.1
 
+      - uses: shivammathur/setup-php@v2
+        name: Setup PHP
+        id: php
+        with:
+          extensions: grpc
+          php-version: ${{ matrix.php-versions }}
+
       - run: composer validate --strict
         name: Validate composer.json and composer.lock
 
