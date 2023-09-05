@@ -289,7 +289,7 @@ Options:
 
         while (microtime(true) <= $startTime + $time) {
             msg_receive($msgQueue, Utils::MSG_TYPE, $msgType, Utils::MESSAGE_SIZE_LIMIT_BYTES, $message);
-            $queryLatencies->observe($this->getLatency($message["sent"]));
+            $queryLatencies->observe($this->getLatencyMilliseconds($message["sent"]));
             switch ($message['type']) {
                 case 'reset':
                     $pushGateway->delete('workload-php', [
