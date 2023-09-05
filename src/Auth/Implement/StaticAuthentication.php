@@ -4,17 +4,19 @@ namespace YdbPlatform\Ydb\Auth\Implement;
 
 use YdbPlatform\Ydb\Auth\Auth;
 use YdbPlatform\Ydb\Auth\TokenInfo;
+use YdbPlatform\Ydb\Auth\UseConfigInterface;
 use YdbPlatform\Ydb\AuthService;
+use YdbPlatform\Ydb\Ydb;
 
-class StaticAuthentication extends Auth
+class StaticAuthentication extends Auth implements UseConfigInterface
 {
     protected $user;
     protected $password;
     protected $token;
     /**
-     * @var AuthService
+     * @var Ydb
      */
-    protected $auth;
+    protected $ydb;
 
     public function __construct(string $user, string $password)
     {
@@ -24,7 +26,7 @@ class StaticAuthentication extends Auth
 
     public function getTokenInfo(): TokenInfo
     {
-        $this->token = $this->auth->getToken($this->user, $this->password);
+        $this->token = $this->ydb->auth()->getToken($this->user, $this->password);
         $expiresIn = 12*60*60;
         $ratio = $this->getRefreshTokenRatio();
 
@@ -36,7 +38,10 @@ class StaticAuthentication extends Auth
         return "Static";
     }
 
-    public function setAuthService(AuthService $auth){
-        $this->auth = $auth;
+    public function setYdbConnectionConfig(array $config)
+    {
+        unset($config['credentials']);
+        $config['credentials'] = new AccessTokenAuthentication('');
+        $this->ydb = new Ydb($config, $this->logger);
     }
 }
