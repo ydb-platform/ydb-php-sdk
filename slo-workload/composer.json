@@ -1,0 +1,27 @@
+{
+    "name": "ydb-platform/ydb-php-slo",
+    "description": "YDB PHP SDK",
+    "license": "Apache-2.0",
+    "authors": [
+        {
+            "name": "Ilia Kharev",
+            "email": "ilyakharev@ydb.tech"
+        }
+    ],
+    "repositories": [
+        {
+            "type": "path",
+            "url": "./../"
+        }
+    ],
+    "require": {
+        "ydb-platform/ydb-php-sdk": "@dev",
+        "promphp/prometheus_push_gateway_php": "^v1.0.1",
+        "ext-sysvmsg": "*"
+    },
+    "autoload": {
+        "psr-4": {
+            "YdbPlatform\\Ydb\\Slo\\": "src/"
+        }
+    }
+}
