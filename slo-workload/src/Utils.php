@@ -10,6 +10,7 @@ use YdbPlatform\Ydb\Ydb;
 class Utils
 {
     const MSG_TYPE = 1;
+    const MESSAGE_SIZE_LIMIT_BYTES = 1024;
     public static function initDriver(string $endpoint, string $db, string $process)
     {
         $endpointData = explode("://", $endpoint);

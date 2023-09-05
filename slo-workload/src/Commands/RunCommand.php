@@ -110,11 +110,11 @@ Options:
         $readTimeout = (int)($options["-read-timeout"] ?? Defaults::READ_TIMEOUT);
         $writeForks = ((int)($options["-write-rps"] ?? Defaults::WRITE_RPS)) / Defaults::RPS_PER_WRITE_FORK;
         $writeTimeout = (int)($options["-write-timeout"] ?? Defaults::WRITE_TIMEOUT);
-        $time = (int)($options["-time"] ?? Defaults::READ_TIME) - 5;
+        $time = (int)($options["-time"] ?? Defaults::READ_TIME);
         $shutdownTime = (int)($options["-shutdown-time"] ?? Defaults::SHUTDOWN_TIME);
 
         $this->queueId = ftok(__FILE__, 'm');
-        $msgQueue = msg_get_queue($this->queueId);
+        msg_remove_queue(msg_get_queue($this->queueId));
 
         $pIds = [];
 
@@ -128,8 +128,8 @@ Options:
         }, $readForks);
         $pIds = array_merge($pIds, $readPIds);
 
-        $writePIds = $this->forkJob(function (int $i) use ($endpoint, $path, $tableName, $initialDataCount, $time, $readTimeout, $shutdownTime, $startTime) {
-            $this->writeJob($endpoint, $path, $tableName, $initialDataCount, $time, $readTimeout, $i, $shutdownTime, $startTime);
+        $writePIds = $this->forkJob(function (int $i) use ($endpoint, $path, $tableName, $initialDataCount, $time, $writeTimeout, $shutdownTime, $startTime) {
+            $this->writeJob($endpoint, $path, $tableName, $initialDataCount, $time, $writeTimeout, $i, $shutdownTime, $startTime);
         }, $writeForks);
         $pIds = array_merge($pIds, $writePIds);
 
@@ -209,13 +209,13 @@ Options:
                         Utils::retriedError($this->queueId, 'write', get_class($e));
                     }
                 ]);
-                Utils::metricDone("read", $this->queueId, $attemps, $this->getLatency($begin));
+                Utils::metricDone("read", $this->queueId, $attemps, $this->getLatencyMilliseconds($begin));
             } catch (\Exception $e) {
                 $table->getLogger()->error($e->getMessage());
-                Utils::metricFail("read", $this->queueId, $attemps, get_class($e), $this->getLatency($begin));
+                Utils::metricFail("read", $this->queueId, $attemps, get_class($e), $this->getLatencyMilliseconds($begin));
             } finally {
                 $i++;
-                $delay = $this->getDelay($startTime, Defaults::RPS_PER_READ_FORK, $i);
+                $delay = $this->getDelayMicroseconds($startTime, Defaults::RPS_PER_READ_FORK, $i);
                 usleep($delay > 0 ? $delay : 1);
             }
         }
@@ -244,13 +244,13 @@ Options:
                         Utils::retriedError($this->queueId, 'write', get_class($e));
                     }
                 ]);
-                Utils::metricDone("write", $this->queueId, $attemps, $this->getLatency($begin));
+                Utils::metricDone("write", $this->queueId, $attemps, $this->getLatencyMilliseconds($begin));
             } catch (\Exception $e) {
                 $table->getLogger()->error($e->getMessage());
-                Utils::metricFail("write", $this->queueId, $attemps, get_class($e), $this->getLatency($begin));
+                Utils::metricFail("write", $this->queueId, $attemps, get_class($e), $this->getLatencyMilliseconds($begin));
             } finally {
                 $i++;
-                $delay = $this->getDelay($startTime, Defaults::RPS_PER_WRITE_FORK, $i);
+                $delay = $this->getDelayMicroseconds($startTime, Defaults::RPS_PER_WRITE_FORK, $i);
                 usleep($delay > 0 ? $delay : 1);
             }
         }
@@ -288,7 +288,7 @@ Options:
         ]);
 
         while (microtime(true) <= $startTime + $time) {
-            msg_receive($msgQueue, Utils::MSG_TYPE, $msgType, 1024, $message);
+            msg_receive($msgQueue, Utils::MSG_TYPE, $msgType, Utils::MESSAGE_SIZE_LIMIT_BYTES, $message);
             $queryLatencies->observe($this->getLatency($message["sent"]));
             switch ($message['type']) {
                 case 'reset':
@@ -325,14 +325,15 @@ Options:
                 $lastPushTime = microtime(true);
             }
         }
+        msg_remove_queue($msgQueue);
     }
 
-    protected function getLatency($begin)
+    protected function getLatencyMilliseconds(float $begin): float
     {
         return (microtime(true) - $begin) * 1000;
     }
 
-    protected function getDelay(float $startTime, int $rps, int $i)
+    protected function getDelayMicroseconds(float $startTime, int $rps, int $i): float
     {
         return $startTime * 1000000 + $i * 1000000 / $rps - microtime(true) * 1000000;
     }
