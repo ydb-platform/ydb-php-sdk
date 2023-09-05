@@ -321,7 +321,7 @@ trait RequestTrait
         }
     }
 
-    private static $ydbExceptions = [
+    public static $ydbExceptions = [
         StatusCode::STATUS_CODE_UNSPECIFIED => \YdbPlatform\Ydb\Exceptions\Ydb\StatusCodeUnspecified::class,
         StatusCode::BAD_REQUEST => \YdbPlatform\Ydb\Exceptions\Ydb\BadRequestException::class,
         StatusCode::UNAUTHORIZED => \YdbPlatform\Ydb\Exceptions\Ydb\UnauthorizedException::class,
@@ -343,7 +343,7 @@ trait RequestTrait
         StatusCode::SESSION_BUSY => \YdbPlatform\Ydb\Exceptions\Ydb\SessionBusyException::class,
     ];
 
-    private static $grpcExceptions = [
+    public static $grpcExceptions = [
         1 => \YdbPlatform\Ydb\Exceptions\Grpc\CanceledException::class,
         2 => \YdbPlatform\Ydb\Exceptions\Grpc\UnknownException::class,
         3 => \YdbPlatform\Ydb\Exceptions\Grpc\InvalidArgumentException::class,
@@ -362,7 +362,7 @@ trait RequestTrait
         16 => \YdbPlatform\Ydb\Exceptions\Grpc\UnauthenticatedException::class
     ];
 
-    private static $grpcNames = [
+    public static $grpcNames = [
         1 => "CANCELLED",
         2 => "UNKNOWN",
         3 => "INVALID_ARGUMENT",
