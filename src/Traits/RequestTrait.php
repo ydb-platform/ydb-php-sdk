@@ -57,7 +57,7 @@ trait RequestTrait
 
         $this->checkDiscovery();
 
-        if(isset($data["skip_get_token"])){
+        if(!empty($data["skip_get_token"])){
             unset($data["skip_get_token"]);
         } else {
             $this->meta['x-ydb-auth-ticket'] = [$this->credentials->token()];
@@ -123,7 +123,11 @@ trait RequestTrait
     {
         $this->checkDiscovery();
 
-        $this->meta['x-ydb-auth-ticket'] = [$this->credentials->token()];
+        if(!empty($data["skip_get_token"])){
+            unset($data["skip_get_token"]);
+        } else {
+            $this->meta['x-ydb-auth-ticket'] = [$this->credentials->token()];
+        }
 
         if (method_exists($this, 'take')) {
             $this->take();
