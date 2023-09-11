@@ -371,7 +371,7 @@ class Session
         $operationParams = new OperationParams();
         if(isset($options['operation_timeout_ms'])){
             $seconds = intdiv( $options['operation_timeout_ms'], 1000); // get seconds
-            $nanos = $options['operation_timeout_ms'] % 1000 * 1000000; // get ns
+            $nanos = fmod($options['operation_timeout_ms'], 1000) * 1000000; // get ns
             $operationParams->setOperationTimeout(new Duration([
                 'seconds'   => $seconds,
                 'nanos'     => $nanos
@@ -379,7 +379,7 @@ class Session
         }
         if(isset($options['cancel_after_ms'])){
             $seconds = intdiv( $options['cancel_after_ms'], 1000); // get seconds
-            $nanos = $options['cancel_after_ms'] % 1000 * 1000000; // get ns
+            $nanos = fmod($options['operation_timeout_ms'], 1000) * 1000000; // get ns
             $operationParams->setCancelAfter(new Duration([
                 'seconds'   => $seconds,
                 'nanos'     => $nanos
