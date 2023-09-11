@@ -370,13 +370,19 @@ class Session
         }
         $operationParams = new OperationParams();
         if(isset($options['operation_timeout_ms'])){
+            $seconds = intdiv( $options['operation_timeout_ms'], 1000); // get seconds
+            $nanos = $options['operation_timeout_ms'] % 1000 * 1000000; // get ns
             $operationParams->setOperationTimeout(new Duration([
-                'nanos'  => $options['operation_timeout_ms'] * 1000000 // convert ms to ns
+                'seconds'   => $seconds,
+                'nanos'     => $nanos
             ]));
         }
         if(isset($options['cancel_after_ms'])){
+            $seconds = intdiv( $options['cancel_after_ms'], 1000); // get seconds
+            $nanos = $options['cancel_after_ms'] % 1000 * 1000000; // get ns
             $operationParams->setCancelAfter(new Duration([
-                'nanos'  => $options['cancel_after_ms'] * 1000000 // convert ms to ns
+                'seconds'   => $seconds,
+                'nanos'     => $nanos
             ]));
         }
         $query->operationParams($operationParams);
