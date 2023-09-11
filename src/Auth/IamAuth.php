@@ -57,4 +57,12 @@ abstract class IamAuth extends Auth
             throw new Exception('Failed to obtain new iamToken: response status is ' . $status);
         }
     }
+
+    public function decodeHeaderAndPayload(string $jwtToken) : array {
+        $paths = explode(".", $jwtToken);
+        $result = [];
+        $result["header"] = json_decode(base64_decode($paths[0]), true);
+        $result["payload"] = json_decode(base64_decode($paths[1]), true);
+        return $result;
+    }
 }

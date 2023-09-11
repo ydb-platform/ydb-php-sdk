@@ -2,13 +2,12 @@
 
 namespace YdbPlatform\Ydb\Auth\Implement;
 
-use YdbPlatform\Ydb\Auth\Auth;
+use YdbPlatform\Ydb\Auth\IamAuth;
 use YdbPlatform\Ydb\Auth\TokenInfo;
 use YdbPlatform\Ydb\Auth\UseConfigInterface;
-use YdbPlatform\Ydb\AuthService;
 use YdbPlatform\Ydb\Ydb;
 
-class StaticAuthentication extends Auth implements UseConfigInterface
+class StaticAuthentication extends IamAuth implements UseConfigInterface
 {
     protected $user;
     protected $password;
@@ -27,10 +26,11 @@ class StaticAuthentication extends Auth implements UseConfigInterface
     public function getTokenInfo(): TokenInfo
     {
         $this->token = $this->ydb->auth()->getToken($this->user, $this->password);
-        $expiresIn = 12*60*60;
+        $jwtData = $this->decodeHeaderAndPayload($this->token);
+        $expiresIn = $this->convertExpiresAt($jwtData['payload']['exp']);
         $ratio = $this->getRefreshTokenRatio();
 
-        return new TokenInfo($this->token, time()+$expiresIn, $ratio);
+        return new TokenInfo($this->token, $expiresIn, $ratio);
     }
 
     public function getName(): string
@@ -41,7 +41,7 @@ class StaticAuthentication extends Auth implements UseConfigInterface
     public function setYdbConnectionConfig(array $config)
     {
         unset($config['credentials']);
-        $config['credentials'] = new AccessTokenAuthentication('');
+        $config['credentials'] = new AnonymousAuthentication();
         $this->ydb = new Ydb($config, $this->logger);
     }
 }
