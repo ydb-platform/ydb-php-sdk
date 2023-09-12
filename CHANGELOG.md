@@ -1,3 +1,4 @@
+## 1.12.0
 * added StaticAuthentication
 * added query timeout and canceled params
 
