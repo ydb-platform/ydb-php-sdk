@@ -4,6 +4,7 @@ namespace YdbPlatform\Ydb;
 
 use Closure;
 use Psr\Log\LoggerInterface;
+use YdbPlatform\Ydb\Auth\UseConfigInterface;
 use YdbPlatform\Ydb\Exceptions\NonRetryableException;
 use YdbPlatform\Ydb\Exceptions\RetryableException;
 use YdbPlatform\Ydb\Exceptions\Ydb\BadSessionException;
@@ -40,6 +41,11 @@ class Ydb
      * @var Iam
      */
     protected $iam;
+
+    /**
+     * @var AuthService
+     */
+    protected $auth;
 
     /**
      * @var Discovery
@@ -111,7 +117,10 @@ class Ydb
 
         if(isset($config['credentials'])){
             $this->iam_config['credentials'] = $config['credentials'];
-            $config['credentials']->setLogger($this->logger());
+            $this->iam_config['credentials']->setLogger($this->logger());
+            if ($this->iam_config['credentials'] instanceof UseConfigInterface){
+                $this->iam_config['credentials']->setYdbConnectionConfig($config);
+            }
         }
 
         if (!empty($config['discovery']))
@@ -234,6 +243,19 @@ class Ydb
         }
 
         return $this->discovery;
+    }
+
+    /**
+     * @return AuthService
+     */
+    public function auth()
+    {
+        if (!isset($this->auth))
+        {
+            $this->auth = new AuthService($this, $this->logger);
+        }
+
+        return $this->auth;
     }
 
     /**

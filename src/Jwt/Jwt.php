@@ -136,4 +136,12 @@ class Jwt
     	}
         return str_replace('=', '', strtr(base64_encode($value), '+/', '-_'));
     }
+
+    public static function decodeHeaderAndPayload(string $jwtToken) : array {
+        $paths = explode(".", $jwtToken);
+        $result = [];
+        $result["header"] = json_decode(base64_decode($paths[0]), true);
+        $result["payload"] = json_decode(base64_decode($paths[1]), true);
+        return $result;
+    }
 }
