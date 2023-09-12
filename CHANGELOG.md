@@ -1,3 +1,5 @@
+* added query timeout and canceled params
+
 ## 1.11.0
 * added query stats
 * added ReadTokenFromFile

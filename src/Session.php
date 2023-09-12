@@ -4,6 +4,8 @@ namespace YdbPlatform\Ydb;
 
 use Closure;
 use Exception;
+use Google\Protobuf\Duration;
+use Ydb\Operations\OperationParams;
 use Ydb\Table\Query;
 use Ydb\Table\QueryCachePolicy;
 // use Ydb\Table\StaleModeSettings;
@@ -366,6 +368,24 @@ class Session
         if(isset($options['collectStats'])){
             $query->collectStats($options['collectStats']);
         }
+        $operationParams = new OperationParams();
+        if(isset($options['operation_timeout_ms'])){
+            $seconds = intdiv( $options['operation_timeout_ms'], 1000); // get seconds
+            $nanos = fmod($options['operation_timeout_ms'], 1000) * 1000000; // get ns
+            $operationParams->setOperationTimeout(new Duration([
+                'seconds'   => $seconds,
+                'nanos'     => $nanos
+            ]));
+        }
+        if(isset($options['cancel_after_ms'])){
+            $seconds = intdiv( $options['cancel_after_ms'], 1000); // get seconds
+            $nanos = fmod($options['operation_timeout_ms'], 1000) * 1000000; // get ns
+            $operationParams->setCancelAfter(new Duration([
+                'seconds'   => $seconds,
+                'nanos'     => $nanos
+            ]));
+        }
+        $query->operationParams($operationParams);
 
         return $this->executeQuery($query);
     }
