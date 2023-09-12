@@ -5,6 +5,7 @@ namespace YdbPlatform\Ydb\Auth\Implement;
 use YdbPlatform\Ydb\Auth\IamAuth;
 use YdbPlatform\Ydb\Auth\TokenInfo;
 use YdbPlatform\Ydb\Auth\UseConfigInterface;
+use YdbPlatform\Ydb\Jwt\Jwt;
 use YdbPlatform\Ydb\Ydb;
 
 class StaticAuthentication extends IamAuth implements UseConfigInterface
@@ -26,7 +27,7 @@ class StaticAuthentication extends IamAuth implements UseConfigInterface
     public function getTokenInfo(): TokenInfo
     {
         $this->token = $this->ydb->auth()->getToken($this->user, $this->password);
-        $jwtData = $this->decodeHeaderAndPayload($this->token);
+        $jwtData = Jwt::decodeHeaderAndPayload($this->token);
         $expiresIn = $this->convertExpiresAt($jwtData['payload']['exp']);
         $ratio = $this->getRefreshTokenRatio();
 
