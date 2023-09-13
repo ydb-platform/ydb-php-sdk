@@ -9,7 +9,9 @@ use YdbPlatform\Ydb\Ydb;
 
 class Utils
 {
-    const MSG_TYPE = 1;
+    const MSG_METRICS_TYPE = 1;
+    const MSG_READ_TYPE = 2;
+    const MSG_WRITE_TYPE = 3;
     const MESSAGE_SIZE_LIMIT_BYTES = 1024;
     public static function initDriver(string $endpoint, string $db, string $process)
     {
@@ -74,7 +76,7 @@ class Utils
     {
         $data["sent"] = microtime(true);
         $msgQueue = msg_get_queue($queueId);
-        msg_send($msgQueue, static::MSG_TYPE, $data);
+        msg_send($msgQueue, static::MSG_METRICS_TYPE, $data);
     }
 
     public static function reset(int $queueId)

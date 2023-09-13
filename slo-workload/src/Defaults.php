@@ -38,4 +38,6 @@ UPSERT INTO `%s` (
     const READ_QUERY = 'DECLARE $id AS Uint64;
 SELECT id, payload_str, payload_double, payload_timestamp, payload_hash
 FROM `%s` WHERE id = $id AND hash = Digest::NumericHash($id);';
+    const READ_FORKS = 20;
+    const WRITE_FORKS = 5;
 }
