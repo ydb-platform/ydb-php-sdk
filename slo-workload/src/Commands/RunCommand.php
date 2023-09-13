@@ -97,9 +97,7 @@ Options:
     /**
      * @var int
      */
-    protected $metricsQueueId;
-    protected $readQueueId;
-    protected $writeQueueId;
+    protected $queueId;
 
     public function execute(string $endpoint, string $path, array $options)
     {
@@ -115,9 +113,7 @@ Options:
         $time = (int)($options["-time"] ?? Defaults::READ_TIME);
         $shutdownTime = (int)($options["-shutdown-time"] ?? Defaults::SHUTDOWN_TIME);
 
-        $this->createQuery('m', $this->metricsQueueId);
-        $this->createQuery('w', $this->readQueueId);
-        $this->createQuery('r', $this->writeQueueId);
+        $this->createQuery('m', $this->queueId);
 
         $pIds = [];
 
@@ -195,9 +191,9 @@ Options:
         $table = $ydb->table();
 
         while (microtime(true) <= $startTime + $time) {
-            if ($this->checkQuery($this->readQueueId)) {
+            if ($this->checkQuery(Utils::MSG_READ_TYPE)) {
                 $begin = microtime(true);
-                Utils::metricsStart("read", $this->metricsQueueId);
+                Utils::metricsStart("read", $this->queueId);
                 $attemps = 0;
                 $id = (new Uint64Type($dataGenerator->getRandomId()))->toTypedValue();
                 try {
@@ -209,22 +205,21 @@ Options:
                             ]);
                             $attemps++;
                         } catch (\Exception $exception) {
-                            Utils::retriedError($this->metricsQueueId, 'read', get_class($exception));
+                            Utils::retriedError($this->queueId, 'read', get_class($exception));
                         }
                     }, true, null, [
                         'callback_on_error' => function (\Exception $e) use (&$attemps) {
                             $attemps++;
-                            Utils::retriedError($this->metricsQueueId, 'write', get_class($e));
+                            Utils::retriedError($this->queueId, 'write', get_class($e));
                         }
                     ]);
-                    Utils::metricDone("read", $this->metricsQueueId, $attemps, $this->getLatencyMilliseconds($begin));
+                    Utils::metricDone("read", $this->queueId, $attemps, $this->getLatencyMilliseconds($begin));
                 } catch (\Exception $e) {
                     $table->getLogger()->error($e->getMessage());
-                    Utils::metricFail("read", $this->metricsQueueId, $attemps, get_class($e), $this->getLatencyMilliseconds($begin));
+                    Utils::metricFail("read", $this->queueId, $attemps, get_class($e), $this->getLatencyMilliseconds($begin));
                 }
             }
             usleep(1000);
-
         }
     }
 
@@ -235,9 +230,9 @@ Options:
         $query = sprintf(Defaults::WRITE_QUERY, $tableName);
         $table = $ydb->table();
         while (microtime(true) <= $startTime + $time) {
-            if ($this->checkQuery($this->writeQueueId)) {
+            if ($this->checkQuery(Utils::MSG_WRITE_TYPE)) {
                 $begin = microtime(true);
-                Utils::metricsStart("write", $this->metricsQueueId);
+                Utils::metricsStart("write", $this->queueId);
                 $attemps = 0;
                 $upsertData = $dataGenerator->getUpsertData();
                 try {
@@ -248,13 +243,13 @@ Options:
                     }, true, null, [
                         'callback_on_error' => function (\Exception $e) use (&$attemps) {
                             $attemps++;
-                            Utils::retriedError($this->metricsQueueId, 'write', get_class($e));
+                            Utils::retriedError($this->queueId, 'write', get_class($e));
                         }
                     ]);
-                    Utils::metricDone("write", $this->metricsQueueId, $attemps, $this->getLatencyMilliseconds($begin));
+                    Utils::metricDone("write", $this->queueId, $attemps, $this->getLatencyMilliseconds($begin));
                 } catch (\Exception $e) {
                     $table->getLogger()->error($e->getMessage());
-                    Utils::metricFail("write", $this->metricsQueueId, $attemps, get_class($e), $this->getLatencyMilliseconds($begin));
+                    Utils::metricFail("write", $this->queueId, $attemps, get_class($e), $this->getLatencyMilliseconds($begin));
                 }
             }
             usleep(1000);
@@ -273,7 +268,7 @@ Options:
         $inflight = $registry->getOrRegisterGauge('', 'inflight', 'amount of requests in flight', ['jobName']);
         $errors = $registry->getOrRegisterGauge('', 'errors', 'amount of errors', ['jobName', 'class', 'in']);
         $attempts = $registry->getOrRegisterHistogram('', 'attempts', 'summary of amount for request', ['jobName', 'status'], range(1, 10, 1));
-        $msgQueue = msg_get_queue($this->metricsQueueId);
+        $msgQueue = msg_get_queue($this->queueId);
         $pushGateway->delete('workload-php', [
             'sdk' => 'php',
             'sdkVersion' => Ydb::VERSION
@@ -335,24 +330,17 @@ Options:
 
     protected function fillQueryJob(int $readRps, int $writeRps, float $startTime, int $time)
     {
-        $readQuery = msg_get_queue($this->readQueueId);
-        $writeQuery = msg_get_queue($this->writeQueueId);
+        $query = msg_get_queue($this->queueId);
         while (microtime(true) <= $startTime + $time) {
             $begin = microtime(true);
-            msg_remove_queue($readQuery);
-            $readQuery = msg_get_queue($this->readQueueId);
             for ($i = 0; $i < $readRps; $i++) {
-                msg_send($readQuery, Utils::MSG_READ_TYPE, 0);
+                msg_send($query, Utils::MSG_READ_TYPE, 0);
             }
-            msg_remove_queue($writeQuery);
-            $writeQuery = msg_get_queue($this->writeQueueId);
-            for ($i = 0; $i < $writeRps; $i++) {
-                msg_send($writeQuery, Utils::MSG_WRITE_TYPE, 0);
+            for ($i = 0; $i < $readRps; $i++) {
+                msg_send($query, Utils::MSG_WRITE_TYPE, 0);
             }
             usleep(($begin + 1 - microtime(true)) * 1000000);
         }
-        msg_remove_queue($readQuery);
-        msg_remove_queue($writeQuery);
     }
 
     protected function getLatencyMilliseconds(float $begin): float
@@ -405,10 +393,10 @@ Options:
         msg_remove_queue(msg_get_queue($query));
     }
 
-    protected function checkQuery(int $queryId): bool
+    protected function checkQuery(int $messageType): bool
     {
-        $query = msg_get_queue($queryId);
-        return msg_receive($query, Utils::MSG_METRICS_TYPE, $msgType, Utils::MESSAGE_SIZE_LIMIT_BYTES, $message, true, MSG_IPC_NOWAIT);
+        $query = msg_get_queue($this->queueId);
+        return msg_receive($query, $messageType, $msgType, Utils::MESSAGE_SIZE_LIMIT_BYTES, $message, true, MSG_IPC_NOWAIT);
     }
 
 }
