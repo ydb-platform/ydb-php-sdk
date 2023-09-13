@@ -417,6 +417,36 @@ The following algorithm that is the same for YDB-PHP-SDK applies:
 4. Otherwise, if the value of the `YDB_ACCESS_TOKEN_CREDENTIALS` environment variable is set, the **Access token** authentication mode is used, where the this variable value is passed.
 5. Otherwise, the **Metadata** authentication mode is used.
 
+## Static credentials
+
+```php
+<?php
+
+use YdbPlatform\Ydb\Ydb;
+use YdbPlatform\Ydb\Auth\Implement\StaticAuthentication;
+
+$config = [
+
+    // Database path
+    'database'    => '/local',
+
+    // Database endpoint
+    'endpoint'    => 'localhost:2136',
+
+    // Auto discovery (dedicated server only)
+    'discovery'   => false,
+
+    // IAM config
+    'iam_config'  => [
+        'insecure' => true,
+    ],
+    
+    'credentials' => new StaticAuthentication($user, $password)
+];
+
+$ydb = new Ydb($config);
+```
+
 ## Reading from text file
 
 ```php
