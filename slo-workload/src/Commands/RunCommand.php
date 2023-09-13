@@ -340,10 +340,12 @@ Options:
         while (microtime(true) <= $startTime + $time) {
             $begin = microtime(true);
             msg_remove_queue($readQuery);
+            $readQuery = msg_get_queue($this->readQueueId);
             for ($i = 0; $i < $readRps; $i++) {
                 msg_send($readQuery, Utils::MSG_READ_TYPE, 0);
             }
             msg_remove_queue($writeQuery);
+            $writeQuery = msg_get_queue($this->writeQueueId);
             for ($i = 0; $i < $writeRps; $i++) {
                 msg_send($writeQuery, Utils::MSG_WRITE_TYPE, 0);
             }
@@ -397,7 +399,7 @@ Options:
         "YDB_SESSION_BUSY"
     ];
 
-    protected function createQuery(string $id, int &$query)
+    protected function createQuery(string $id, &$query)
     {
         $query = ftok(__FILE__, $id);
         msg_remove_queue(msg_get_queue($query));
