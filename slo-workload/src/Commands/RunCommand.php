@@ -128,11 +128,13 @@ Options:
         $pIds = array_merge($pIds, $metricsPIds);
 
         $readPIds = $this->forkJob(function (int $i) use ($endpoint, $path, $tableName, $initialDataCount, $time, $readTimeout, $shutdownTime, $startTime) {
+            usleep($i*10000);
             $this->readJob($endpoint, $path, $tableName, $initialDataCount, $time, $readTimeout, $i, $shutdownTime, $startTime);
         }, Defaults::READ_FORKS);
         $pIds = array_merge($pIds, $readPIds);
 
         $writePIds = $this->forkJob(function (int $i) use ($endpoint, $path, $tableName, $initialDataCount, $time, $writeTimeout, $shutdownTime, $startTime) {
+            usleep($i*10000);
             $this->writeJob($endpoint, $path, $tableName, $initialDataCount, $time, $writeTimeout, $i, $shutdownTime, $startTime);
         }, Defaults::WRITE_FORKS);
         $pIds = array_merge($pIds, $writePIds);
@@ -333,13 +335,13 @@ Options:
         $query = msg_get_queue($this->queueId);
         while (microtime(true) <= $startTime + $time) {
             $begin = microtime(true);
-            for ($i = 0; $i < $readRps; $i++) {
+            for ($i = 0; $i < $readRps/5; $i++) {
                 msg_send($query, Utils::MSG_READ_TYPE, 0);
             }
-            for ($i = 0; $i < $readRps; $i++) {
+            for ($i = 0; $i < $writeRps/5; $i++) {
                 msg_send($query, Utils::MSG_WRITE_TYPE, 0);
             }
-            usleep(($begin + 1 - microtime(true)) * 1000000);
+            usleep(($begin + 1 - microtime(true)) * 1000000 / 5);
         }
     }
 
