@@ -107,7 +107,11 @@ class Ydb
         $this->database = $config['database'] ?? null;
         $this->iam_config = $config['iam_config'] ?? [];
 
-        if ($logger){
+        if (!is_null($logger) && isset($config['logger'])){
+            throw new \Exception('Logger set in 2 places');
+        } else if (isset($config['logger']) && $config['logger'] instanceof LoggerInterface) {
+            $this->logger = $config['logger'];
+        } else if ($logger) {
             $this->logger = $logger;
         } else {
             $this->logger = new NullLogger();
@@ -350,5 +354,13 @@ class Ydb
     public function discoveryInterval()
     {
         return $this->discoveryInterval;
+    }
+
+    /**
+     * @return LoggerInterface|NullLogger
+     */
+    public function getLogger()
+    {
+        return $this->logger;
     }
 }
