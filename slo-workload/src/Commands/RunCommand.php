@@ -341,7 +341,7 @@ Options:
             for ($i = 0; $i < $writeRps/5; $i++) {
                 msg_send($query, Utils::MSG_WRITE_TYPE, 0);
             }
-            usleep(($begin + 1 - microtime(true)) * 1000000 / 5);
+            usleep(($begin + 0.2 - microtime(true)) * 1000000);
         }
     }
 
