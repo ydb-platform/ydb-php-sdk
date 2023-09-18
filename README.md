@@ -545,3 +545,27 @@ Methods of the query builder:
 - `txControl(\Ydb\Table\TransactionControl $tx_control)` - transaction control with custom settings
 
 You can chain these methods for convenience.
+
+## Logging
+
+For logging purposes, you need use class, which implements `\Psr\Log\LoggerInterface`.
+Example of using:
+
+```php
+class SimpleLogger extends \Psr\Log\LoggerInterface
+{
+    use LoggerTrait;
+    public function log($level, string $message, array $context = []): void
+    {
+        fwrite(STDERR,
+            date("d/m/y H:i:s")." ".self::getLevelName($level). " ".$message." ".json_encode($context)."\n"
+        );
+    }
+}
+
+$config = [
+    'logger' => new SimpleLogger()
+]
+$ydb = new \YdbPlatform\Ydb\Ydb($config);
+```
+
