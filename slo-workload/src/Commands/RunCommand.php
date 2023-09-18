@@ -336,9 +336,9 @@ Options:
         while (microtime(true) <= $startTime + $time) {
             $begin = microtime(true);
             for ($i = 0; $i < 10; $i++) {
-                msg_send($query, Utils::MSG_WRITE_TYPE, 0);
+                msg_send($query, Utils::MSG_READ_TYPE, 0);
             }
-            msg_send($query, Utils::MSG_READ_TYPE, 0);
+            msg_send($query, Utils::MSG_WRITE_TYPE, 0);
             usleep(($begin + 0.01 - microtime(true)) * 1000000);
         }
     }
@@ -396,7 +396,7 @@ Options:
     protected function checkQuery(int $messageType): bool
     {
         $query = msg_get_queue($this->queueId);
-        return msg_receive($query, $messageType, $msgType, Utils::MESSAGE_SIZE_LIMIT_BYTES, $message, true, MSG_IPC_NOWAIT);
+        return msg_receive($query, $messageType, $msgType, Utils::MESSAGE_SIZE_LIMIT_BYTES, $message, true, MSG_IPC_NOWAIT, $php_errormsg);
     }
 
 }
