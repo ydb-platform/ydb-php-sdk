@@ -124,7 +124,7 @@ Options:
         $pIds = array_merge($pIds, $metricsPIds);
 
         $readPIds = $this->forkJob(function (int $i) use ($endpoint, $path, $tableName, $initialDataCount, $time, $readTimeout, $shutdownTime, $startTime) {
-            usleep($i*10000);
+            usleep($i*15000);
             $this->readJob($endpoint, $path, $tableName, $initialDataCount, $time, $readTimeout, $i, $shutdownTime, $startTime);
         }, $readForks);
         $pIds = array_merge($pIds, $readPIds);
