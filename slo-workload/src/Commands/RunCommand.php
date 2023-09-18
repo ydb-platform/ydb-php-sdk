@@ -113,7 +113,7 @@ Options:
         $time = (int)($options["-time"] ?? Defaults::READ_TIME);
         $shutdownTime = (int)($options["-shutdown-time"] ?? Defaults::SHUTDOWN_TIME);
 
-        $this->createQuery('m', $this->queueId);
+        $this->createQuery('m');
 
         $pIds = [];
 
@@ -128,7 +128,7 @@ Options:
         $pIds = array_merge($pIds, $metricsPIds);
 
         $readPIds = $this->forkJob(function (int $i) use ($endpoint, $path, $tableName, $initialDataCount, $time, $readTimeout, $shutdownTime, $startTime) {
-            usleep($i*10000);
+            usleep($i*1000);
             $this->readJob($endpoint, $path, $tableName, $initialDataCount, $time, $readTimeout, $i, $shutdownTime, $startTime);
         }, Defaults::READ_FORKS);
         $pIds = array_merge($pIds, $readPIds);
@@ -335,13 +335,11 @@ Options:
         $query = msg_get_queue($this->queueId);
         while (microtime(true) <= $startTime + $time) {
             $begin = microtime(true);
-            for ($i = 0; $i < $readRps/5; $i++) {
-                msg_send($query, Utils::MSG_READ_TYPE, 0);
-            }
-            for ($i = 0; $i < $writeRps/5; $i++) {
+            for ($i = 0; $i < 10; $i++) {
                 msg_send($query, Utils::MSG_WRITE_TYPE, 0);
             }
-            usleep(($begin + 0.2 - microtime(true)) * 1000000);
+            msg_send($query, Utils::MSG_READ_TYPE, 0);
+            usleep(($begin + 0.01 - microtime(true)) * 1000000);
         }
     }
 
@@ -389,10 +387,10 @@ Options:
         "YDB_SESSION_BUSY"
     ];
 
-    protected function createQuery(string $id, &$query)
+    protected function createQuery(string $id)
     {
-        $query = ftok(__FILE__, $id);
-        msg_remove_queue(msg_get_queue($query));
+        $this->queueId = ftok(__FILE__, $id);
+        msg_remove_queue(msg_get_queue($this->queueId));
     }
 
     protected function checkQuery(int $messageType): bool
