@@ -3,6 +3,7 @@
 namespace YdbPlatform\Ydb\Test;
 
 use PHPUnit\Framework\TestCase;
+use YdbPlatform\Ydb\Auth\Implement\AnonymousAuthentication;
 use YdbPlatform\Ydb\Logger\NullLogger;
 use YdbPlatform\Ydb\Logger\SimpleStdLogger;
 use YdbPlatform\Ydb\Ydb;
@@ -32,6 +33,15 @@ class LoggerCheckTest extends TestCase{
     }
     public function testCheckUseNullLogger(){
         $config = [];
+        $ydb = new Ydb($config);
+        $this->assertInstanceOf(NullLogger::class, $ydb->getLogger());
+    }
+
+    public function testThrowExceptionOnNonLoggerObject(){
+        $config = [
+            'logger'    => new AnonymousAuthentication()
+        ];
+        $this->expectException('TypeError');
         $ydb = new Ydb($config);
         $this->assertInstanceOf(NullLogger::class, $ydb->getLogger());
     }
