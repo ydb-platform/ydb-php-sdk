@@ -549,22 +549,14 @@ You can chain these methods for convenience.
 ## Logging
 
 For logging purposes, you need use class, which implements `\Psr\Log\LoggerInterface`.
+YDB-PHP-SDK has build-in loggers in `YdbPlatform\Ydb\Logger` namespace:
+* `NullLogger` - default
+* `SimpleStdLogger($level)` - logger, which push logs in STDERR. 
+
 Example of using:
-
 ```php
-class SimpleLogger extends \Psr\Log\LoggerInterface
-{
-    use LoggerTrait;
-    public function log($level, string $message, array $context = []): void
-    {
-        fwrite(STDERR,
-            date("d/m/y H:i:s")." ".self::getLevelName($level). " ".$message." ".json_encode($context)."\n"
-        );
-    }
-}
-
 $config = [
-    'logger' => new SimpleLogger()
+    'logger' => new \YdbPlatform\Ydb\Logger\SimpleStdLogger(\YdbPlatform\Ydb\Logger\SimpleStdLogger::INFO)
 ]
 $ydb = new \YdbPlatform\Ydb\Ydb($config);
 ```
