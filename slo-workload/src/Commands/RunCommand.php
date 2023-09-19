@@ -130,11 +130,13 @@ Options:
         $pIds = array_merge($pIds, $metricsPIds);
 
         $readPIds = $this->forkJob(function (int $i) use ($endpoint, $path, $tableName, $initialDataCount, $time, $readTimeout, $shutdownTime, $startTime) {
+            usleep($i*10000);
             $this->readJob($endpoint, $path, $tableName, $initialDataCount, $time, $readTimeout, $i, $shutdownTime, $startTime);
         }, $readForks);
         $pIds = array_merge($pIds, $readPIds);
 
         $writePIds = $this->forkJob(function (int $i) use ($endpoint, $path, $tableName, $initialDataCount, $time, $writeTimeout, $shutdownTime, $startTime) {
+            usleep($i*10000);
             $this->writeJob($endpoint, $path, $tableName, $initialDataCount, $time, $writeTimeout, $i, $shutdownTime, $startTime);
         }, $writeForks);
         $pIds = array_merge($pIds, $writePIds);
