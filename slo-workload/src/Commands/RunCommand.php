@@ -224,7 +224,7 @@ Options:
             } finally {
                 $i++;
                 $delay = $this->getDelayMicroseconds($startTime, Defaults::RPS_PER_READ_FORK, $i);
-                msg_send($msgQuery, Utils::AVAILABLE_WRITE_MSG, 0);
+                msg_send($msgQuery, Utils::AVAILABLE_READ_MSG, 0);
                 usleep($delay > 0 ? $delay : 1);
             }
         }
