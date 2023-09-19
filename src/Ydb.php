@@ -110,11 +110,11 @@ class Ydb
         if (!is_null($logger) && isset($config['logger'])){
             throw new \Exception('Logger set in 2 places');
         } else if (isset($config['logger'])) {
-            $this->logger = $config['logger'];
+            $this->setLogger($config['logger']);
         } else if ($logger) {
-            $this->logger = $logger;
+            $this->setLogger($logger);
         } else {
-            $this->logger = new NullLogger();
+            $this->setLogger(new NullLogger());
         }
 
         $this->retry = new Retry($this->logger);
@@ -362,6 +362,14 @@ class Ydb
     public function getLogger()
     {
         return $this->logger;
+    }
+
+    /**
+     * @param LoggerInterface $logger
+     * @return void
+     */
+    protected function setLogger(LoggerInterface $logger){
+        $this->logger = $logger;
     }
 
 }

@@ -1,3 +1,5 @@
+* add logger as Ydb config
+
 ## 1.12.0
 * added StaticAuthentication
 * added query timeout and canceled params
