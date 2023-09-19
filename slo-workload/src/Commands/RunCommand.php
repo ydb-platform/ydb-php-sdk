@@ -116,6 +116,12 @@ Options:
         $this->queueId = ftok(__FILE__, 'm');
         msg_remove_queue(msg_get_queue($this->queueId));
 
+        $query = msg_get_queue($this->queueId);
+        for ($i = 0; $i < Defaults::MAX_INFLIGHT; $i++) {
+            msg_send($query, Utils::AVAILABLE_READ_MSG, 0);
+            msg_send($query, Utils::AVAILABLE_WRITE_MSG, 0);
+        }
+
         $pIds = [];
 
         $metricsPIds = $this->forkJob(function (int $i) use ($startTime, $reportPeriod, $time, $promPgw) {
@@ -186,8 +192,10 @@ Options:
         $query = sprintf(Defaults::READ_QUERY, $tableName);
         $table = $ydb->table();
         $i = 0;
+        $msgQuery = msg_get_queue($this->queueId);
 
         while (microtime(true) <= $startTime + $time) {
+            msg_receive($msgQuery, Utils::AVAILABLE_READ_MSG, $msgType, Utils::MESSAGE_SIZE_LIMIT_BYTES, $msg);
             $begin = microtime(true);
             Utils::metricsStart("read", $this->queueId);
             $attemps = 0;
@@ -216,6 +224,7 @@ Options:
             } finally {
                 $i++;
                 $delay = $this->getDelayMicroseconds($startTime, Defaults::RPS_PER_READ_FORK, $i);
+                msg_send($msgQuery, Utils::AVAILABLE_WRITE_MSG, 0);
                 usleep($delay > 0 ? $delay : 1);
             }
         }
@@ -228,7 +237,10 @@ Options:
         $query = sprintf(Defaults::WRITE_QUERY, $tableName);
         $table = $ydb->table();
         $i=0;
+        $msgQuery = msg_get_queue($this->queueId);
+
         while (microtime(true) <= $startTime + $time) {
+            msg_receive($msgQuery, Utils::AVAILABLE_WRITE_MSG, $msgType, Utils::MESSAGE_SIZE_LIMIT_BYTES, $msg);
             $begin = microtime(true);
             Utils::metricsStart("write", $this->queueId);
             $attemps = 0;
@@ -251,6 +263,7 @@ Options:
             } finally {
                 $i++;
                 $delay = $this->getDelayMicroseconds($startTime, Defaults::RPS_PER_WRITE_FORK, $i);
+                msg_send($msgQuery, Utils::AVAILABLE_WRITE_MSG, 0);
                 usleep($delay > 0 ? $delay : 1);
             }
         }
@@ -288,7 +301,7 @@ Options:
         ]);
 
         while (microtime(true) <= $startTime + $time) {
-            msg_receive($msgQueue, Utils::MSG_TYPE, $msgType, Utils::MESSAGE_SIZE_LIMIT_BYTES, $message);
+            msg_receive($msgQueue, Utils::METRICS_MSG, $msgType, Utils::MESSAGE_SIZE_LIMIT_BYTES, $message);
             $queryLatencies->observe($this->getLatencyMilliseconds($message["sent"]));
             switch ($message['type']) {
                 case 'reset':
