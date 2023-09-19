@@ -119,8 +119,8 @@ Options:
         $query = msg_get_queue($this->queueId);
         for ($i = 0; $i < Defaults::MAX_INFLIGHT; $i++) {
             msg_send($query, Utils::AVAILABLE_READ_MSG, 0);
-            msg_send($query, Utils::AVAILABLE_WRITE_MSG, 0);
         }
+        msg_send($query, Utils::AVAILABLE_WRITE_MSG, 0);
 
         $pIds = [];
 
