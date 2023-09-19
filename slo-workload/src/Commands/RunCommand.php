@@ -119,8 +119,8 @@ Options:
         $query = msg_get_queue($this->queueId);
         for ($i = 0; $i < Defaults::MAX_INFLIGHT; $i++) {
             msg_send($query, Utils::AVAILABLE_READ_MSG, 0);
+            msg_send($query, Utils::AVAILABLE_WRITE_MSG, 0);
         }
-        msg_send($query, Utils::AVAILABLE_WRITE_MSG, 0);
 
         $pIds = [];
 
@@ -275,7 +275,7 @@ Options:
         $pushGateway = new PushGateway($promPgw);
 
         $latencies = $registry->getOrRegisterSummary('', 'latency', 'summary of latencies in ms', ['jobName', 'status'], 15, [0.5, 0.99, 0.999]);
-        $queryLatencies = $registry->getOrRegisterSummary('', 'query_latency', 'summary of latencies in ms in query',[], 15, [0.5, 0.99, 0.999]);
+        $queryLatencies = $registry->getOrRegisterSummary('', 'query_latency', 'summary of latencies in ms in query',[], 15, [0.5, 0.99]);
         $oks = $registry->getOrRegisterGauge('', 'oks', 'amount of OK requests', ['jobName']);
         $notOks = $registry->getOrRegisterGauge('', 'not_oks', 'amount of not OK requests', ['jobName']);
         $inflight = $registry->getOrRegisterGauge('', 'inflight', 'amount of requests in flight', ['jobName']);
