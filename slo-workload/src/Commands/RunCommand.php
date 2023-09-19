@@ -274,7 +274,7 @@ Options:
         $registry = new CollectorRegistry(new InMemory);
         $pushGateway = new PushGateway($promPgw);
 
-        $latencies = $registry->getOrRegisterSummary('', 'latency', 'summary of latencies in ms', ['jobName', 'status'], 15, [0.5, 0.99, 0.999]);
+        $latencies = $registry->getOrRegisterSummary('', 'latency', 'summary of latencies in ms', ['jobName', 'status'], 15, [0.5, 0.99]);
         $queryLatencies = $registry->getOrRegisterSummary('', 'query_latency', 'summary of latencies in ms in query',[], 15, [0.5, 0.99]);
         $oks = $registry->getOrRegisterGauge('', 'oks', 'amount of OK requests', ['jobName']);
         $notOks = $registry->getOrRegisterGauge('', 'not_oks', 'amount of not OK requests', ['jobName']);
