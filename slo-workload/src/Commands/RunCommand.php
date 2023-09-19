@@ -196,12 +196,13 @@ Options:
         $i = 0;
         $msgQuery = msg_get_queue($this->queueId);
 
+        usleep($process*10000);
         while (microtime(true) <= $startTime + $time) {
             msg_receive($msgQuery, Utils::AVAILABLE_READ_MSG, $msgType, Utils::MESSAGE_SIZE_LIMIT_BYTES, $msg);
-            $begin = microtime(true);
             Utils::metricsStart("read", $this->queueId);
             $attemps = 0;
             $id = (new Uint64Type($dataGenerator->getRandomId()))->toTypedValue();
+            $begin = microtime(true);
             try {
                 $table->retryTransaction(function (Session $session)
                 use ($id, $query, $dataGenerator, $tableName, &$attemps) {
@@ -241,12 +242,13 @@ Options:
         $i=0;
         $msgQuery = msg_get_queue($this->queueId);
 
+        usleep($process*10000);
         while (microtime(true) <= $startTime + $time) {
             msg_receive($msgQuery, Utils::AVAILABLE_WRITE_MSG, $msgType, Utils::MESSAGE_SIZE_LIMIT_BYTES, $msg);
-            $begin = microtime(true);
             Utils::metricsStart("write", $this->queueId);
             $attemps = 0;
             $upsertData = $dataGenerator->getUpsertData();
+            $begin = microtime(true);
             try {
                 $table->retryTransaction(function (Session $session)
                 use ($upsertData, $query, $dataGenerator, $tableName, &$attemps) {
