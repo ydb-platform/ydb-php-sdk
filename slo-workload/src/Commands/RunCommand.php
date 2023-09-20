@@ -197,6 +197,7 @@ Options:
         $msgQuery = msg_get_queue($this->queueId);
 
         usleep($process*10000);
+        $table->query("SELECT 1");
         while (microtime(true) <= $startTime + $time) {
             msg_receive($msgQuery, Utils::AVAILABLE_READ_MSG, $msgType, Utils::MESSAGE_SIZE_LIMIT_BYTES, $msg);
             Utils::metricsStart("read", $this->queueId);
@@ -243,6 +244,7 @@ Options:
         $msgQuery = msg_get_queue($this->queueId);
 
         usleep($process*10000);
+        $table->query("SELECT 1");
         while (microtime(true) <= $startTime + $time) {
             msg_receive($msgQuery, Utils::AVAILABLE_WRITE_MSG, $msgType, Utils::MESSAGE_SIZE_LIMIT_BYTES, $msg);
             Utils::metricsStart("write", $this->queueId);
