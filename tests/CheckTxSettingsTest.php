@@ -6,7 +6,6 @@ use PHPUnit\Framework\TestCase;
 use YdbPlatform\Ydb\Auth\Implement\AnonymousAuthentication;
 use YdbPlatform\Ydb\Logger\SimpleStdLogger;
 use YdbPlatform\Ydb\Ydb;
-use YdbPlatform\Ydb\YdbQuery;
 
 class CheckTxSettingsTest extends TestCase
 {
@@ -23,7 +22,6 @@ class CheckTxSettingsTest extends TestCase
      * @var \YdbPlatform\Ydb\Session|null
      */
     protected $session;
-    protected $yql = "SELECT 1;";
 
     public function __construct(?string $name = null, array $data = [], $dataName = '')
     {
@@ -66,8 +64,9 @@ class CheckTxSettingsTest extends TestCase
 
     protected function checkTx(string $mode, string $value)
     {
-        $query= $this->session->newQuery($this->yql)
+        $query= $this->session->newQuery("SELECT 1;")
             ->beginTx($mode);
         self::assertEquals($value, $query->getRequestData()['tx_control']->getBeginTx()->getTxMode());
+        $query->execute();
     }
 }
