@@ -213,9 +213,17 @@ class YdbQuery
      */
     public function execute()
     {
-        if (is_null($this->keep_query_in_cache)){
-            $this->keep_query_in_cache = $this->parameters&&count($this->parameters)>0;
-        }
+        $this->keep_query_in_cache = self::isNeedSetKeepQueryInCache($this->keep_query_in_cache, $this->parameters);
         return $this->session->executeQuery($this);
+    }
+
+    /**
+     * @param bool|null $currentParams
+     * @param array|null $queryDeclaredParams
+     * @return bool
+     */
+    protected static function isNeedSetKeepQueryInCache(?bool $currentParams, ?array $queryDeclaredParams): bool
+    {
+        return $currentParams ?? $queryDeclaredParams&&count($queryDeclaredParams)>0;
     }
 }
