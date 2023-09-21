@@ -1,3 +1,5 @@
+* fix keepInCache param in YdbQuery
+
 ## 1.12.0
 * added StaticAuthentication
 * added query timeout and canceled params
