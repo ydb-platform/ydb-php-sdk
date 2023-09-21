@@ -185,7 +185,7 @@ Options:
         $dataGenerator = new DataGenerator($initialDataCount);
         $query = sprintf(Defaults::READ_QUERY, $tableName);
         $table = $ydb->table();
-        $i = 0;
+        $table->query("SELECT 1l");
 
         while (microtime(true) <= $startTime + $time) {
             $begin = microtime(true);
@@ -223,7 +223,7 @@ Options:
         $dataGenerator = new DataGenerator($initialDataCount);
         $query = sprintf(Defaults::WRITE_QUERY, $tableName);
         $table = $ydb->table();
-        $i=0;
+        $table->query("SELECT 1l");
         while (microtime(true) <= $startTime + $time) {
             $begin = microtime(true);
             Utils::metricsStart("write", $this->queueId);
