@@ -218,12 +218,12 @@ class YdbQuery
     }
 
     /**
-     * @param bool|null $currentParams
+     * @param bool|null $userFlag
      * @param array|null $queryDeclaredParams
      * @return bool
      */
-    protected static function isNeedSetKeepQueryInCache(?bool $currentParams, ?array $queryDeclaredParams): bool
+    protected static function isNeedSetKeepQueryInCache(?bool $userFlag, ?array $queryDeclaredParams): bool
     {
-        return $currentParams ?? $queryDeclaredParams&&count($queryDeclaredParams)>0;
+        return $userFlag ?? $queryDeclaredParams&&count($queryDeclaredParams)>0;
     }
 }

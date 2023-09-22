@@ -9,29 +9,27 @@ class KeepInCacheTest extends TestCase
 {
     protected $sampleParams = ["x", 1];
 
-    public function testPreparedQueryWithParamsWithoutConfig()
+    public function testIsNeedSetKeepQueryInCache()
     {
-        self::assertEquals(true, YdbQuery::isNeedSetKeepQueryInCache(null, $this->sampleParams));
-    }
-
-    public function testPreparedQueryWithParamsWithConfig()
-    {
-        self::assertEquals(false, YdbQuery::isNeedSetKeepQueryInCache(false, $this->sampleParams));
-    }
-
-    public function testPreparedQueryWithoutParamsWithoutConfig()
-    {
-        self::assertEquals(false, YdbQuery::isNeedSetKeepQueryInCache(null, null));
-    }
-
-    public function testPreparedQueryWithoutParamsWithConfig()
-    {
-        self::assertEquals(false, YdbQuery::isNeedSetKeepQueryInCache(null, null));
+        $tests = [
+            ["flag" => null, "params" => null, "result" => false],
+            ["flag" => null, "params" => [], "result" => false],
+            ["flag" => null, "params" => $this->sampleParams, "result" => true],
+            ["flag" => false, "params" => null, "result" => false],
+            ["flag" => false, "params" => [], "result" => false],
+            ["flag" => false, "params" => $this->sampleParams, "result" => false],
+            ["flag" => true, "params" => null, "result" => true],
+            ["flag" => true, "params" => [], "result" => true],
+            ["flag" => true, "params" => $this->sampleParams, "result" => true],
+        ];
+        foreach ($tests as $i => $test){
+            self::assertEquals($test["result"], YdbQuery::isNeedSetKeepQueryInCache($test["flag"], $test["params"]));
+        }
     }
 }
 class YdbQuery extends \YdbPlatform\Ydb\YdbQuery{
-    public static function isNeedSetKeepQueryInCache(?bool $currentParams, ?array $queryDeclaredParams): bool
+    public static function isNeedSetKeepQueryInCache(?bool $userFlag, ?array $queryDeclaredParams): bool
     {
-        return parent::isNeedSetKeepQueryInCache($currentParams, $queryDeclaredParams);
+        return parent::isNeedSetKeepQueryInCache($userFlag, $queryDeclaredParams);
     }
 }
