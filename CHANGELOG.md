@@ -1,3 +1,5 @@
+* added snapshot mode in noninteractive transaction
+
 ## 1.12.0
 * added StaticAuthentication
 * added query timeout and canceled params
