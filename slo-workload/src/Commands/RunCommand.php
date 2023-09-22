@@ -106,9 +106,9 @@ Options:
         $initialDataCount = (int)($options["-initial-data-count"] ?? Defaults::GENERATOR_DATA_COUNT);
         $promPgw = ($options["-prom-pgw"] ?? Defaults::PROMETHEUS_PUSH_GATEWAY);
         $reportPeriod = (int)($options["-report-period"] ?? Defaults::PROMETHEUS_PUSH_PERIOD);
-        $readForks = ((int)($options["-read-rps"] ?? Defaults::READ_RPS)) / Defaults::RPS_PER_READ_FORK;
+        $readRps = ((int)($options["-read-rps"] ?? Defaults::READ_RPS));
         $readTimeout = (int)($options["-read-timeout"] ?? Defaults::READ_TIMEOUT);
-        $writeForks = ((int)($options["-write-rps"] ?? Defaults::WRITE_RPS)) / Defaults::RPS_PER_WRITE_FORK;
+        $writeRps = ((int)($options["-write-rps"] ?? Defaults::WRITE_RPS));
         $writeTimeout = (int)($options["-write-timeout"] ?? Defaults::WRITE_TIMEOUT);
         $time = (int)($options["-time"] ?? Defaults::READ_TIME);
         $shutdownTime = (int)($options["-shutdown-time"] ?? Defaults::SHUTDOWN_TIME);
@@ -125,12 +125,12 @@ Options:
 
         $readPIds = $this->forkJob(function (int $i) use ($endpoint, $path, $tableName, $initialDataCount, $time, $readTimeout, $shutdownTime, $startTime) {
             $this->readJob($endpoint, $path, $tableName, $initialDataCount, $time, $readTimeout, $i, $shutdownTime, $startTime);
-        }, $readForks);
+        }, Defaults::READ_FORKS);
         $pIds = array_merge($pIds, $readPIds);
 
         $writePIds = $this->forkJob(function (int $i) use ($endpoint, $path, $tableName, $initialDataCount, $time, $writeTimeout, $shutdownTime, $startTime) {
             $this->writeJob($endpoint, $path, $tableName, $initialDataCount, $time, $writeTimeout, $i, $shutdownTime, $startTime);
-        }, $writeForks);
+        }, Defaults::WRITE_FORKS);
         $pIds = array_merge($pIds, $writePIds);
 
         foreach ($pIds as $pid) {
@@ -185,7 +185,7 @@ Options:
         $dataGenerator = new DataGenerator($initialDataCount);
         $query = sprintf(Defaults::READ_QUERY, $tableName);
         $table = $ydb->table();
-        $i = 0;
+        $table->createSession();
 
         while (microtime(true) <= $startTime + $time) {
             $begin = microtime(true);
@@ -213,10 +213,6 @@ Options:
             } catch (\Exception $e) {
                 $table->getLogger()->error($e->getMessage());
                 Utils::metricFail("read", $this->queueId, $attemps, get_class($e), $this->getLatencyMilliseconds($begin));
-            } finally {
-                $i++;
-                $delay = $this->getDelayMicroseconds($startTime, Defaults::RPS_PER_READ_FORK, $i);
-                usleep($delay > 0 ? $delay : 1);
             }
         }
     }
@@ -227,7 +223,7 @@ Options:
         $dataGenerator = new DataGenerator($initialDataCount);
         $query = sprintf(Defaults::WRITE_QUERY, $tableName);
         $table = $ydb->table();
-        $i=0;
+        $table->createSession();
         while (microtime(true) <= $startTime + $time) {
             $begin = microtime(true);
             Utils::metricsStart("write", $this->queueId);
@@ -248,10 +244,6 @@ Options:
             } catch (\Exception $e) {
                 $table->getLogger()->error($e->getMessage());
                 Utils::metricFail("write", $this->queueId, $attemps, get_class($e), $this->getLatencyMilliseconds($begin));
-            } finally {
-                $i++;
-                $delay = $this->getDelayMicroseconds($startTime, Defaults::RPS_PER_WRITE_FORK, $i);
-                usleep($delay > 0 ? $delay : 1);
             }
         }
     }
@@ -331,11 +323,6 @@ Options:
     protected function getLatencyMilliseconds(float $begin): float
     {
         return (microtime(true) - $begin) * 1000;
-    }
-
-    protected function getDelayMicroseconds(float $startTime, int $rps, int $i): float
-    {
-        return $startTime * 1000000 + $i * 1000000 / $rps - microtime(true) * 1000000;
     }
 
     protected $errors = [
