@@ -546,3 +546,19 @@ Methods of the query builder:
 - `txControl(\Ydb\Table\TransactionControl $tx_control)` - transaction control with custom settings
 
 You can chain these methods for convenience.
+
+## Logging
+
+For logging purposes, you need use class, which implements `\Psr\Log\LoggerInterface`.
+YDB-PHP-SDK has build-in loggers in `YdbPlatform\Ydb\Logger` namespace:
+* `NullLogger` - default
+* `SimpleStdLogger($level)` - logger, which push logs in STDERR. 
+
+Example of using:
+```php
+$config = [
+    'logger' => new \YdbPlatform\Ydb\Logger\SimpleStdLogger(\YdbPlatform\Ydb\Logger\SimpleStdLogger::INFO)
+]
+$ydb = new \YdbPlatform\Ydb\Ydb($config);
+```
+

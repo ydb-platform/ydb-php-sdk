@@ -1,3 +1,4 @@
+* add logger as Ydb config
 * added snapshot mode in noninteractive transaction
 
 ## 1.12.0
