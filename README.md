@@ -542,6 +542,7 @@ Methods of the query builder:
     - online
     - online_inconsistent
     - serializable
+    - snapshot
 - `txControl(\Ydb\Table\TransactionControl $tx_control)` - transaction control with custom settings
 
 You can chain these methods for convenience.
