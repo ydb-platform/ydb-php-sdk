@@ -7,7 +7,7 @@ class YsonType extends AbstractType
     /**
      * @inherit
      */
-    protected $ydb_key_name = 'text_value';
+    protected $ydb_key_name = 'bytes_value';
 
     /**
      * @inherit

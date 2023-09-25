@@ -192,6 +192,7 @@ class QueryResult
                 }
                 switch ($column['type'])
                 {
+                    case 'YSON':
                     case 'STRING':
                         $_row[$column['name']] = base64_decode($value);
                         break;
