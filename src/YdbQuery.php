@@ -4,6 +4,7 @@ namespace YdbPlatform\Ydb;
 
 use Ydb\Table\Query;
 use Ydb\Table\QueryCachePolicy;
+use Ydb\Table\SnapshotModeSettings;
 use Ydb\Table\StaleModeSettings;
 use Ydb\Table\OnlineModeSettings;
 use Ydb\Table\TransactionControl;
@@ -168,6 +169,11 @@ class YdbQuery
                 $tx_settings['online_read_only'] = new OnlineModeSettings([
                     'allow_inconsistent_reads' => true,
                 ]);
+                break;
+
+            case 'snapshot':
+            case 'snapshot_read_only':
+                $tx_settings['snapshot_read_only'] = new SnapshotModeSettings;
                 break;
 
             case 'serializable':
