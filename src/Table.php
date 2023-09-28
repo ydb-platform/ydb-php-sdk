@@ -505,9 +505,15 @@ class Table
         if (!isset($options['callback_on_error'])) {
             $options['callback_on_error'] = function (\Exception $exception) {};
         }
-        return $this->retrySession(function (Session $session) use ($options, $userFunc) {
+
+        $txMode = '';
+        if (isset($options['tx_mode'])){
+            $txMode = $options['tx_mode'];
+        }
+
+        return $this->retrySession(function (Session $session) use ($txMode, $options, $userFunc) {
             try {
-                $session->beginTransaction();
+                $session->beginTransaction($txMode);
                 $result = $userFunc($session);
                 $session->commitTransaction();
                 return $result;
