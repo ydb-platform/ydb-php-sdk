@@ -1,4 +1,5 @@
 * fix keepInCache param in YdbQuery
+* added Yson type
 * add logger as Ydb config
 * added snapshot mode in noninteractive transaction
 

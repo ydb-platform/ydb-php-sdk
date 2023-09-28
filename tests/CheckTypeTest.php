@@ -45,6 +45,12 @@ class CheckTypeTest  extends TestCase{
         ];
 
         $checkTypes = [
+            "Yson"  => [
+                "class"     => YsonType::class,
+                "values"    => [
+                    "<a=b>c"
+                ]
+            ],
             "Bool"  => [
                 "class" => BoolType::class,
                 "values" => [
