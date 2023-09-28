@@ -396,7 +396,7 @@ class Session
         $query = $this->newQuery($yql)
             ->parameters($parameters)
             ->txControl($tx_control)
-            ->keepInCache($this->keep_query_in_cache ?? ($parameters&&count($parameters)>0));
+            ->keepInCache($this->keep_query_in_cache);
 
         if(isset($options['collectStats'])){
             $query->collectStats($options['collectStats']);

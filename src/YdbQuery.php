@@ -27,7 +27,7 @@ class YdbQuery
     /**
      * @var bool
      */
-    protected $keep_query_in_cache = false;
+    protected $keep_query_in_cache = null;
 
     /**
      * @var int
@@ -219,6 +219,17 @@ class YdbQuery
      */
     public function execute()
     {
+        $this->keep_query_in_cache = self::isNeedSetKeepQueryInCache($this->keep_query_in_cache, $this->parameters);
         return $this->session->executeQuery($this);
+    }
+
+    /**
+     * @param bool|null $userFlag
+     * @param array|null $queryDeclaredParams
+     * @return bool
+     */
+    protected static function isNeedSetKeepQueryInCache(?bool $userFlag, ?array $queryDeclaredParams): bool
+    {
+        return $userFlag ?? $queryDeclaredParams&&count($queryDeclaredParams)>0;
     }
 }
