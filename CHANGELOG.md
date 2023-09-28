@@ -1,3 +1,4 @@
+* added transaction mode for retryTransaction
 * add logger as Ydb config
 * added snapshot mode in noninteractive transaction
 
