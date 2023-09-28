@@ -6,10 +6,13 @@ use Closure;
 use Exception;
 use Google\Protobuf\Duration;
 use Ydb\Operations\OperationParams;
+use Ydb\Table\OnlineModeSettings;
 use Ydb\Table\Query;
 use Ydb\Table\QueryCachePolicy;
 // use Ydb\Table\StaleModeSettings;
 // use Ydb\Table\OnlineModeSettings;
+use Ydb\Table\SnapshotModeSettings;
+use Ydb\Table\StaleModeSettings;
 use Ydb\Table\TransactionControl;
 use Ydb\Table\TransactionSettings;
 use Ydb\Table\SerializableModeSettings;
@@ -218,15 +221,45 @@ class Session
      * @return mixed
      * @throws Exception
      */
-    public function beginTransaction()
+    public function beginTransaction(string $mode = null)
     {
-        $serializable_read_write = new SerializableModeSettings;
-        // $online_read_only = new OnlineModeSettings;
-        // $stale_read_only = new StaleModeSettings;
+        $tx_settings = [];
 
-        $transaction_settings = new TransactionSettings([
-            'serializable_read_write' => $serializable_read_write,
-        ]);
+        switch ($mode)
+        {
+            case 'stale':
+            case 'stale_read_only':
+                $tx_settings['stale_read_only'] = new StaleModeSettings;
+                break;
+
+            case 'online':
+            case 'online_read_only':
+                $tx_settings['online_read_only'] = new OnlineModeSettings([
+                    'allow_inconsistent_reads' => false,
+                ]);
+                break;
+
+            case 'inconsistent_reads':
+            case 'online_inconsistent':
+            case 'online_inconsistent_reads':
+                $tx_settings['online_read_only'] = new OnlineModeSettings([
+                    'allow_inconsistent_reads' => true,
+                ]);
+                break;
+
+            case 'snapshot':
+            case 'snapshot_read_only':
+                $tx_settings['snapshot_read_only'] = new SnapshotModeSettings;
+                break;
+
+            case 'serializable':
+            case 'serializable_read_write':
+            default:
+                $tx_settings['serializable_read_write'] = new SerializableModeSettings;
+                break;
+        }
+
+        $transaction_settings = new TransactionSettings($tx_settings);
 
         $result = $this->request('BeginTransaction', [
             'session_id' => $this->session_id,
