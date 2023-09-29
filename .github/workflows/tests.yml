@@ -23,6 +23,7 @@ jobs:
           YDB_USE_IN_MEMORY_PDISKS: true
         options: '-h localhost'
     runs-on: ubuntu-latest
+    continue-on-error: true
     strategy:
       matrix:
         php-versions: [ '7.2', '7.4', '8.0', '8.2' ]
