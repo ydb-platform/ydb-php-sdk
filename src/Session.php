@@ -223,45 +223,8 @@ class Session
      */
     public function beginTransaction(string $mode = 'serializable_read_write')
     {
-        $tx_settings = [];
 
-        switch ($mode)
-        {
-            case 'stale':
-            case 'stale_read_only':
-                $tx_settings['stale_read_only'] = new StaleModeSettings;
-                break;
-
-            case 'online':
-            case 'online_read_only':
-                $tx_settings['online_read_only'] = new OnlineModeSettings([
-                    'allow_inconsistent_reads' => false,
-                ]);
-                break;
-
-            case 'inconsistent_reads':
-            case 'online_inconsistent':
-            case 'online_inconsistent_reads':
-                $tx_settings['online_read_only'] = new OnlineModeSettings([
-                    'allow_inconsistent_reads' => true,
-                ]);
-                break;
-
-            case 'snapshot':
-            case 'snapshot_read_only':
-                $tx_settings['snapshot_read_only'] = new SnapshotModeSettings;
-                break;
-
-            case 'serializable':
-            case 'serializable_read_write':
-                $tx_settings['serializable_read_write'] = new SerializableModeSettings;
-                break;
-
-            default:
-                throw new Exception("");
-        }
-
-        $transaction_settings = new TransactionSettings($tx_settings);
+        $transaction_settings = new TransactionSettings($this::parseTxMode($mode));
 
         $result = $this->request('BeginTransaction', [
             'session_id' => $this->session_id,
@@ -679,5 +642,53 @@ class Session
     protected function streamRequest($method, array $data = [])
     {
         return $this->doStreamRequest('Table', $method, $data);
+    }
+
+    /**
+     * @param string $mode
+     * @return array
+     * @throws Exception
+     */
+    protected static function parseTxMode(string $mode): array
+    {
+        $tx_settings = [];
+
+        switch ($mode)
+        {
+            case 'stale':
+            case 'stale_read_only':
+                $tx_settings['stale_read_only'] = new StaleModeSettings;
+                break;
+
+            case 'online':
+            case 'online_read_only':
+                $tx_settings['online_read_only'] = new OnlineModeSettings([
+                    'allow_inconsistent_reads' => false,
+                ]);
+                break;
+
+            case 'inconsistent_reads':
+            case 'online_inconsistent':
+            case 'online_inconsistent_reads':
+                $tx_settings['online_read_only'] = new OnlineModeSettings([
+                    'allow_inconsistent_reads' => true,
+                ]);
+                break;
+
+            case 'snapshot':
+            case 'snapshot_read_only':
+                $tx_settings['snapshot_read_only'] = new SnapshotModeSettings;
+                break;
+
+            case 'serializable':
+            case 'serializable_read_write':
+                $tx_settings['serializable_read_write'] = new SerializableModeSettings;
+                break;
+
+            default:
+                throw new Exception("");
+        }
+
+        return $tx_settings;
     }
 }
