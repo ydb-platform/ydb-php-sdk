@@ -25,6 +25,7 @@ jobs:
     runs-on: ubuntu-latest
     continue-on-error: true
     strategy:
+      fail-fast: false
       matrix:
         php-versions: [ '7.2', '7.4', '8.0', '8.2' ]
         ydb-versions: ['stable-22-5', 'trunk', '23.3', '23.2', '23.1']
