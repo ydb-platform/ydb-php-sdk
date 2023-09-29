@@ -506,7 +506,7 @@ class Table
             $options['callback_on_error'] = function (\Exception $exception) {};
         }
 
-        $txMode = '';
+        $txMode = 'serializable_read_write';
         if (isset($options['tx_mode'])){
             $txMode = $options['tx_mode'];
         }

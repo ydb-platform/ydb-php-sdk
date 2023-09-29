@@ -221,7 +221,7 @@ class Session
      * @return mixed
      * @throws Exception
      */
-    public function beginTransaction(string $mode = null)
+    public function beginTransaction(string $mode = 'serializable_read_write')
     {
         $tx_settings = [];
 
@@ -254,9 +254,11 @@ class Session
 
             case 'serializable':
             case 'serializable_read_write':
-            default:
                 $tx_settings['serializable_read_write'] = new SerializableModeSettings;
                 break;
+
+            default:
+                throw new Exception("");
         }
 
         $transaction_settings = new TransactionSettings($tx_settings);

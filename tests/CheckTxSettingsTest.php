@@ -5,6 +5,8 @@ namespace YdbPlatform\Ydb\Test;
 use PHPUnit\Framework\TestCase;
 use YdbPlatform\Ydb\Auth\Implement\AnonymousAuthentication;
 use YdbPlatform\Ydb\Logger\SimpleStdLogger;
+use YdbPlatform\Ydb\Session;
+use YdbPlatform\Ydb\Table;
 use YdbPlatform\Ydb\Ydb;
 
 class CheckTxSettingsTest extends TestCase
@@ -69,4 +71,36 @@ class CheckTxSettingsTest extends TestCase
         self::assertEquals($value, $query->getRequestData()['tx_control']->getBeginTx()->getTxMode());
         $query->execute();
     }
+}
+
+class TableWithEditableSessions extends Table
+{
+    public static function addSession(Table $table, Session $session)
+    {
+        $table::$session_pool->addSession($session);
+    }
+    public static function removeSession(Table $table, Session $session)
+    {
+        $table::$session_pool->dropSession($session->id());
+    }
+}
+
+class EditablePreparedSession extends Session
+{
+    public static function setId(Session $session, string $id)
+    {
+        $session->session_id = $id;
+    }
+
+    public static function setIdle(Session $session)
+    {
+        $session->is_busy = false;
+    }
+
+
+    public function executeQuery(YdbQuery $query)
+    {
+        return $query->getRequestData()['query_cache_policy']->getKeepInCache();
+    }
+
 }
