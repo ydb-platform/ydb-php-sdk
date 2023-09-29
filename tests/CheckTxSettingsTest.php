@@ -10,7 +10,7 @@ use Ydb\Table\StaleModeSettings;
 class CheckTxSettingsTest extends TestCase
 {
 
-    protected function testCheckParseTxModeTes()
+    public function testCheckParseTxMode()
     {
         $tests = [
             ['mode' => 'stale_read_only', 'result' => ['stale_read_only' => new StaleModeSettings]],
@@ -27,7 +27,7 @@ class CheckTxSettingsTest extends TestCase
             ['mode' => 'online_inconsistent', 'result' => ['online_read_only' => new OnlineModeSettings([
                 'allow_inconsistent_reads' => true,
             ])]],
-            ['mode' => 'online_inconsistent_read', 'result' => ['online_read_only' => new OnlineModeSettings([
+            ['mode' => 'online_inconsistent_reads', 'result' => ['online_read_only' => new OnlineModeSettings([
                 'allow_inconsistent_reads' => true,
             ])]],
             ['mode' => 'snapshot', 'result' => ['snapshot_read_only' => new SnapshotModeSettings]],
@@ -41,7 +41,7 @@ class CheckTxSettingsTest extends TestCase
     }
 }
 class Session extends \YdbPlatform\Ydb\Session {
-    public static function parseTxMode(string $mode): array
+    public static function parseTxMode(string $mode = null): array
     {
         return parent::parseTxMode($mode);
     }

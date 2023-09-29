@@ -649,7 +649,7 @@ class Session
      * @return array
      * @throws Exception
      */
-    protected static function parseTxMode(string $mode): array
+    protected static function parseTxMode(string $mode = null): array
     {
         $tx_settings = [];
 
@@ -686,7 +686,7 @@ class Session
                 break;
 
             default:
-                throw new Exception("");
+                throw new Exception("Tx mode '".($mode ?? 'null')."' is not valid");
         }
 
         return $tx_settings;
