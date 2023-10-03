@@ -23,7 +23,6 @@ jobs:
           YDB_USE_IN_MEMORY_PDISKS: true
         options: '-h localhost'
     runs-on: ubuntu-latest
-    continue-on-error: true
     strategy:
       fail-fast: false
       matrix:
