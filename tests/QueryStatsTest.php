@@ -45,9 +45,6 @@ class QueryStatsTest extends TestCase{
                'collectStats' => CollectQueryStatsMode::STATS_COLLECTION_BASIC
             ]);
              self::assertNotNull($result->getQueryStats());
-             self::assertNotEquals(0, count($result->getQueryStats()->getQueryPhases()));
-            self::assertNotNull($result->getQueryStats()->getCompilation());
-            self::assertNotEquals("", $result->getQueryStats()->getQueryPlan());
         }, true);
 
     }

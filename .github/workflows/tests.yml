@@ -12,7 +12,7 @@ jobs:
   tests:
     services:
       ydb:
-        image: cr.yandex/yc/yandex-docker-local-ydb:stable-22-5
+        image: cr.yandex/yc/yandex-docker-local-ydb:${{ matrix.ydb-versions }}
         ports:
           - 2135:2135
           - 2136:2136
@@ -24,8 +24,10 @@ jobs:
         options: '-h localhost'
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
-        php-versions: [ '7.2' ]
+        php-versions: [ '7.2', '7.4', '8.0', '8.2' ]
+        ydb-versions: ['stable-22-5', 'trunk', '23.3', '23.2', '23.1']
     steps:
       - uses: actions/checkout@v3
         name: Checkout
