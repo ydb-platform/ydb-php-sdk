@@ -227,9 +227,9 @@ class Table
      * @return mixed
      * @throws Exception
      */
-    public function transaction(Closure $closure)
+    public function transaction(Closure $closure, string $mode = 'serializable_read_write')
     {
-        return $this->session()->transaction($closure);
+        return $this->session()->transaction($closure, $mode);
     }
 
     /**
@@ -505,9 +505,12 @@ class Table
         if (!isset($options['callback_on_error'])) {
             $options['callback_on_error'] = function (\Exception $exception) {};
         }
-        return $this->retrySession(function (Session $session) use ($options, $userFunc) {
+
+        $txMode = $options['tx_mode'] ?? 'serializable_read_write';
+
+        return $this->retrySession(function (Session $session) use ($txMode, $options, $userFunc) {
             try {
-                $session->beginTransaction();
+                $session->beginTransaction($txMode);
                 $result = $userFunc($session);
                 $session->commitTransaction();
                 return $result;

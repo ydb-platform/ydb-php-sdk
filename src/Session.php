@@ -6,10 +6,11 @@ use Closure;
 use Exception;
 use Google\Protobuf\Duration;
 use Ydb\Operations\OperationParams;
+use Ydb\Table\OnlineModeSettings;
 use Ydb\Table\Query;
 use Ydb\Table\QueryCachePolicy;
-// use Ydb\Table\StaleModeSettings;
-// use Ydb\Table\OnlineModeSettings;
+use Ydb\Table\SnapshotModeSettings;
+use Ydb\Table\StaleModeSettings;
 use Ydb\Table\TransactionControl;
 use Ydb\Table\TransactionSettings;
 use Ydb\Table\SerializableModeSettings;
@@ -195,9 +196,9 @@ class Session
      * @return mixed
      * @throws Exception
      */
-    public function transaction(Closure $closure)
+    public function transaction(Closure $closure, string $mode = 'serializable_read_write')
     {
-        $this->beginTransaction();
+        $this->beginTransaction($mode);
         try
         {
             $result = $closure($this);
@@ -218,15 +219,9 @@ class Session
      * @return mixed
      * @throws Exception
      */
-    public function beginTransaction()
+    public function beginTransaction(string $mode = 'serializable_read_write')
     {
-        $serializable_read_write = new SerializableModeSettings;
-        // $online_read_only = new OnlineModeSettings;
-        // $stale_read_only = new StaleModeSettings;
-
-        $transaction_settings = new TransactionSettings([
-            'serializable_read_write' => $serializable_read_write,
-        ]);
+        $transaction_settings = new TransactionSettings(parseTxMode($mode));
 
         $result = $this->request('BeginTransaction', [
             'session_id' => $this->session_id,
@@ -645,4 +640,52 @@ class Session
     {
         return $this->doStreamRequest('Table', $method, $data);
     }
+}
+
+/**
+ * @param string $mode
+ * @return array
+ * @throws Exception
+ */
+function parseTxMode(string $mode): array
+{
+    $tx_settings = [];
+
+    switch ($mode)
+    {
+        case 'stale':
+        case 'stale_read_only':
+            $tx_settings['stale_read_only'] = new StaleModeSettings;
+            break;
+
+        case 'online':
+        case 'online_read_only':
+            $tx_settings['online_read_only'] = new OnlineModeSettings([
+                'allow_inconsistent_reads' => false,
+            ]);
+            break;
+
+        case 'inconsistent_reads':
+        case 'online_inconsistent':
+        case 'online_inconsistent_reads':
+            $tx_settings['online_read_only'] = new OnlineModeSettings([
+                'allow_inconsistent_reads' => true,
+            ]);
+            break;
+
+        case 'snapshot':
+        case 'snapshot_read_only':
+            $tx_settings['snapshot_read_only'] = new SnapshotModeSettings;
+            break;
+
+        case 'serializable':
+        case 'serializable_read_write':
+            $tx_settings['serializable_read_write'] = new SerializableModeSettings;
+            break;
+
+        default:
+            throw new Exception("Tx mode '".($mode ?? 'null')."' is not valid");
+    }
+
+    return $tx_settings;
 }
