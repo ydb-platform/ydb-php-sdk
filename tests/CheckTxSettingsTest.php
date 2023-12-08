@@ -12,7 +12,7 @@ use YdbPlatform\Ydb\Logger\SimpleStdLogger;
 use YdbPlatform\Ydb\Ydb;
 use function YdbPlatform\Ydb\parseTxMode;
 
-require_once '../src/Session.php';
+require_once __DIR__.'/../src/Session.php';
 
 class CheckTxSettingsTest extends TestCase
 {
