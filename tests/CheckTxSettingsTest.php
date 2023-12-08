@@ -3,27 +3,21 @@
 namespace YdbPlatform\Ydb\Test;
 
 use PHPUnit\Framework\TestCase;
+use Ydb\Table\OnlineModeSettings;
+use Ydb\Table\SerializableModeSettings;
+use Ydb\Table\SnapshotModeSettings;
+use Ydb\Table\StaleModeSettings;
 use YdbPlatform\Ydb\Auth\Implement\AnonymousAuthentication;
 use YdbPlatform\Ydb\Logger\SimpleStdLogger;
 use YdbPlatform\Ydb\Ydb;
+use function YdbPlatform\Ydb\parseTxMode;
+
+require_once __DIR__.'/../src/Session.php';
 
 class CheckTxSettingsTest extends TestCase
 {
 
-    /**
-     * @var Ydb
-     */
-    protected $ydb;
-    /**
-     * @var \YdbPlatform\Ydb\Table
-     */
-    protected $table;
-    /**
-     * @var \YdbPlatform\Ydb\Session|null
-     */
-    protected $session;
-
-    public function __construct(?string $name = null, array $data = [], $dataName = '')
+    public function testParseTxMode(?string $name = null, array $data = [], $dataName = '')
     {
         parent::__construct($name, $data, $dataName);
         $config = [
@@ -43,30 +37,41 @@ class CheckTxSettingsTest extends TestCase
             ],
             'credentials' => new AnonymousAuthentication()
         ];
-        $this->ydb = new Ydb($config, new SimpleStdLogger(SimpleStdLogger::DEBUG));
-        $this->table = $this->ydb->table();
-        $this->session = $this->table->session();
-    }
+        $ydb = new Ydb($config, new SimpleStdLogger(SimpleStdLogger::DEBUG));
+        $table = $ydb->table();
+        $session = $table->createSession();
 
-    public function testSerializableTxConfig(){
-        $this->checkTx('serializable', 'serializable_read_write');
-    }
-
-    public function testSnapshotTxConfig(){
-        $this->checkTx('snapshot', 'snapshot_read_only');
-    }
-    public function testStaleTxConfig(){
-        $this->checkTx('stale', 'stale_read_only');
-    }
-    public function testOnlineTxConfig(){
-        $this->checkTx('online', 'online_read_only');
-    }
-
-    protected function checkTx(string $mode, string $value)
-    {
-        $query= $this->session->newQuery("SELECT 1;")
-            ->beginTx($mode);
-        self::assertEquals($value, $query->getRequestData()['tx_control']->getBeginTx()->getTxMode());
-        $query->execute();
+        $testsQuery = [
+            ['mode' => 'stale_read_only', 'result' => ['stale_read_only' => new StaleModeSettings], 'interactive' => false],
+            ['mode' => 'stale', 'result' => ['stale_read_only' => new StaleModeSettings], 'interactive' => false],
+            ['mode' => 'online_read_only', 'result' => ['online_read_only' => new OnlineModeSettings([
+                'allow_inconsistent_reads' => false,
+            ])], 'interactive' => false],
+            ['mode' => 'online', 'result' => ['online_read_only' => new OnlineModeSettings([
+                'allow_inconsistent_reads' => false,
+            ])], 'interactive' => false],
+            ['mode' => 'inconsistent_reads', 'result' => ['online_read_only' => new OnlineModeSettings([
+                'allow_inconsistent_reads' => true,
+            ])], 'interactive' => false],
+            ['mode' => 'online_inconsistent', 'result' => ['online_read_only' => new OnlineModeSettings([
+                'allow_inconsistent_reads' => true,
+            ])], 'interactive' => false],
+            ['mode' => 'online_inconsistent_reads', 'result' => ['online_read_only' => new OnlineModeSettings([
+                'allow_inconsistent_reads' => true,
+            ])], 'interactive' => false],
+            ['mode' => 'snapshot', 'result' => ['snapshot_read_only' => new SnapshotModeSettings], 'interactive' => true],
+            ['mode' => 'snapshot_read_only', 'result' => ['snapshot_read_only' => new SnapshotModeSettings], 'interactive' => true],
+            ['mode' => 'serializable', 'result' => ['serializable_read_write' => new SerializableModeSettings], 'interactive' => true],
+            ['mode' => 'serializable_read_write', 'result' => ['serializable_read_write' => new SerializableModeSettings], 'interactive' => true],
+        ];
+        foreach ($testsQuery as $i => $test){
+            self::assertEquals($test["result"], parseTxMode($test["mode"]));
+            $query= $session->newQuery("SELECT 1;")
+                ->beginTx($test['mode']);
+            $query->execute();
+            if ($test['interactive']){
+                $table->transaction(function (){}, $test['mode']);
+            }
+        }
     }
 }

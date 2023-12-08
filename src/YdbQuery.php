@@ -12,6 +12,7 @@ use Ydb\Table\TransactionSettings;
 use Ydb\Table\SerializableModeSettings;
 use Ydb\Operations\OperationParams;
 
+require_once 'Table.php';
 class YdbQuery
 {
     /**
@@ -147,41 +148,8 @@ class YdbQuery
      */
     public function beginTx($mode)
     {
-        $tx_settings = [];
 
-        switch ($mode)
-        {
-            case 'stale':
-            case 'stale_read_only':
-                $tx_settings['stale_read_only'] = new StaleModeSettings;
-                break;
-
-            case 'online':
-            case 'online_read_only':
-                $tx_settings['online_read_only'] = new OnlineModeSettings([
-                    'allow_inconsistent_reads' => false,
-                ]);
-                break;
-
-            case 'inconsistent_reads':
-            case 'online_inconsistent':
-            case 'online_inconsistent_reads':
-                $tx_settings['online_read_only'] = new OnlineModeSettings([
-                    'allow_inconsistent_reads' => true,
-                ]);
-                break;
-
-            case 'snapshot':
-            case 'snapshot_read_only':
-                $tx_settings['snapshot_read_only'] = new SnapshotModeSettings;
-                break;
-
-            case 'serializable':
-            case 'serializable_read_write':
-            default:
-                $tx_settings['serializable_read_write'] = new SerializableModeSettings;
-                break;
-        }
+        $tx_settings = parseTxMode($mode);
 
         $this->tx_control = new TransactionControl([
             'begin_tx' => new TransactionSettings($tx_settings),

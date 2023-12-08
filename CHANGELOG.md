@@ -1,3 +1,4 @@
+* added transaction mode for retryTransaction
 * fix keepInCache param in YdbQuery
 * added Yson type
 * add logger as Ydb config
