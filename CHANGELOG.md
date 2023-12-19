@@ -1,3 +1,4 @@
+## 1.13.1
 * changed default mode for ExecuteScanQueryRequest from MODE_UNSPECIFIED to MODE_EXEC
 
 ## 1.13.0
