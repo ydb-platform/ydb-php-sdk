@@ -1,3 +1,5 @@
+* changed default mode for ExecuteScanQueryRequest from MODE_UNSPECIFIED to MODE_EXEC
+
 ## 1.13.0
 * added transaction mode for retryTransaction
 * fix keepInCache param in YdbQuery
