@@ -1,3 +1,4 @@
+## 1.13.2
 ### Bugs
 
 * fixed case with unexisting rows in query result
