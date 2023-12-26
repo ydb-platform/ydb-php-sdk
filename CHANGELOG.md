@@ -1,7 +1,7 @@
 ### Bugs
 
-- Fix "undefined key rows" for scan query
-  
+* fixed case with unexisting rows in query result
+
 ## 1.13.1
 * changed default mode for ExecuteScanQueryRequest from MODE_UNSPECIFIED to MODE_EXEC
 
