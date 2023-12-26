@@ -40,7 +40,7 @@ class QueryResult
                 $data = json_decode($set->serializeToJsonString(), true);
 
                 $this->fillColumns($data['columns']);
-                $this->fillRows($data['rows']);
+                $this->fillRows($data['rows'] ?? []);
                 $this->truncated = $data['truncated'] ?? false;
             }
         }
