@@ -24,7 +24,7 @@ class ExecuteScanQueryRequest extends \Google\Protobuf\Internal\Message
     /**
      * Generated from protobuf field <code>.Ydb.Table.ExecuteScanQueryRequest.Mode mode = 6;</code>
      */
-    protected $mode = 3;
+    protected $mode = 0;
     /**
      * Generated from protobuf field <code>.Ydb.Table.QueryStatsCollection.Mode collect_stats = 8;</code>
      */

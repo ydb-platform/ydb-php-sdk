@@ -8,6 +8,7 @@ use Psr\Log\LoggerInterface;
 use Ydb\Table\Query;
 use Ydb\Table\V1\TableServiceClient as ServiceClient;
 use YdbPlatform\Ydb\Contracts\SessionPoolContract;
+use YdbPlatform\Ydb\Enums\ScanQueryMode;
 use YdbPlatform\Ydb\Exceptions\Grpc\InvalidArgumentException;
 use YdbPlatform\Ydb\Exceptions\Grpc\UnknownException;
 use YdbPlatform\Ydb\Exceptions\NonRetryableException;
@@ -395,14 +396,16 @@ class Table
 
     /**
      * @param string $yql
+     * @param ScanQueryMode $mode
      * @return \Generator
      */
-    public function scanQuery($yql)
+    public function scanQuery($yql, $mode = ScanQueryMode::MODE_EXEC)
     {
         $q = new Query(['yql_text' => $yql]);
 
         return $this->streamRequest('StreamExecuteScanQuery', [
             'query' => $q,
+            'mode'  => $mode
         ]);
     }
 
