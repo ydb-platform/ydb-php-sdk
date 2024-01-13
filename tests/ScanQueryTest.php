@@ -11,7 +11,7 @@ use YdbPlatform\Ydb\YdbTable;
 class ScanQueryTest extends TestCase
 {
 
-    function testScanQueryWith()
+    function testScanQuery()
     {
         self::expectNotToPerformAssertions();
 
@@ -38,7 +38,7 @@ class ScanQueryTest extends TestCase
 
         $table->retrySession(function (\YdbPlatform\Ydb\Session $session){
             $session->createTable(
-                'episodes',
+                'seasons',
                 YdbTable::make()
                     ->addColumn('series_id', 'UINT64')
                     ->addColumn('title', 'UTF8')
