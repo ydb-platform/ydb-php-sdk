@@ -38,19 +38,16 @@ class ScanQueryTest extends TestCase
 
         $table->retrySession(function (\YdbPlatform\Ydb\Session $session){
             $session->createTable(
-                'seasons',
+                'scan_table',
                 YdbTable::make()
-                    ->addColumn('series_id', 'UINT64')
-                    ->addColumn('title', 'UTF8')
-                    ->addColumn('episode_id', 'UINT64')
-                    ->addColumn('season_id', 'UINT64')
-                    ->primaryKey('series_id')
+                    ->addColumn('id', 'UINT64')
+                    ->primaryKey('id')
             );
         }, true);
 
-        $yql = 'SELECT series_id, season_id, title, first_aired
-FROM seasons
-WHERE series_id = 1;';
+        $yql = 'SELECT id
+FROM scan_table
+WHERE id = 1;';
 
         $scanWithOutParam = $table->scanQuery($yql);
         $scanWithExplainParam = $table->scanQuery($yql, ScanQueryMode::MODE_EXPLAIN);
