@@ -396,11 +396,17 @@ class Table
 
     /**
      * @param string $yql
-     * @param ScanQueryMode $mode
+     * @param array $parameters
+     * @param int $mode
      * @return \Generator
+     * @throws Exception
      */
-    public function scanQuery($yql, $mode = ScanQueryMode::MODE_EXEC)
+    public function scanQuery($yql, $parameters = [], $mode = ScanQueryMode::MODE_EXEC)
     {
+        if($parameters != []){
+            throw new Exception("Not implemented");
+        }
+
         $q = new Query(['yql_text' => $yql]);
 
         return $this->streamRequest('StreamExecuteScanQuery', [

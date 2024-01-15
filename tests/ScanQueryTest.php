@@ -13,7 +13,6 @@ class ScanQueryTest extends TestCase
 
     function testScanQuery()
     {
-        self::expectNotToPerformAssertions();
 
         $config = [
 
@@ -49,13 +48,17 @@ class ScanQueryTest extends TestCase
 FROM scan_table
 WHERE id = 1;';
 
-        $scanWithOutParam = $table->scanQuery($yql);
-        $scanWithExplainParam = $table->scanQuery($yql, ScanQueryMode::MODE_EXPLAIN);
-        $scanWithExecParam = $table->scanQuery($yql, ScanQueryMode::MODE_EXEC);
+        $scanWithOutMode = $table->scanQuery($yql);
+        $scanWithExplainMode = $table->scanQuery($yql, [], ScanQueryMode::MODE_EXPLAIN);
+        $scanWithExecMode = $table->scanQuery($yql, [], ScanQueryMode::MODE_EXEC);
 
         // These `foreach` needs for requests
-        foreach ($scanWithOutParam as $value){}
-        foreach ($scanWithExplainParam as $value){}
-        foreach ($scanWithExecParam as $value){}
+        foreach ($scanWithOutMode as $value){}
+        foreach ($scanWithExplainMode as $value){}
+        foreach ($scanWithExecMode as $value){}
+
+        self::expectExceptionMessage("Not implemented");
+        $scanWithParams = $table->scanQuery($yql, ["value"=>"some"]);
+        foreach ($scanWithParams as $value){}
     }
 }
