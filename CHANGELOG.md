@@ -1,3 +1,4 @@
+## 1.14.0
 * added `ScanQueryMode` for `Table::scanQuery`
 
 ## 1.13.2
