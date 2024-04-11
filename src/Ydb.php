@@ -38,6 +38,11 @@ class Ydb
     protected $iam_config;
 
     /**
+     * @var array
+     */
+    protected $opts;
+
+    /**
      * @var Iam
      */
     protected $iam;
@@ -106,6 +111,7 @@ class Ydb
         $this->endpoint = $config['endpoint'] ?? null;
         $this->database = $config['database'] ?? null;
         $this->iam_config = $config['iam_config'] ?? [];
+        $this->opts = $config['opts'] ?? [];
 
         if (!is_null($logger) && isset($config['logger'])){
             throw new \Exception('Logger set in 2 places');
@@ -171,6 +177,14 @@ class Ydb
         }
 
         return $meta;
+    }
+
+    public function opts(): array
+    {
+        $opts = $this->opts;
+        $opts['credentials'] = $this->iam()->getCredentials();
+
+        return $opts;
     }
 
     /**

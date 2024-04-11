@@ -41,9 +41,7 @@ class Scheme
     {
         $this->ydb = $ydb;
 
-        $this->client = new ServiceClient($ydb->endpoint(), [
-            'credentials' => $ydb->iam()->getCredentials(),
-        ]);
+        $this->client = new ServiceClient($ydb->endpoint(), $ydb->opts());
 
         $this->meta = $ydb->meta();
 

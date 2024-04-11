@@ -562,3 +562,19 @@ $config = [
 $ydb = new \YdbPlatform\Ydb\Ydb($config);
 ```
 
+## gRPC options
+
+You can customize the gRPC client's behavior by setting options in config array
+
+Example of using:
+```php
+$config = [
+    // ...
+    'opts' => [
+        'grpc.max_receive_message_length' => 8*1024*1024,
+        'grpc.default_compression_algorithm' => 2,
+        'grpc.default_compression_level' => 2,
+    ],
+]
+$ydb = new \YdbPlatform\Ydb\Ydb($config);
+```
