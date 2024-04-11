@@ -1,3 +1,5 @@
+* added `$opts` array for customize gRPC client options
+
 ## 1.14.0
 * added `ScanQueryMode` for `Table::scanQuery`
 
