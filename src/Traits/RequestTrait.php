@@ -193,7 +193,7 @@ trait RequestTrait
             if ($this->ydb->needDiscovery() && count($this->ydb->cluster()->all()) > 0){
                 $endpoint = $this->ydb->cluster()->all()[array_rand($this->ydb->cluster()->all())]->endpoint();
             }
-            $this->client = new $this->client($endpoint, $this->ydb->opts());
+            $this->client = new $this->client($endpoint, $this->ydb->grpcOpts());
             if (isset(self::$grpcExceptions[$status->code])) {
                 throw new self::$grpcExceptions[$status->code]($message);
             } else {

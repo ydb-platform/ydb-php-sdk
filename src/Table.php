@@ -75,7 +75,7 @@ class Table
     {
         $this->ydb = $ydb;
 
-        $this->client = new ServiceClient($ydb->endpoint(), $ydb->opts());
+        $this->client = new ServiceClient($ydb->endpoint(), $ydb->grpcOpts());
 
         $this->meta = $ydb->meta();
 
