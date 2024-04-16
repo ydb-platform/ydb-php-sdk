@@ -1,3 +1,4 @@
+## 1.15.0
 * added `$grpc_config` array for customize gRPC behavior
 
 ## 1.14.0

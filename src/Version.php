@@ -1,5 +1,5 @@
 <?php
 const MAJOR = "1";
-const MINOR = "14";
+const MINOR = "15";
 const PATCH = "0";
 
