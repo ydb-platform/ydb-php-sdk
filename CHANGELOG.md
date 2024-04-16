@@ -1,3 +1,5 @@
+* added `$grpc_config` array for customize gRPC behavior
+
 ## 1.14.0
 * added `ScanQueryMode` for `Table::scanQuery`
 

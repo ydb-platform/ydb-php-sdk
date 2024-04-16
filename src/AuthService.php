@@ -28,9 +28,7 @@ class AuthService{
     {
         $this->ydb = $ydb;
         $this->logger = $logger;
-        $this->client = new ServiceClient($ydb->endpoint(), [
-            'credentials' => $ydb->iam()->getCredentials(),
-        ]);
+        $this->client = new ServiceClient($ydb->endpoint(), $ydb->grpcOpts());
         $this->credentials = $ydb->iam();
         $this->meta = [
             'x-ydb-database' => [$ydb->database()],

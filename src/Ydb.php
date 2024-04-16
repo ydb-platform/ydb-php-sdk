@@ -38,6 +38,11 @@ class Ydb
     protected $iam_config;
 
     /**
+     * @var array
+     */
+    protected $grpc_config;
+
+    /**
      * @var Iam
      */
     protected $iam;
@@ -106,6 +111,7 @@ class Ydb
         $this->endpoint = $config['endpoint'] ?? null;
         $this->database = $config['database'] ?? null;
         $this->iam_config = $config['iam_config'] ?? [];
+        $this->grpc_config = (array) ($config['grpc'] ?? []);
 
         if (!is_null($logger) && isset($config['logger'])){
             throw new \Exception('Logger set in 2 places');
@@ -171,6 +177,14 @@ class Ydb
         }
 
         return $meta;
+    }
+
+    public function grpcOpts(): array
+    {
+        $grpcOpts = (array) ($this->grpc_config['opts'] ?? []);
+        $grpcOpts['credentials'] = $this->iam()->getCredentials();
+
+        return $grpcOpts;
     }
 
     /**
