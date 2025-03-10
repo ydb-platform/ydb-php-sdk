@@ -1,3 +1,6 @@
+## 1.15.1
+* fixed Error parsing JSON @1:9: No such field
+
 ## 1.15.0
 * added `$grpc_config` array for customize gRPC behavior
 
