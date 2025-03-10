@@ -23,7 +23,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         if: env.DOCKER_REPO != null # check permissions
         env:
           DOCKER_REPO: ${{ secrets.SLO_DOCKER_REPO }}
@@ -58,7 +58,7 @@ jobs:
           workload_build_context0: ../.
           workload_build_options0: -f Dockerfile
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         if: always() && env.DOCKER_REPO != null # check permissions and execute, even if the previous stage was failed
         env:
           DOCKER_REPO: ${{ secrets.SLO_DOCKER_REPO }}
