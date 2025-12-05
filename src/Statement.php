@@ -56,16 +56,17 @@ class Statement
 
     /**
      * @param array $parameters
+     * @param array $options
      * @return bool|QueryResult
      * @throws \YdbPlatform\Ydb\Exception
      */
-    public function execute(array $parameters = [])
+    public function execute(array $parameters = [], array $options = [])
     {
         $q = new Query([
             'yql_text' => $this->yql,
         ]);
 
-        return $this->session->query($q, $this->prepareParameters($parameters));
+        return $this->session->query($q, $this->prepareParameters($parameters), $options);
     }
 
     /**
