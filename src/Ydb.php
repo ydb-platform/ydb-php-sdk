@@ -43,6 +43,11 @@ class Ydb
     protected $grpc_config;
 
     /**
+     * @var int|null
+     */
+    protected $grpcTimeout;
+
+    /**
      * @var Iam
      */
     protected $iam;
@@ -112,6 +117,7 @@ class Ydb
         $this->database = $config['database'] ?? null;
         $this->iam_config = $config['iam_config'] ?? [];
         $this->grpc_config = (array) ($config['grpc'] ?? []);
+        $this->grpcTimeout = $config['grpc']['timeout'] ?? null;
 
         if (!is_null($logger) && isset($config['logger'])){
             throw new \Exception('Logger set in 2 places');
@@ -185,6 +191,16 @@ class Ydb
         $grpcOpts['credentials'] = $this->iam()->getCredentials();
 
         return $grpcOpts;
+    }
+
+    /**
+     * Get gRPC timeout in microseconds
+     *
+     * @return int|null
+     */
+    public function getGrpcTimeout()
+    {
+        return $this->grpcTimeout;
     }
 
     /**
