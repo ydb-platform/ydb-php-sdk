@@ -97,7 +97,8 @@ trait RequestTrait
             json_decode($request->serializeToJsonString(), true)
         );
 
-        $call = $this->client->$method($request, $this->meta);
+        $options = $this->buildGrpcOptions();
+        $call = $this->client->$method($request, $this->meta, $options);
 
         if (method_exists($call, 'wait')) {
             list($response, $status) = $call->wait();
@@ -152,7 +153,8 @@ trait RequestTrait
 
         $request = new $requestClass($data);
 
-        $call = $this->client->$method($request, $this->meta);
+        $options = $this->buildGrpcOptions();
+        $call = $this->client->$method($request, $this->meta, $options);
 
         if (method_exists($call, 'responses')) {
             // $status = $call->getStatus();
@@ -321,6 +323,23 @@ trait RequestTrait
 
             }
         }
+    }
+
+    /**
+     * Build gRPC call options including timeout if configured
+     *
+     * @return array
+     */
+    protected function buildGrpcOptions()
+    {
+        $options = [];
+
+        $timeout = $this->ydb->getGrpcTimeout();
+        if ($timeout !== null) {
+            $options['timeout'] = $timeout;
+        }
+
+        return $options;
     }
 
     public static $ydbExceptions = [

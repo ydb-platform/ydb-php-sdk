@@ -430,10 +430,11 @@ class Session
 
     /**
      * @param string $yql
+     * @param array $options
      * @return Statement
      * @throws Exception
      */
-    public function prepare($yql)
+    public function prepare($yql, array $options = [])
     {
         $statement = new Statement($this, $yql);
 
@@ -442,10 +443,24 @@ class Session
             return $statement;
         }
 
-        $result = $this->request('PrepareDataQuery', [
+        $data = [
             'session_id' => $this->session_id,
             'yql_text' => $yql,
-        ]);
+        ];
+        
+        // Add operation_timeout if specified
+        if(isset($options['operation_timeout_ms'])){
+            $operationParams = new OperationParams();
+            $seconds = intdiv( $options['operation_timeout_ms'], 1000); // get seconds
+            $nanos = fmod($options['operation_timeout_ms'], 1000) * 1000000; // get ns
+            $operationParams->setOperationTimeout(new Duration([
+                'seconds'   => $seconds,
+                'nanos'     => $nanos
+            ]));
+            $data['operation_params'] = $operationParams;
+        }
+
+        $result = $this->request('PrepareDataQuery', $data);
 
         $statement->saveInCache();
 
