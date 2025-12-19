@@ -240,7 +240,7 @@ trait RequestTrait
                     $this->logger()->debug('YDB: Received API response [' . $resultClass . '].', json_decode($jsonResult, true));
 
                     $result = new $resultClass;
-                    $result->mergeFromJsonString($jsonResult);
+                    $result->mergeFromJsonString($jsonResult, true);
                 }
             }
 
@@ -333,12 +333,12 @@ trait RequestTrait
     protected function buildGrpcOptions()
     {
         $options = [];
-        
+
         $timeout = $this->ydb->getGrpcTimeout();
         if ($timeout !== null) {
             $options['timeout'] = $timeout;
         }
-        
+
         return $options;
     }
 

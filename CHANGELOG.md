@@ -1,3 +1,5 @@
+* added support operation timeout option
+
 ## 1.15.1
 * fixed Error parsing JSON @1:9: No such field
 
