@@ -562,6 +562,24 @@ $config = [
 $ydb = new \YdbPlatform\Ydb\Ydb($config);
 ```
 
+## Internal discovery
+
+Tuning keys for the internal endpoint discovery loop (used when `discovery => true`):
+
+- `discoveryTimeoutMs` (default `5000`) — total budget for one background discovery iteration (ms).
+- `discoveryAttemptTimeoutMs` (default `1000`) — per-attempt gRPC deadline for internal discovery (ms).
+- `discoveryInitialTimeoutMs` (default `5000`) — total budget for the startup discovery in the `Ydb` constructor (ms). If the cluster is unreachable longer than this, the constructor throws. To wait indefinitely for the cluster on startup, set this to `PHP_INT_MAX`:
+
+```php
+$config = [
+    // ...
+    'discovery' => true,
+    'discoveryInitialTimeoutMs' => PHP_INT_MAX,
+];
+```
+
+For cross-region or otherwise high-latency setups, bump `discoveryAttemptTimeoutMs` to 2000-3000 and `discoveryTimeoutMs` to 10000-15000 to give cold gRPC connects enough time to complete on retries.
+
 ## gRPC
 
 ### gRPC client's options

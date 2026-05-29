@@ -23,6 +23,13 @@ class Ydb
     const VERSION = MAJOR.".".MINOR.".".PATCH;
 
     /**
+     * Default gRPC load-balancing policy applied to every channel built via grpcOpts().
+     * Distributes RPCs across all resolved A-records of the target DNS name. Users can
+     * override per-channel via `grpc.opts.grpc.lb_policy_name` in their Ydb config.
+     */
+    const DEFAULT_LB_POLICY_NAME = 'round_robin';
+
+    /**
      * @var string
      */
     protected $endpoint;
@@ -104,7 +111,10 @@ class Ydb
      */
     protected $discoveryInterval = 60;
 
-    protected $triedDiscovery = false;
+    /**
+     * @var \YdbPlatform\Ydb\Internal\Discovery
+     */
+    protected $internalDiscovery;
 
     /**
      * @param array $config
@@ -139,6 +149,15 @@ class Ydb
             }
         }
 
+        $this->internalDiscovery = new Internal\Discovery(
+            $this,
+            isset($config['endpoint']) ? $config['endpoint'] : null,
+            isset($config['discoveryTimeoutMs'])        ? (int)$config['discoveryTimeoutMs']        : Internal\Discovery::DEFAULT_TIMEOUT_MS,
+            isset($config['discoveryAttemptTimeoutMs']) ? (int)$config['discoveryAttemptTimeoutMs'] : Internal\Discovery::DEFAULT_ATTEMPT_TIMEOUT_MS,
+            isset($config['discoveryInitialTimeoutMs']) ? (int)$config['discoveryInitialTimeoutMs'] : Internal\Discovery::DEFAULT_INITIAL_TIMEOUT_MS,
+            $this->logger
+        );
+
         if (!empty($config['discovery']))
         {
             $this->discover = true;
@@ -146,9 +165,7 @@ class Ydb
                 $this->discoveryInterval = $config['discoveryInterval'];
             }
 
-            $this->retry(function (){
-                $this->discover();
-            }, true);
+            $this->applyDiscoveryResult($this->internalDiscovery->initialListEndpoints());
         }
 
         $this->logger()->info('YDB: Initialized');
@@ -189,6 +206,9 @@ class Ydb
     {
         $grpcOpts = (array) ($this->grpc_config['opts'] ?? []);
         $grpcOpts['credentials'] = $this->iam()->getCredentials();
+        if (!isset($grpcOpts['grpc.lb_policy_name'])) {
+            $grpcOpts['grpc.lb_policy_name'] = self::DEFAULT_LB_POLICY_NAME;
+        }
 
         return $grpcOpts;
     }
@@ -204,31 +224,36 @@ class Ydb
     }
 
     /**
-     * Discover available endpoints to connect to.
+     * Background discovery (discoveryTimeoutMs budget, retries any error). Used from
+     * checkDiscovery / handleGrpcStatus on the request path. Startup discovery runs
+     * from the constructor via Internal\Discovery::initialListEndpoints().
      *
      * @return void
      * @throws Exception
      */
     public function discover()
     {
-        if ($this->triedDiscovery)
+        $this->applyDiscoveryResult($this->internalDiscovery->listEndpoints());
+    }
+
+    /**
+     * Apply a ListEndpoints result to the cluster and the current endpoint. Shared
+     * between the startup path (constructor) and the background path (discover()).
+     *
+     * @param array $endpoints
+     * @return void
+     */
+    protected function applyDiscoveryResult(array $endpoints)
+    {
+        if (empty($endpoints)) {
             return;
-
-        $this->triedDiscovery = true;
-
-        try {
-            $endpoints = $this->discovery()->listEndpoints();
-            if (!empty($endpoints)) {
-                $this->cluster()->sync((array)$endpoints);
-                $clusterEndpoints = array_map(function ($e) {
-                    return $e["address"] . ":" . $e["port"];
-                }, (array)$endpoints);
-                if (!array_search($this->endpoint, $clusterEndpoints)) {
-                    $this->endpoint = $clusterEndpoints[array_rand($clusterEndpoints)];
-                }
-            }
-        } finally {
-            $this->triedDiscovery = false;
+        }
+        $this->cluster()->sync($endpoints);
+        $clusterEndpoints = array_map(function ($e) {
+            return $e["address"] . ":" . $e["port"];
+        }, $endpoints);
+        if (!in_array($this->endpoint, $clusterEndpoints, true)) {
+            $this->endpoint = $clusterEndpoints[array_rand($clusterEndpoints)];
         }
     }
 
