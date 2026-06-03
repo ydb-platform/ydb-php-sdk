@@ -598,8 +598,8 @@ These apply only when `discovery => true`.
 
     discoveryInterval            default 60       seconds
     discoveryInitialTimeoutMs    default 5000     milliseconds
-    discoveryTimeoutMs           default 5000     milliseconds
-    discoveryAttemptTimeoutMs    default 1000     milliseconds
+    discoveryTimeoutMs           default 1000     milliseconds
+    discoveryAttemptTimeoutMs    default 300      milliseconds
 
 - `discoveryInterval` — how often the background loop re-fetches
   the endpoint list.
@@ -623,10 +623,10 @@ Example — wait forever for the cluster on startup:
         'discoveryInitialTimeoutMs' => PHP_INT_MAX,
     ];
 
-For cross-region or otherwise high-latency setups, bump
-`discoveryAttemptTimeoutMs` to 200-300 and `discoveryTimeoutMs`
-to 1000-2000 so that cold gRPC connects have enough time to
-complete on retries.
+For cross-region or otherwise high-latency setups, raise
+`discoveryInitialTimeoutMs` up to 15000 and triple the other two
+(`discoveryTimeoutMs` ≈ 3000, `discoveryAttemptTimeoutMs` ≈ 900)
+so that cold gRPC connects have enough time to complete on retries.
 
 ## gRPC
 

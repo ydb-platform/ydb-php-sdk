@@ -20,8 +20,8 @@ class Discovery
     use ParseResultTrait;
     use LoggerTrait;
 
-    const DEFAULT_TIMEOUT_MS         = 5000;
-    const DEFAULT_ATTEMPT_TIMEOUT_MS = 1000;
+    const DEFAULT_TIMEOUT_MS         = 1000;
+    const DEFAULT_ATTEMPT_TIMEOUT_MS = 300;
     const DEFAULT_INITIAL_TIMEOUT_MS = 5000;
 
     const BACKOFF_SLOT_MS = 20;
