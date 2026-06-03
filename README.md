@@ -562,23 +562,71 @@ $config = [
 $ydb = new \YdbPlatform\Ydb\Ydb($config);
 ```
 
-## Internal discovery
+## Discovery
 
-Tuning keys for the internal endpoint discovery loop (used when `discovery => true`):
+Endpoint discovery asks the cluster which nodes are currently
+serving the database, and balances subsequent requests across them.
+The SDK keeps the list fresh in the background and re-discovers
+automatically when a node becomes unavailable.
 
-- `discoveryTimeoutMs` (default `5000`) — total budget for one background discovery iteration (ms).
-- `discoveryAttemptTimeoutMs` (default `1000`) — per-attempt gRPC deadline for internal discovery (ms).
-- `discoveryInitialTimeoutMs` (default `5000`) — total budget for the startup discovery in the `Ydb` constructor (ms). If the cluster is unreachable longer than this, the constructor throws. To wait indefinitely for the cluster on startup, set this to `PHP_INT_MAX`:
 
-```php
-$config = [
-    // ...
-    'discovery' => true,
-    'discoveryInitialTimeoutMs' => PHP_INT_MAX,
-];
-```
+### Turning it on or off
 
-For cross-region or otherwise high-latency setups, bump `discoveryAttemptTimeoutMs` to 2000-3000 and `discoveryTimeoutMs` to 10000-15000 to give cold gRPC connects enough time to complete on retries.
+Controlled by the `discovery` config key. The default is `false` (off).
+
+    $config = [
+        // ...
+        'discovery' => true,
+    ];
+
+Turn it on for long-running processes that issue many queries per run —
+workers, daemons, web apps under heavy query load. You get load
+balancing across cluster nodes and automatic recovery when a node
+goes down, at the cost of one extra round-trip on startup plus a
+periodic background refresh.
+
+Leave it off for short-lived scripts that make only a handful of
+queries — cron jobs, CLI utilities, or simple PHP pages that finish 
+in under a minute and issue at most a couple of dozen queries to YDB. 
+The startup cost is not worth it: a single endpoint is enough, and 
+the script exits long before the background refresh would have mattered.
+
+
+### Tuning keys
+
+These apply only when `discovery => true`.
+
+    discoveryInterval            default 60       seconds
+    discoveryInitialTimeoutMs    default 5000     milliseconds
+    discoveryTimeoutMs           default 5000     milliseconds
+    discoveryAttemptTimeoutMs    default 1000     milliseconds
+
+- `discoveryInterval` — how often the background loop re-fetches
+  the endpoint list.
+
+- `discoveryInitialTimeoutMs` — total budget for the startup
+  discovery call in the `Ydb` constructor. If the cluster is
+  unreachable for longer than this, the constructor throws.
+  Set to `PHP_INT_MAX` to wait indefinitely on startup.
+
+- `discoveryTimeoutMs` — total budget for one background
+  re-discovery iteration.
+
+- `discoveryAttemptTimeoutMs` — per-attempt gRPC deadline inside
+  the discovery retry loop.
+
+Example — wait forever for the cluster on startup:
+
+    $config = [
+        // ...
+        'discovery' => true,
+        'discoveryInitialTimeoutMs' => PHP_INT_MAX,
+    ];
+
+For cross-region or otherwise high-latency setups, bump
+`discoveryAttemptTimeoutMs` to 200-300 and `discoveryTimeoutMs`
+to 1000-2000 so that cold gRPC connects have enough time to
+complete on retries.
 
 ## gRPC
 
