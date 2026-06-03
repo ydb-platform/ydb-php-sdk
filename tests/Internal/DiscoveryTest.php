@@ -272,7 +272,7 @@ class DiscoveryTest extends TestCase
     // recreateClient must be called exactly k times.
     // ------------------------------------------------------------------
 
-    public function testSucceedsOnThirdAttemptAndRecreatesOnce(): void
+    public function testSucceedsOnFourthAttemptAndRecreatesThreeTimes(): void
     {
         $ydb = $this->makeYdb();
 
