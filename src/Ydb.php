@@ -229,7 +229,7 @@ class Ydb
      * from the constructor via Internal\Discovery::initialListEndpoints().
      *
      * @return void
-     * @throws Exception
+     * @throws \Throwable
      */
     public function discover()
     {
