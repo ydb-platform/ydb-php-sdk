@@ -123,8 +123,8 @@ class Ydb
      */
     public function __construct($config = [], LoggerInterface $logger = null)
     {
-        $this->endpoint = $config['endpoint'];
-        $this->database = $config['database'];
+        $this->endpoint = $config['endpoint'] ?? null;
+        $this->database = $config['database'] ?? null;
         $this->iam_config = $config['iam_config'] ?? [];
         $this->grpc_config = (array) ($config['grpc'] ?? []);
         $this->grpcTimeout = $config['grpc']['timeout'] ?? null;
@@ -151,7 +151,7 @@ class Ydb
 
         $this->internalDiscovery = new Internal\Discovery(
             $this,
-            $config['endpoint'],
+            $this->endpoint,
             isset($config['discoveryTimeoutMs'])        ? (int)$config['discoveryTimeoutMs']        : Internal\Discovery::DEFAULT_TIMEOUT_MS,
             isset($config['discoveryAttemptTimeoutMs']) ? (int)$config['discoveryAttemptTimeoutMs'] : Internal\Discovery::DEFAULT_ATTEMPT_TIMEOUT_MS,
             isset($config['discoveryInitialTimeoutMs']) ? (int)$config['discoveryInitialTimeoutMs'] : Internal\Discovery::DEFAULT_INITIAL_TIMEOUT_MS,
