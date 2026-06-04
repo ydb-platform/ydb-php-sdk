@@ -1,3 +1,4 @@
+## 1.16.1
 * added resilient internal endpoint discovery (`YdbPlatform\Ydb\Internal\Discovery`) that always targets the original bootstrap endpoint and recreates the gRPC channel with `force_new` on retries to bust the c-core DNS cache and survive bootstrap IP changes
 * added discovery tuning config keys: `discoveryTimeoutMs` (default 1000), `discoveryAttemptTimeoutMs` (default 300), `discoveryInitialTimeoutMs` (default 5000; set to `PHP_INT_MAX` to wait indefinitely on startup)
 * set `grpc.lb_policy_name = round_robin` as the default for every gRPC channel built via `Ydb::grpcOpts()`; user overrides via `grpc.opts.grpc.lb_policy_name` are respected
