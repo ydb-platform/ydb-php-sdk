@@ -36,5 +36,12 @@
             "App\\": "examples/",
             "YdbPlatform\\Ydb\\Slo\\": "slo-workload"
         }
+    },
+    "config": {
+        "policy": {
+            "advisories": {
+                "ignore-id": ["PKSA-tcfz-w4fm-hhk9"]
+            }
+        }
     }
 }
