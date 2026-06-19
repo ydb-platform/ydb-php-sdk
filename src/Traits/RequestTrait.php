@@ -37,9 +37,18 @@ trait RequestTrait
     protected $ydb;
 
     /**
-     * @var int
+     * @var int Timestamp of the last SUCCESSFUL discovery. Drives the regular
+     *          refresh schedule via discoveryInterval().
      */
     protected $lastDiscovery = 0;
+
+    /**
+     * @var int Timestamp of the last FAILED discovery attempt. Used to avoid
+     *          calling discover() on every API request while it is down — under
+     *          load each request would otherwise pay ~discoveryTimeoutMs on top
+     *          until discovery recovers.
+     */
+    protected $lastDiscoveryAttempt = 0;
 
 
 
@@ -315,13 +324,28 @@ trait RequestTrait
     }
 
     protected function checkDiscovery(){
-        if ($this->ydb->needDiscovery() && time()-$this->lastDiscovery>$this->ydb->discoveryInterval()){
-            try{
-                $this->lastDiscovery = time();
-                $this->ydb->discover();
-            } catch (\Exception $e){
+        if (!$this->ydb->needDiscovery()) {
+            return;
+        }
+        $now = time();
+        $interval = $this->ydb->discoveryInterval();
 
-            }
+        // Scheduled refresh is gated by the last success; retries after a
+        // failure are gated by lastDiscoveryAttempt so a broken discovery
+        // does not get called on every single API request.
+        if ($now - $this->lastDiscovery <= $interval) {
+            return;
+        }
+        if ($now - $this->lastDiscoveryAttempt <= $interval) {
+            return;
+        }
+
+        $this->lastDiscoveryAttempt = $now;
+        try {
+            $this->ydb->discover();
+            $this->lastDiscovery = $now;
+        } catch (\Exception $e) {
+            $this->logger()->warning('YDB: discovery refresh failed: ' . $e->getMessage());
         }
     }
 
