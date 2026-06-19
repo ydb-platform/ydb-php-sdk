@@ -342,6 +342,7 @@ trait RequestTrait
 
         $this->lastDiscoveryAttempt = $now;
         try {
+            $this->logger()->debug('YDB: discovery for update ydb nodes list.');
             $this->ydb->discover();
             $this->lastDiscovery = $now;
         } catch (\Exception $e) {
