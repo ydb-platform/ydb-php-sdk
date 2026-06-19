@@ -20,7 +20,7 @@ use YdbPlatform\Ydb\Retry\Backoff;
 use YdbPlatform\Ydb\Retry\Retry;
 use YdbPlatform\Ydb\Retry\RetryParams;
 
-class Table
+class  Table
 {
     use Traits\RequestTrait;
     use Traits\ParseResultTrait;

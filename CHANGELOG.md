@@ -1,3 +1,6 @@
+* logged failed discovery refresh in `checkDiscovery` instead of silently swallowing the exception
+* fixed discovery retry rate after a failure: a separate `lastDiscoveryAttempt` timer gates retries by `discoveryInterval()`, so a broken discovery no longer triggers `discover()` on every API request
+
 ## 1.16.1
 * added resilient internal endpoint discovery (`YdbPlatform\Ydb\Internal\Discovery`) that always targets the original bootstrap endpoint and recreates the gRPC channel with `force_new` on retries to bust the c-core DNS cache and survive bootstrap IP changes
 * added discovery tuning config keys: `discoveryTimeoutMs` (default 1000), `discoveryAttemptTimeoutMs` (default 300), `discoveryInitialTimeoutMs` (default 5000; set to `PHP_INT_MAX` to wait indefinitely on startup)
