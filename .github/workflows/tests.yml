@@ -13,7 +13,43 @@ permissions:
   contents: read
 
 jobs:
+  prepare-grpc:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        php-versions: [ '7.2', '7.4', '8.0', '8.2' ]
+    steps:
+      - uses: actions/checkout@v3
+        name: Checkout
+
+      - name: Setup cache environment
+        id: ext-cache
+        uses: shivammathur/cache-extensions@v1
+        with:
+          php-version: ${{ matrix.php-versions }}
+          extensions: grpc
+          key: php-ext-grpc-v1
+
+      - name: Cache PHP grpc extension
+        uses: actions/cache@v3
+        with:
+          path: ${{ steps.ext-cache.outputs.dir }}
+          key: ${{ steps.ext-cache.outputs.key }}
+
+      - uses: eWaterCycle/setup-grpc@v5
+        name: Setup gRPC
+        with:
+          grpc-version: 1.51.1
+
+      - uses: shivammathur/setup-php@v2
+        name: Setup PHP
+        with:
+          extensions: grpc
+          php-version: ${{ matrix.php-versions }}
+
   tests:
+    needs: prepare-grpc
     services:
       ydb:
         image: cr.yandex/yc/yandex-docker-local-ydb:${{ matrix.ydb-versions }}
@@ -35,6 +71,20 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         name: Checkout
+
+      - name: Setup cache environment
+        id: ext-cache
+        uses: shivammathur/cache-extensions@v1
+        with:
+          php-version: ${{ matrix.php-versions }}
+          extensions: grpc
+          key: php-ext-grpc-v1
+
+      - name: Cache PHP grpc extension
+        uses: actions/cache@v3
+        with:
+          path: ${{ steps.ext-cache.outputs.dir }}
+          key: ${{ steps.ext-cache.outputs.key }}
 
       - uses: eWaterCycle/setup-grpc@v5
         name: Setup gRPC
