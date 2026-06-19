@@ -1,4 +1,3 @@
-## 1.16.2
 * logged failed discovery refresh in `checkDiscovery` instead of silently swallowing the exception
 * fixed discovery retry rate after a failure: a separate `lastDiscoveryAttempt` timer gates retries by `discoveryInterval()`, so a broken discovery no longer triggers `discover()` on every API request
 
