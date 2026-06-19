@@ -334,9 +334,11 @@ trait RequestTrait
         // failure are gated by lastDiscoveryAttempt so a broken discovery
         // does not get called on every single API request.
         if ($now - $this->lastDiscovery <= $interval) {
+            $this->logger()->debug('YDB: skip discovery by interval.');
             return;
         }
         if ($now - $this->lastDiscoveryAttempt <= $interval) {
+            $this->logger()->debug('YDB: skip discovery by attempt interval.');
             return;
         }
 
