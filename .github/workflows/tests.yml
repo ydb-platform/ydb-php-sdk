@@ -14,7 +14,7 @@ permissions:
 
 env:
   GRPC_VERSION: '1.51.1'
-  CACHE_VERSION: 'v1'
+  CACHE_VERSION: 'v2'
 
 jobs:
   prepare-grpc:
