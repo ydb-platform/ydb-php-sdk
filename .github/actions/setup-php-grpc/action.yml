@@ -1,0 +1,46 @@
+name: Setup PHP with cached grpc extension
+description: Installs PHP and grpc extension, building and caching grpc.so on first run.
+
+inputs:
+  php-version:
+    required: true
+    description: PHP version, e.g. 7.2 / 8.2
+  grpc-version:
+    required: true
+    description: gRPC version for eWaterCycle/setup-grpc (must match what pecl will build)
+  cache-version:
+    required: true
+    description: Bump to invalidate cache manually
+
+runs:
+  using: composite
+  steps:
+    - name: Setup PHP (without grpc, to resolve ext dir)
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: ${{ inputs.php-version }}
+
+    - name: Resolve extension dir
+      shell: bash
+      run: echo "EXT_DIR=$(php-config --extension-dir)" >> "$GITHUB_ENV"
+
+    - name: Restore grpc.so cache
+      id: grpc-cache
+      uses: actions/cache@v3
+      with:
+        path: ${{ env.EXT_DIR }}/grpc.so
+        key: php-grpc-${{ inputs.php-version }}-${{ runner.os }}-grpc${{ inputs.grpc-version }}-${{ inputs.cache-version }}
+
+    - name: Install grpc extension (apt/pecl via setup-php)
+      if: steps.grpc-cache.outputs.cache-hit != 'true'
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: ${{ inputs.php-version }}
+        extensions: grpc
+
+    - name: Enable grpc extension
+      shell: bash
+      run: |
+        INI_DIR=$(php -r 'echo PHP_CONFIG_FILE_SCAN_DIR;')
+        echo "extension=grpc.so" | sudo tee "$INI_DIR/20-grpc.ini"
+        php -m | grep -i grpc
