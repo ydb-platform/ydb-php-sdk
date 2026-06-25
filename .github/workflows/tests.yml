@@ -25,7 +25,7 @@ jobs:
           - /tmp/ydb_certs:/ydb_certs
         env:
           YDB_USE_IN_MEMORY_PDISKS: true
-        options: '-h localhost'
+        options: '-h localhost --name ydb'
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -33,6 +33,9 @@ jobs:
         php-versions: [ '7.2', '7.4', '8.0', '8.2' ]
         ydb-versions: ['stable-22-5', 'trunk', '23.3', '23.2', '23.1']
     steps:
+      - name: Show YDB version
+        run: docker exec ydb /ydbd -V
+
       - uses: actions/checkout@v3
         name: Checkout
 
