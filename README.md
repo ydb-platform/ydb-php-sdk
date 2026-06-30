@@ -1,3 +1,7 @@
+# YDB PHP SDK
+
+[![codecov](https://codecov.io/gh/ydb-platform/ydb-php-sdk/badge.svg?precision=2)](https://app.codecov.io/gh/ydb-platform/ydb-php-sdk)
+
 YDB PHP SDK provides access to [YDB](https://ydb.tech/) from PHP code.
 
 YDB is a open-source distributed fault-tolerant DBMS with high availability and scalability, strict consistency and ACID. An SQL dialect – YQL – is used for queries.
