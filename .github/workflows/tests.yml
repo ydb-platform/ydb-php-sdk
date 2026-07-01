@@ -47,6 +47,7 @@ jobs:
         with:
           extensions: grpc
           php-version: ${{ matrix.php-versions }}
+          coverage: xdebug
 
       - run: composer validate --strict
         name: Validate composer.json and composer.lock
@@ -67,8 +68,18 @@ jobs:
         run: docker exec $(docker ps --latest --quiet) /ydb -e grpc://localhost:2136 -d /local scripting yql -s "CREATE USER testuser PASSWORD 'testpassword'"
 
       - name: Run tests
-        run: ./vendor/bin/phpunit \
-          --coverage-text \
-          --whitelist src \
-          --testdox \
-          tests
+        run: |
+          ./vendor/bin/phpunit \
+            --coverage-text \
+            --coverage-clover=coverage.xml \
+            --whitelist src \
+            --testdox \
+            tests
+
+      - name: Upload coverage to Codecov
+        if: matrix.php-versions == '8.2' && matrix.ydb-versions == 'trunk'
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./coverage.xml
+          fail_ci_if_error: false
