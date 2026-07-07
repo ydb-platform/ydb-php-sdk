@@ -2,10 +2,11 @@ coverage:
   status:
     project:
       default:
-        informational: true
+        target: auto       # do not drop below the current level...
+        threshold: 1%      # ...by more than 1%
     patch:
       default:
-        informational: true
+        target: 80%        # new/changed code in the PR diff must be >= 80% covered
 
 comment:
   layout: "reach, diff, flags, components, files"
