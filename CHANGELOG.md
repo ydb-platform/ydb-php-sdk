@@ -1,3 +1,5 @@
+* regenerated `Ydb.Scheme.Entry.Type` (`protos/Ydb/Scheme/Entry/Type.php`) from current `ydb-api-protos`, adding `EXTERNAL_TABLE`, `EXTERNAL_DATA_SOURCE`, `VIEW`, `RESOURCE_POOL`, `TRANSFER`, `SYS_VIEW`, `SECRET`, and the `Entry::interrupt_permission_inheritance` field; fixes `Scheme::listDirectory()`/`Session::describeTable()` silently returning the raw type int instead of a name (e.g. `20` instead of `"VIEW"`) for any entry kind added since the previous codegen
+
 ## 1.16.3
 * improve log
 
