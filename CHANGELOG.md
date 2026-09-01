@@ -1,3 +1,6 @@
+* fixed `Session::query()` leaving `tx_id` stuck after a failed `ExecuteDataQuery` - the server had already aborted that transaction, but nothing cleared the SDK-side id, so it kept getting reused on every later call until an explicit `commit()`/`rollBack()`; matches how the transaction state is cleared on query failure in the official Python and Java SDKs
+* fixed `Session::commitTransaction()`/`rollbackTransaction()` leaving `tx_id` stuck on a dead transaction when their own `CommitTransaction`/`RollbackTransaction` RPC call fails (which happens precisely when the transaction is already aborted server-side - exactly the case a caller is recovering from by calling `commit()`/`rollBack()`) - previously this left the session permanently reusing that dead transaction id, so every later query on it failed with "Transaction not found" regardless of whether it had anything to do with the original error
+
 ## 1.16.3
 * improve log
 

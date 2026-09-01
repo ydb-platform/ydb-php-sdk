@@ -246,15 +246,16 @@ class Session
      */
     public function commitTransaction()
     {
-        if ($tx_id = $this->tx_id)
+        $tx_id = $this->tx_id;
+        $this->tx_id = null;
+
+        if ($tx_id)
         {
             $this->request('CommitTransaction', [
                 'session_id' => $this->session_id,
                 'tx_id' => $tx_id,
             ]);
         }
-
-        $this->tx_id = null;
 
         return true;
     }
@@ -276,15 +277,16 @@ class Session
      */
     public function rollbackTransaction()
     {
-        if ($tx_id = $this->tx_id)
+        $tx_id = $this->tx_id;
+        $this->tx_id = null;
+
+        if ($tx_id)
         {
             $this->request('RollbackTransaction', [
                 'session_id' => $this->session_id,
                 'tx_id' => $tx_id,
             ]);
         }
-
-        $this->tx_id = null;
 
         return true;
     }
@@ -382,7 +384,18 @@ class Session
         }
         $query->operationParams($operationParams);
 
-        return $this->executeQuery($query);
+        try
+        {
+            return $this->executeQuery($query);
+        }
+        catch (Exception $e)
+        {
+            // The server has already aborted this transaction; reusing $tx_id
+            // would just fail again, so start fresh next time.
+            $this->tx_id = null;
+
+            throw $e;
+        }
     }
 
     /**
