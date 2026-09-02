@@ -110,6 +110,14 @@ trait TypeValueHelpersTrait
      */
     public function valueOfType($value, $type)
     {
+        $type = trim($type);
+
+        // "T?" is YQL shorthand for "Optional<T>" - the server accepts both.
+        if (substr($type, -1) === '?')
+        {
+            return (new OptionalType($value))->itemType(trim(substr($type, 0, -1)));
+        }
+
         $_type = strtoupper($type);
         switch ($_type)
         {
