@@ -1,3 +1,5 @@
+* added `YdbQuery::beginTx($mode, bool $commit = true)` - passing `$commit = false` leaves the transaction open instead of always committing right after that one query; `Session::executeQuery()` now picks up the resulting transaction id from the response, so a following `Session::query()`/`commitTransaction()`/`rollbackTransaction()` call continues and closes it, the same way `Session::beginTransaction()` already does. Default behavior (`beginTx($mode)`, no second argument) is unchanged.
+
 ## 1.16.3
 * improve log
 

@@ -142,18 +142,20 @@ class YdbQuery
 
     /**
      * Begin a transaction with the given mode (stale, online, serializable).
+     * $commit=false leaves it open for a following query()/commitTransaction().
      *
      * @param string $mode
+     * @param bool $commit
      * @return $this
      */
-    public function beginTx($mode)
+    public function beginTx($mode, $commit = true)
     {
 
         $tx_settings = parseTxMode($mode);
 
         $this->tx_control = new TransactionControl([
             'begin_tx' => new TransactionSettings($tx_settings),
-            'commit_tx' => true,
+            'commit_tx' => $commit,
         ]);
         return $this;
     }

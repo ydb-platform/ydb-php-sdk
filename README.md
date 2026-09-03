@@ -520,19 +520,41 @@ Normally, a regular query through the `query()` method is sufficient, but in exc
 ```php
 <?php
 
-$result = $table->retryTransaction(function(Session $session){
+// Don't nest this inside retryTransaction() - it already begins its own
+// transaction, independent of this one.
+$session = $table->createSession();
 
-    // creating a new query builder instance
-    $query = $session->newQuery('select * from `users` limit 10;');
-    
-    // a setting to keep in cache
-    $query->keepInCache();
-    
-    // a setting to begin a transaction with the given mode
-    $query->beginTx('stale');
-    
-    return $query->execute();
-}, true);
+$query = $session->newQuery('select * from `users` limit 10;');
+
+// a setting to keep in cache
+$query->keepInCache();
+
+// begin a transaction with the given mode and commit right after this query
+// (the default - see "Multi-statement transactions" below to keep it open)
+$query->beginTx('stale');
+
+$result = $query->execute();
+```
+
+`query()` never commits on its own - a bare `$session->query(...)` call leaves
+the transaction open on the session until something explicitly calls
+`commitTransaction()`/`rollbackTransaction()`. `beginTx($mode)` (default,
+auto-commit) is how you run one self-contained statement - optionally in a
+non-default mode like `stale` - that begins *and* commits in a single
+`ExecuteDataQuery` call, leaving nothing open on the session afterward. Use
+it for standalone one-off queries outside of `retryTransaction()`'s own
+managed transaction lifecycle.
+
+If you only need a custom transaction mode for a single query running through
+`retryTransaction()`, pass it as an option instead of reaching for the query
+builder at all:
+
+```php
+<?php
+
+$result = $table->retryTransaction(function(Session $session){
+    return $session->query('select * from `users` limit 10;');
+}, true, null, ['tx_mode' => 'stale']);
 ```
 
 Methods of the query builder:
@@ -541,15 +563,46 @@ Methods of the query builder:
 - `collectStats(int $value)` - collect stats (default: 1)
 - `parameters(array $parameters)` - parameters
 - `operationParams(\Ydb\Operations\OperationParams $operation_params)` - operation params
-- `beginTx(string $mode)` - begin a transaction with the given [mode](https://ydb.tech/en/docs/concepts/transactions):
+- `beginTx(string $mode, bool $commit = true)` - begin a transaction with the given [mode](https://ydb.tech/en/docs/concepts/transactions):
     - stale
     - online
     - online_inconsistent
     - serializable
     - snapshot
+
+  Pass `$commit = false` to leave the transaction open instead of committing
+  it right after this query - see "Multi-statement transactions" below.
 - `txControl(\Ydb\Table\TransactionControl $tx_control)` - transaction control with custom settings
 
 You can chain these methods for convenience.
+
+### Multi-statement transactions through the query builder
+
+`beginTx($mode, false)` leaves the transaction open: the session picks up its
+id from the response, so a following `$session->query(...)` call continues
+it, and `commitTransaction()`/`rollbackTransaction()` closes it - the same
+lifecycle `$session->beginTransaction()` already gives you, but with the
+query builder's extra settings (cache, stats, custom tx mode) available on
+the first statement:
+
+```php
+<?php
+
+$session = $table->createSession();
+
+$session->newQuery('insert into `users` (id, name) values (1, "Alice")')
+    ->beginTx('serializable', false)
+    ->execute();
+
+// continues the same transaction - Session::query() reuses the session's
+// tx_id once beginTx(..., false) has set it
+$session->query('insert into `users` (id, name) values (2, "Bob")');
+
+$session->commitTransaction();
+```
+
+Omitting `false` (or passing `true`) commits after the first statement, same
+as before - existing code using `beginTx($mode)` is unaffected.
 
 ## Logging
 
