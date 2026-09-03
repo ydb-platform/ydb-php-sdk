@@ -4,6 +4,7 @@ namespace YdbPlatform\Ydb;
 
 use DateTime;
 use YdbPlatform\Ydb\QueryStats\QueryStats;
+use YdbPlatform\Ydb\Types\UuidType;
 
 class QueryResult
 {
@@ -182,9 +183,19 @@ class QueryResult
 
             foreach ($row['items'] as $i => $item)
             {
+                $column = $this->columns[$i];
+
+                // low128/high128 aren't a oneof - needs both, unlike every type below.
+                if ($column['type'] === 'UUID')
+                {
+                    $_row[$column['name']] = isset($item['low128'], $item['high128'])
+                        ? UuidType::fromParts($item['low128'], $item['high128'])
+                        : null;
+                    continue;
+                }
+
                 $values = array_values($item);
                 $value = count($values)>0?$values[0]:[];;
-                $column = $this->columns[$i];
                 if ($value === null)
                 {
                     $_row[$column['name']] = null;
@@ -195,10 +206,6 @@ class QueryResult
                     case 'YSON':
                     case 'STRING':
                         $_row[$column['name']] = base64_decode($value);
-                        break;
-
-                    case 'UUID':
-                        $_row[$column['name']] = dechex($value);
                         break;
 
                     case 'JSON':
