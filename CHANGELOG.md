@@ -1,3 +1,5 @@
+* fixed `Serialization of 'Closure' is not allowed` when a logger is set - `Iam::token_temp_file()` serializes the whole config to build a cache filename, and `Ydb::__construct()` attaches the logger onto the credentials object, so any real logger holding a `Closure` internally (common - processors, handlers, formatters) broke every request. `Auth::__sleep()` now drops any object-valued property before serializing, which also covers `StaticAuthentication`'s own nested `Ydb` instance.
+
 ## 1.16.3
 * improve log
 
