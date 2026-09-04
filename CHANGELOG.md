@@ -1,3 +1,5 @@
+* regenerated `Ydb\Table\ColumnMeta` and other `Ydb.Table.*` messages from an up-to-date `ydb-api-protos` checkout; `DescribeTable` can now report a column's `not_null` flag and default value (including `Serial`/`BigSerial` sequence info via `from_sequence`), which the stale generated code silently dropped before
+
 ## 1.16.3
 * improve log
 

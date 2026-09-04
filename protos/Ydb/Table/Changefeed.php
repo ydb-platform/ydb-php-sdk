@@ -43,6 +43,36 @@ class Changefeed extends \Google\Protobuf\Internal\Message
      * Generated from protobuf field <code>bool virtual_timestamps = 5;</code>
      */
     protected $virtual_timestamps = false;
+    /**
+     * Initial scan will output the current state of the table first
+     *
+     * Generated from protobuf field <code>bool initial_scan = 6;</code>
+     */
+    protected $initial_scan = false;
+    /**
+     * Attributes. Total size is limited to 10 KB.
+     *
+     * Generated from protobuf field <code>map<string, string> attributes = 7 [(.Ydb.length) = {</code>
+     */
+    private $attributes;
+    /**
+     * Value that will be emitted in the `awsRegion` field of the record in DYNAMODB_STREAMS_JSON format
+     *
+     * Generated from protobuf field <code>string aws_region = 8 [(.Ydb.length) = {</code>
+     */
+    protected $aws_region = '';
+    /**
+     * Periodically emit resolved timestamps. If unspecified, resolved timestamps are not emitted.
+     *
+     * Generated from protobuf field <code>.google.protobuf.Duration resolved_timestamps_interval = 9;</code>
+     */
+    protected $resolved_timestamps_interval = null;
+    /**
+     * Emit schema change events or not
+     *
+     * Generated from protobuf field <code>bool schema_changes = 11;</code>
+     */
+    protected $schema_changes = false;
 
     /**
      * Constructor.
@@ -60,6 +90,16 @@ class Changefeed extends \Google\Protobuf\Internal\Message
      *           How long data in changefeed's underlying topic should be stored
      *     @type bool $virtual_timestamps
      *           Emit virtual timestamps of changes along with data or not
+     *     @type bool $initial_scan
+     *           Initial scan will output the current state of the table first
+     *     @type array|\Google\Protobuf\Internal\MapField $attributes
+     *           Attributes. Total size is limited to 10 KB.
+     *     @type string $aws_region
+     *           Value that will be emitted in the `awsRegion` field of the record in DYNAMODB_STREAMS_JSON format
+     *     @type \Google\Protobuf\Duration $resolved_timestamps_interval
+     *           Periodically emit resolved timestamps. If unspecified, resolved timestamps are not emitted.
+     *     @type bool $schema_changes
+     *           Emit schema change events or not
      * }
      */
     public function __construct($data = NULL) {
@@ -203,6 +243,146 @@ class Changefeed extends \Google\Protobuf\Internal\Message
     {
         GPBUtil::checkBool($var);
         $this->virtual_timestamps = $var;
+
+        return $this;
+    }
+
+    /**
+     * Initial scan will output the current state of the table first
+     *
+     * Generated from protobuf field <code>bool initial_scan = 6;</code>
+     * @return bool
+     */
+    public function getInitialScan()
+    {
+        return $this->initial_scan;
+    }
+
+    /**
+     * Initial scan will output the current state of the table first
+     *
+     * Generated from protobuf field <code>bool initial_scan = 6;</code>
+     * @param bool $var
+     * @return $this
+     */
+    public function setInitialScan($var)
+    {
+        GPBUtil::checkBool($var);
+        $this->initial_scan = $var;
+
+        return $this;
+    }
+
+    /**
+     * Attributes. Total size is limited to 10 KB.
+     *
+     * Generated from protobuf field <code>map<string, string> attributes = 7 [(.Ydb.length) = {</code>
+     * @return \Google\Protobuf\Internal\MapField
+     */
+    public function getAttributes()
+    {
+        return $this->attributes;
+    }
+
+    /**
+     * Attributes. Total size is limited to 10 KB.
+     *
+     * Generated from protobuf field <code>map<string, string> attributes = 7 [(.Ydb.length) = {</code>
+     * @param array|\Google\Protobuf\Internal\MapField $var
+     * @return $this
+     */
+    public function setAttributes($var)
+    {
+        $arr = GPBUtil::checkMapField($var, \Google\Protobuf\Internal\GPBType::STRING, \Google\Protobuf\Internal\GPBType::STRING);
+        $this->attributes = $arr;
+
+        return $this;
+    }
+
+    /**
+     * Value that will be emitted in the `awsRegion` field of the record in DYNAMODB_STREAMS_JSON format
+     *
+     * Generated from protobuf field <code>string aws_region = 8 [(.Ydb.length) = {</code>
+     * @return string
+     */
+    public function getAwsRegion()
+    {
+        return $this->aws_region;
+    }
+
+    /**
+     * Value that will be emitted in the `awsRegion` field of the record in DYNAMODB_STREAMS_JSON format
+     *
+     * Generated from protobuf field <code>string aws_region = 8 [(.Ydb.length) = {</code>
+     * @param string $var
+     * @return $this
+     */
+    public function setAwsRegion($var)
+    {
+        GPBUtil::checkString($var, True);
+        $this->aws_region = $var;
+
+        return $this;
+    }
+
+    /**
+     * Periodically emit resolved timestamps. If unspecified, resolved timestamps are not emitted.
+     *
+     * Generated from protobuf field <code>.google.protobuf.Duration resolved_timestamps_interval = 9;</code>
+     * @return \Google\Protobuf\Duration|null
+     */
+    public function getResolvedTimestampsInterval()
+    {
+        return $this->resolved_timestamps_interval;
+    }
+
+    public function hasResolvedTimestampsInterval()
+    {
+        return isset($this->resolved_timestamps_interval);
+    }
+
+    public function clearResolvedTimestampsInterval()
+    {
+        unset($this->resolved_timestamps_interval);
+    }
+
+    /**
+     * Periodically emit resolved timestamps. If unspecified, resolved timestamps are not emitted.
+     *
+     * Generated from protobuf field <code>.google.protobuf.Duration resolved_timestamps_interval = 9;</code>
+     * @param \Google\Protobuf\Duration $var
+     * @return $this
+     */
+    public function setResolvedTimestampsInterval($var)
+    {
+        GPBUtil::checkMessage($var, \Google\Protobuf\Duration::class);
+        $this->resolved_timestamps_interval = $var;
+
+        return $this;
+    }
+
+    /**
+     * Emit schema change events or not
+     *
+     * Generated from protobuf field <code>bool schema_changes = 11;</code>
+     * @return bool
+     */
+    public function getSchemaChanges()
+    {
+        return $this->schema_changes;
+    }
+
+    /**
+     * Emit schema change events or not
+     *
+     * Generated from protobuf field <code>bool schema_changes = 11;</code>
+     * @param bool $var
+     * @return $this
+     */
+    public function setSchemaChanges($var)
+    {
+        GPBUtil::checkBool($var);
+        $this->schema_changes = $var;
 
         return $this;
     }
