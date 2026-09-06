@@ -4,6 +4,7 @@ namespace YdbPlatform\Ydb;
 
 use DateTime;
 use YdbPlatform\Ydb\QueryStats\QueryStats;
+use YdbPlatform\Ydb\Types\DecimalType;
 
 class QueryResult
 {
@@ -146,9 +147,16 @@ class QueryResult
             $type = null;
             $options = null;
 
-            if (isset($column['type']['optionalType']))
+            $item = $column['type']['optionalType']['item'] ?? $column['type'];
+
+            if (isset($item['decimalType']))
             {
-                $type = $column['type']['optionalType']['item']['typeId'];
+                $type = 'DECIMAL';
+                $options = $item['decimalType'];
+            }
+            else if (isset($item['typeId']))
+            {
+                $type = $item['typeId'];
             }
             else if (isset($column['type']['structType']))
             {
@@ -158,10 +166,6 @@ class QueryResult
                 {
                     $options[] = $member;
                 }
-            }
-            else if (isset($column['type']['typeId']))
-            {
-                $type = $column['type']['typeId'];
             }
 
             $this->columns[] = [
@@ -182,9 +186,20 @@ class QueryResult
 
             foreach ($row['items'] as $i => $item)
             {
+                $column = $this->columns[$i];
+
+                // low128/high128 aren't a oneof - needs both. high128 is omitted
+                // when 0, so only a missing low128 means null, not a missing high128.
+                if ($column['type'] === 'DECIMAL')
+                {
+                    $_row[$column['name']] = isset($item['low128'])
+                        ? DecimalType::fromParts($item['low128'], $item['high128'] ?? 0, $column['options']['scale'])
+                        : null;
+                    continue;
+                }
+
                 $values = array_values($item);
                 $value = count($values)>0?$values[0]:[];;
-                $column = $this->columns[$i];
                 if ($value === null)
                 {
                     $_row[$column['name']] = null;
