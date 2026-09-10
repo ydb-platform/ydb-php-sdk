@@ -137,6 +137,17 @@ class Session
     }
 
     /**
+     * Like take(), but doesn't notify the pool - for reconstructing already-known-taken state.
+     *
+     * @return $this
+     */
+    public function markTaken()
+    {
+        $this->is_busy = true;
+        return $this;
+    }
+
+    /**
      * @return $this
      */
     public function release()

@@ -1,3 +1,5 @@
+* fixed `Sessions\FileSessionPool` not being safe for the multiprocess use it exists for (ydb-platform/ydb-php-sdk#53) - `load()`/`save()` had no locking, so two PHP-FPM workers sharing a pool file could both see the same session as idle and take it concurrently, and a reader could crash on a torn/empty write (`foreach() on null`). Every pool operation now runs under a reentrant `flock()` held for its whole duration, `getIdleSession()` persists the taken mark itself before returning (instead of relying on a separate, unlocked follow-up call), and `save()` writes via a temp file + `rename()` so a concurrent reader never observes a half-written file.
+
 ## 1.16.3
 * improve log
 
