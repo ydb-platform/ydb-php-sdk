@@ -1,3 +1,5 @@
+* added `Session::isInTransaction()` - there was no public way to check whether a session currently has an active transaction, only the protected `tx_id` field.
+
 ## 1.16.3
 * improve log
 
