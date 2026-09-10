@@ -52,6 +52,12 @@ class Entry extends \Google\Protobuf\Internal\Message
      * Generated from protobuf field <code>.Ydb.VirtualTimestamp created_at = 9;</code>
      */
     protected $created_at = null;
+    /**
+     * When true, permissions are not inherited from parent objects
+     *
+     * Generated from protobuf field <code>bool interrupt_permission_inheritance = 10;</code>
+     */
+    protected $interrupt_permission_inheritance = false;
 
     /**
      * Constructor.
@@ -73,6 +79,8 @@ class Entry extends \Google\Protobuf\Internal\Message
      *           Empty (zero) in other cases.
      *     @type \Ydb\VirtualTimestamp $created_at
      *           Virtual timestamp when the object was created
+     *     @type bool $interrupt_permission_inheritance
+     *           When true, permissions are not inherited from parent objects
      * }
      */
     public function __construct($data = NULL) {
@@ -262,6 +270,32 @@ class Entry extends \Google\Protobuf\Internal\Message
     {
         GPBUtil::checkMessage($var, \Ydb\VirtualTimestamp::class);
         $this->created_at = $var;
+
+        return $this;
+    }
+
+    /**
+     * When true, permissions are not inherited from parent objects
+     *
+     * Generated from protobuf field <code>bool interrupt_permission_inheritance = 10;</code>
+     * @return bool
+     */
+    public function getInterruptPermissionInheritance()
+    {
+        return $this->interrupt_permission_inheritance;
+    }
+
+    /**
+     * When true, permissions are not inherited from parent objects
+     *
+     * Generated from protobuf field <code>bool interrupt_permission_inheritance = 10;</code>
+     * @param bool $var
+     * @return $this
+     */
+    public function setInterruptPermissionInheritance($var)
+    {
+        GPBUtil::checkBool($var);
+        $this->interrupt_permission_inheritance = $var;
 
         return $this;
     }

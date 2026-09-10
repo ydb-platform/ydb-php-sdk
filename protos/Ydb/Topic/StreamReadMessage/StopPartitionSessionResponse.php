@@ -23,6 +23,14 @@ class StopPartitionSessionResponse extends \Google\Protobuf\Internal\Message
      * Generated from protobuf field <code>int64 partition_session_id = 1;</code>
      */
     protected $partition_session_id = 0;
+    /**
+     * Flag of graceful stop, used only when InitRequest.direct_read is true
+     * Client must pass this value unchanged from the StopPartitionSessionRequest.
+     * Server can sent two StopPartitionSessionRequests, the first with graceful=true, the second with graceful=false. The client must answer both of them.
+     *
+     * Generated from protobuf field <code>bool graceful = 2;</code>
+     */
+    protected $graceful = false;
 
     /**
      * Constructor.
@@ -32,6 +40,10 @@ class StopPartitionSessionResponse extends \Google\Protobuf\Internal\Message
      *
      *     @type int|string $partition_session_id
      *           Partition session identifier of partition session that is released by client.
+     *     @type bool $graceful
+     *           Flag of graceful stop, used only when InitRequest.direct_read is true
+     *           Client must pass this value unchanged from the StopPartitionSessionRequest.
+     *           Server can sent two StopPartitionSessionRequests, the first with graceful=true, the second with graceful=false. The client must answer both of them.
      * }
      */
     public function __construct($data = NULL) {
@@ -61,6 +73,36 @@ class StopPartitionSessionResponse extends \Google\Protobuf\Internal\Message
     {
         GPBUtil::checkInt64($var);
         $this->partition_session_id = $var;
+
+        return $this;
+    }
+
+    /**
+     * Flag of graceful stop, used only when InitRequest.direct_read is true
+     * Client must pass this value unchanged from the StopPartitionSessionRequest.
+     * Server can sent two StopPartitionSessionRequests, the first with graceful=true, the second with graceful=false. The client must answer both of them.
+     *
+     * Generated from protobuf field <code>bool graceful = 2;</code>
+     * @return bool
+     */
+    public function getGraceful()
+    {
+        return $this->graceful;
+    }
+
+    /**
+     * Flag of graceful stop, used only when InitRequest.direct_read is true
+     * Client must pass this value unchanged from the StopPartitionSessionRequest.
+     * Server can sent two StopPartitionSessionRequests, the first with graceful=true, the second with graceful=false. The client must answer both of them.
+     *
+     * Generated from protobuf field <code>bool graceful = 2;</code>
+     * @param bool $var
+     * @return $this
+     */
+    public function setGraceful($var)
+    {
+        GPBUtil::checkBool($var);
+        $this->graceful = $var;
 
         return $this;
     }

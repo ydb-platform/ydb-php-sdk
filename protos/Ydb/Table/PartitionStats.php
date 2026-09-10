@@ -25,6 +25,12 @@ class PartitionStats extends \Google\Protobuf\Internal\Message
      * Generated from protobuf field <code>uint64 store_size = 2;</code>
      */
     protected $store_size = 0;
+    /**
+     * id of node that serve shard key range
+     *
+     * Generated from protobuf field <code>uint32 leader_node_id = 3;</code>
+     */
+    protected $leader_node_id = 0;
 
     /**
      * Constructor.
@@ -36,6 +42,8 @@ class PartitionStats extends \Google\Protobuf\Internal\Message
      *           Approximate number of rows in shard
      *     @type int|string $store_size
      *           Approximate size of shard (bytes)
+     *     @type int $leader_node_id
+     *           id of node that serve shard key range
      * }
      */
     public function __construct($data = NULL) {
@@ -91,6 +99,32 @@ class PartitionStats extends \Google\Protobuf\Internal\Message
     {
         GPBUtil::checkUint64($var);
         $this->store_size = $var;
+
+        return $this;
+    }
+
+    /**
+     * id of node that serve shard key range
+     *
+     * Generated from protobuf field <code>uint32 leader_node_id = 3;</code>
+     * @return int
+     */
+    public function getLeaderNodeId()
+    {
+        return $this->leader_node_id;
+    }
+
+    /**
+     * id of node that serve shard key range
+     *
+     * Generated from protobuf field <code>uint32 leader_node_id = 3;</code>
+     * @param int $var
+     * @return $this
+     */
+    public function setLeaderNodeId($var)
+    {
+        GPBUtil::checkUint32($var);
+        $this->leader_node_id = $var;
 
         return $this;
     }

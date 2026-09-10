@@ -1,14 +1,20 @@
-FROM thecodingmachine/php:8.0-v4-cli
+# The image contains x86-64 binaries only (protoc release below and the
+# pre-built php_plugin/grpc_php_plugin), so the platform is pinned explicitly.
+# On arm64 hosts (Apple Silicon) it runs through emulation.
+FROM --platform=linux/amd64 thecodingmachine/php:8.0-v4-cli
 
 ENV PHP_EXTENSION_GRPC=1
 ENV PHP_EXTENSION_BCMATH=1
 
 USER root:root
 
-RUN wget -O /tmp/z.$$ https://github.com/protocolbuffers/protobuf/releases/download/v22.0/protoc-22.0-linux-x86_64.zip \
+RUN sudo apt update \
+    && sudo apt install -y wget \
+    && wget -O /tmp/z.$$ https://github.com/protocolbuffers/protobuf/releases/download/v22.0/protoc-22.0-linux-x86_64.zip \
 	&& unzip -d /usr/local /tmp/z.$$ bin/protoc \
 	&& unzip -d /usr /tmp/z.$$ include/google/protobuf/*.proto \
-	&& rm /tmp/z.$$
+	&& rm /tmp/z.$$ \
+    && rm -rf /var/lib/apt/lists/*
 
 RUN chmod a+x /usr/local/bin/protoc
 

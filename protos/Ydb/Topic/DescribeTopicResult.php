@@ -51,6 +51,7 @@ class DescribeTopicResult extends \Google\Protobuf\Internal\Message
     /**
      * List of allowed codecs for writers.
      * Writes with codec not from this list are forbidden.
+     * If empty, codec compatibility check for the topic is disabled.
      *
      * Generated from protobuf field <code>.Ydb.Topic.SupportedCodecs supported_codecs = 7;</code>
      */
@@ -62,6 +63,14 @@ class DescribeTopicResult extends \Google\Protobuf\Internal\Message
      * Generated from protobuf field <code>int64 partition_write_speed_bytes_per_second = 8;</code>
      */
     protected $partition_write_speed_bytes_per_second = 0;
+    /**
+     * Generated from protobuf field <code>int64 partition_total_read_speed_bytes_per_second = 14;</code>
+     */
+    protected $partition_total_read_speed_bytes_per_second = 0;
+    /**
+     * Generated from protobuf field <code>int64 partition_consumer_read_speed_bytes_per_second = 15;</code>
+     */
+    protected $partition_consumer_read_speed_bytes_per_second = 0;
     /**
      * Burst size for write in partition, in bytes.
      * Zero value means default limit: 1 MB.
@@ -93,6 +102,18 @@ class DescribeTopicResult extends \Google\Protobuf\Internal\Message
      * Generated from protobuf field <code>.Ydb.Topic.DescribeTopicResult.TopicStats topic_stats = 13;</code>
      */
     protected $topic_stats = null;
+    /**
+     * Metrics level.
+     *
+     * Generated from protobuf field <code>optional uint32 metrics_level = 16;</code>
+     */
+    protected $metrics_level = null;
+    /**
+     * Is content-based deduplication enabled for the topic.
+     *
+     * Generated from protobuf field <code>bool content_based_deduplication = 17;</code>
+     */
+    protected $content_based_deduplication = false;
 
     /**
      * Constructor.
@@ -116,9 +137,12 @@ class DescribeTopicResult extends \Google\Protobuf\Internal\Message
      *     @type \Ydb\Topic\SupportedCodecs $supported_codecs
      *           List of allowed codecs for writers.
      *           Writes with codec not from this list are forbidden.
+     *           If empty, codec compatibility check for the topic is disabled.
      *     @type int|string $partition_write_speed_bytes_per_second
      *           Partition write speed in bytes per second.
      *           Zero value means default limit: 1 MB per second.
+     *     @type int|string $partition_total_read_speed_bytes_per_second
+     *     @type int|string $partition_consumer_read_speed_bytes_per_second
      *     @type int|string $partition_write_burst_bytes
      *           Burst size for write in partition, in bytes.
      *           Zero value means default limit: 1 MB.
@@ -130,6 +154,10 @@ class DescribeTopicResult extends \Google\Protobuf\Internal\Message
      *           Metering settings.
      *     @type \Ydb\Topic\DescribeTopicResult\TopicStats $topic_stats
      *           Statistics of topic.
+     *     @type int $metrics_level
+     *           Metrics level.
+     *     @type bool $content_based_deduplication
+     *           Is content-based deduplication enabled for the topic.
      * }
      */
     public function __construct($data = NULL) {
@@ -306,6 +334,7 @@ class DescribeTopicResult extends \Google\Protobuf\Internal\Message
     /**
      * List of allowed codecs for writers.
      * Writes with codec not from this list are forbidden.
+     * If empty, codec compatibility check for the topic is disabled.
      *
      * Generated from protobuf field <code>.Ydb.Topic.SupportedCodecs supported_codecs = 7;</code>
      * @return \Ydb\Topic\SupportedCodecs|null
@@ -328,6 +357,7 @@ class DescribeTopicResult extends \Google\Protobuf\Internal\Message
     /**
      * List of allowed codecs for writers.
      * Writes with codec not from this list are forbidden.
+     * If empty, codec compatibility check for the topic is disabled.
      *
      * Generated from protobuf field <code>.Ydb.Topic.SupportedCodecs supported_codecs = 7;</code>
      * @param \Ydb\Topic\SupportedCodecs $var
@@ -365,6 +395,50 @@ class DescribeTopicResult extends \Google\Protobuf\Internal\Message
     {
         GPBUtil::checkInt64($var);
         $this->partition_write_speed_bytes_per_second = $var;
+
+        return $this;
+    }
+
+    /**
+     * Generated from protobuf field <code>int64 partition_total_read_speed_bytes_per_second = 14;</code>
+     * @return int|string
+     */
+    public function getPartitionTotalReadSpeedBytesPerSecond()
+    {
+        return $this->partition_total_read_speed_bytes_per_second;
+    }
+
+    /**
+     * Generated from protobuf field <code>int64 partition_total_read_speed_bytes_per_second = 14;</code>
+     * @param int|string $var
+     * @return $this
+     */
+    public function setPartitionTotalReadSpeedBytesPerSecond($var)
+    {
+        GPBUtil::checkInt64($var);
+        $this->partition_total_read_speed_bytes_per_second = $var;
+
+        return $this;
+    }
+
+    /**
+     * Generated from protobuf field <code>int64 partition_consumer_read_speed_bytes_per_second = 15;</code>
+     * @return int|string
+     */
+    public function getPartitionConsumerReadSpeedBytesPerSecond()
+    {
+        return $this->partition_consumer_read_speed_bytes_per_second;
+    }
+
+    /**
+     * Generated from protobuf field <code>int64 partition_consumer_read_speed_bytes_per_second = 15;</code>
+     * @param int|string $var
+     * @return $this
+     */
+    public function setPartitionConsumerReadSpeedBytesPerSecond($var)
+    {
+        GPBUtil::checkInt64($var);
+        $this->partition_consumer_read_speed_bytes_per_second = $var;
 
         return $this;
     }
@@ -507,6 +581,68 @@ class DescribeTopicResult extends \Google\Protobuf\Internal\Message
     {
         GPBUtil::checkMessage($var, \Ydb\Topic\DescribeTopicResult\TopicStats::class);
         $this->topic_stats = $var;
+
+        return $this;
+    }
+
+    /**
+     * Metrics level.
+     *
+     * Generated from protobuf field <code>optional uint32 metrics_level = 16;</code>
+     * @return int
+     */
+    public function getMetricsLevel()
+    {
+        return isset($this->metrics_level) ? $this->metrics_level : 0;
+    }
+
+    public function hasMetricsLevel()
+    {
+        return isset($this->metrics_level);
+    }
+
+    public function clearMetricsLevel()
+    {
+        unset($this->metrics_level);
+    }
+
+    /**
+     * Metrics level.
+     *
+     * Generated from protobuf field <code>optional uint32 metrics_level = 16;</code>
+     * @param int $var
+     * @return $this
+     */
+    public function setMetricsLevel($var)
+    {
+        GPBUtil::checkUint32($var);
+        $this->metrics_level = $var;
+
+        return $this;
+    }
+
+    /**
+     * Is content-based deduplication enabled for the topic.
+     *
+     * Generated from protobuf field <code>bool content_based_deduplication = 17;</code>
+     * @return bool
+     */
+    public function getContentBasedDeduplication()
+    {
+        return $this->content_based_deduplication;
+    }
+
+    /**
+     * Is content-based deduplication enabled for the topic.
+     *
+     * Generated from protobuf field <code>bool content_based_deduplication = 17;</code>
+     * @param bool $var
+     * @return $this
+     */
+    public function setContentBasedDeduplication($var)
+    {
+        GPBUtil::checkBool($var);
+        $this->content_based_deduplication = $var;
 
         return $this;
     }
