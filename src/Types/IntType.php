@@ -4,6 +4,9 @@ namespace YdbPlatform\Ydb\Types;
 
 class IntType extends AbstractType
 {
+    // 2^64, for folding an overflowed Uint64 into its signed 64-bit bit pattern.
+    private const TWO_POW_64 = '18446744073709551616';
+
     /**
      * @var bool
      */
@@ -86,7 +89,20 @@ class IntType extends AbstractType
      */
     protected function getYdbValue()
     {
-        return $this->bits === 64 ? (string)$this->value : $this->value;
+        if ($this->bits !== 64)
+        {
+            return $this->value;
+        }
+
+        // Fold into the signed-64 bit pattern (wire setter clamps otherwise) at an explicit scale.
+        if (is_string($this->value))
+        {
+            return bccomp($this->value, (string)PHP_INT_MAX) > 0
+                ? bcsub($this->value, self::TWO_POW_64, 0)
+                : (string)(int)$this->value;
+        }
+
+        return (string)$this->value;
     }
 
     /**
@@ -94,10 +110,12 @@ class IntType extends AbstractType
      */
     protected function normalizeValue($value)
     {
-//        if ($value < 0)
-//        {
-//            $this->unsigned = true;
-//        }
+        // Keep an overflowed Uint64 as a string - (int) would silently clamp it.
+        if ($this->bits === 64 && $this->unsigned && bccomp((string)$value, (string)PHP_INT_MAX) > 0)
+        {
+            return (string)$value;
+        }
+
         return (int)$value;
     }
 
