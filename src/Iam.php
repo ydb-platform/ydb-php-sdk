@@ -348,7 +348,7 @@ class Iam implements IamTokenContract
 
             if (!is_dir($temp_dir))
             {
-                mkdir($temp_dir, 0600, true);
+                mkdir($temp_dir, 0700, true);
             }
 
             $this->token_temp_file = $temp_dir . '/ydb-iam-' . md5(serialize($this->config)) . '.json';

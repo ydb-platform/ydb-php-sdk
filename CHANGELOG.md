@@ -1,3 +1,5 @@
+* fixed `temp_dir` being created with `0600` permissions instead of `0700` (ydb-platform/ydb-php-sdk#128) - a directory needs the executable bit to be entered/traversed, not just read/write, so every `file_put_contents()` into a freshly auto-created `temp_dir` failed with "Permission denied"
+
 ## 1.16.3
 * improve log
 
