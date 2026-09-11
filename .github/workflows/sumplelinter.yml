@@ -15,7 +15,6 @@ permissions:
 jobs:
   linter:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
     strategy:
       matrix:
         php-versions: [ '7.2' ]
