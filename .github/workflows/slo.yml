@@ -13,9 +13,13 @@ jobs:
     concurrency:
       group: slo-${{ github.ref }}
       cancel-in-progress: true
+    # On `labeled` events run only when the `SLO` label itself was just added:
+    # otherwise any unrelated label change on a PR that already carries `SLO`
+    # would start a fresh run and cancel the in-progress one via `cancel-in-progress`.
     if: >-
       github.event_name == 'workflow_dispatch' ||
-      contains(github.event.pull_request.labels.*.name, 'SLO')
+      (github.event.action == 'labeled' && github.event.label.name == 'SLO') ||
+      (github.event.action != 'labeled' && contains(github.event.pull_request.labels.*.name, 'SLO'))
 
     runs-on: ubuntu-latest
     name: SLO test
