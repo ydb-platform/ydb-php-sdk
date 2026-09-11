@@ -5,6 +5,7 @@ namespace YdbPlatform\Ydb\Test;
 use PHPUnit\Framework\TestCase;
 use YdbPlatform\Ydb\Auth\Auth;
 use YdbPlatform\Ydb\Auth\TokenInfo;
+use YdbPlatform\Ydb\Iam;
 use YdbPlatform\Ydb\Ydb;
 
 class FakeCredentials extends Auth {
@@ -28,7 +29,8 @@ class FakeCredentials extends Auth {
         if ($this->counter==2){
             throw new \Exception("Some error");
         }
-        return new TokenInfo(time()+$this->tokenLiveTime,time()+$this->tokenLiveTime);
+        // Token value is unique per call, so a refreshed token is distinguishable from the previous one.
+        return new TokenInfo("token-" . $this->counter, time()+$this->tokenLiveTime);
     }
 
     public function getName(): string
@@ -43,13 +45,32 @@ class MetaGetter extends \YdbPlatform\Ydb\Session{
     }
 }
 
+class IamRefreshForcer extends Iam {
+    /**
+     * Move the refresh deadline of the current token into the past, so the next
+     * request triggers a token refresh without waiting for wall-clock time.
+     */
+    public static function forceRefresh(Iam $iam)
+    {
+        $iam->refresh_at = time() - 1;
+    }
+}
+
 class RefreshTokenTest extends TestCase
 {
     public function testRefreshToken(){
 
         $counter = 0;
 
-        $TOKEN_LIVE_TIME = 10;
+        // Long enough that the token never becomes due for refresh on its own
+        // during the test, so the test does not depend on runner speed.
+        $TOKEN_LIVE_TIME = 3600;
+
+        // Isolate the on-disk token cache from other tests and previous runs:
+        // the cache key is derived from the config, so a token left by an earlier
+        // run of this very test would otherwise be reused and skip the first fetch.
+        $tempDir = sys_get_temp_dir() . '/ydb-refresh-token-test-' . bin2hex(random_bytes(4));
+        mkdir($tempDir, 0700, true);
 
         $config = [
 
@@ -65,6 +86,7 @@ class RefreshTokenTest extends TestCase
             // IAM config
             'iam_config'  => [
                 'insecure' => true,
+                'temp_dir' => $tempDir,
             ],
             'credentials' => new FakeCredentials($counter, $TOKEN_LIVE_TIME)
         ];
@@ -87,8 +109,9 @@ class RefreshTokenTest extends TestCase
             $token,
             MetaGetter::getMeta($session)["x-ydb-auth-ticket"][0]
         );
+
         // Check that sdk used old token when failed refreshing
-        usleep($ydb->iam()->config('credentials')->getRefreshTokenRatio()*$TOKEN_LIVE_TIME*1000*1000); // waiting 10% from token live time
+        IamRefreshForcer::forceRefresh($ydb->iam());
         $session->query('select 1 as res');
         self::assertEquals(
             2,
@@ -99,7 +122,7 @@ class RefreshTokenTest extends TestCase
             MetaGetter::getMeta($session)["x-ydb-auth-ticket"][0]
         );
 
-        // Check that token refreshed
+        // Check that token refreshed on the next attempt
         $session->query('select 1 as res');
         self::assertEquals(
             3,
