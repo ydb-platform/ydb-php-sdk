@@ -39,6 +39,10 @@ class Progress
      * Generated from protobuf enum <code>PROGRESS_CANCELLED = 6;</code>
      */
     const PROGRESS_CANCELLED = 6;
+    /**
+     * Generated from protobuf enum <code>PROGRESS_CREATE_CHANGEFEEDS = 7;</code>
+     */
+    const PROGRESS_CREATE_CHANGEFEEDS = 7;
 
     private static $valueToName = [
         self::PROGRESS_UNSPECIFIED => 'PROGRESS_UNSPECIFIED',
@@ -48,6 +52,7 @@ class Progress
         self::PROGRESS_DONE => 'PROGRESS_DONE',
         self::PROGRESS_CANCELLATION => 'PROGRESS_CANCELLATION',
         self::PROGRESS_CANCELLED => 'PROGRESS_CANCELLED',
+        self::PROGRESS_CREATE_CHANGEFEEDS => 'PROGRESS_CREATE_CHANGEFEEDS',
     ];
 
     public static function name($value)

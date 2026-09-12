@@ -32,7 +32,7 @@ class PartitionStats extends \Google\Protobuf\Internal\Message
      */
     protected $last_write_time = null;
     /**
-     * Maximum of differences between write timestamp and create timestamp for all messages, written during last minute. 
+     * Maximum of differences between write timestamp and create timestamp for all messages, written during last minute.
      *
      * Generated from protobuf field <code>.google.protobuf.Duration max_write_time_lag = 4;</code>
      */
@@ -44,9 +44,10 @@ class PartitionStats extends \Google\Protobuf\Internal\Message
      */
     protected $bytes_written = null;
     /**
-     * Host where tablet for this partition works. Useful for debugging purposes.
+     * Partition host. Useful for debugging purposes.
      *
-     * Generated from protobuf field <code>int32 partition_node_id = 8;</code>
+     * Generated from protobuf field <code>int32 partition_node_id = 8 [deprecated = true];</code>
+     * @deprecated
      */
     protected $partition_node_id = 0;
 
@@ -63,11 +64,11 @@ class PartitionStats extends \Google\Protobuf\Internal\Message
      *     @type \Google\Protobuf\Timestamp $last_write_time
      *           Timestamp of last write.
      *     @type \Google\Protobuf\Duration $max_write_time_lag
-     *           Maximum of differences between write timestamp and create timestamp for all messages, written during last minute. 
+     *           Maximum of differences between write timestamp and create timestamp for all messages, written during last minute.
      *     @type \Ydb\Topic\MultipleWindowsStat $bytes_written
      *           How much bytes were written during several windows in this partition.
      *     @type int $partition_node_id
-     *           Host where tablet for this partition works. Useful for debugging purposes.
+     *           Partition host. Useful for debugging purposes.
      * }
      */
     public function __construct($data = NULL) {
@@ -174,7 +175,7 @@ class PartitionStats extends \Google\Protobuf\Internal\Message
     }
 
     /**
-     * Maximum of differences between write timestamp and create timestamp for all messages, written during last minute. 
+     * Maximum of differences between write timestamp and create timestamp for all messages, written during last minute.
      *
      * Generated from protobuf field <code>.google.protobuf.Duration max_write_time_lag = 4;</code>
      * @return \Google\Protobuf\Duration|null
@@ -195,7 +196,7 @@ class PartitionStats extends \Google\Protobuf\Internal\Message
     }
 
     /**
-     * Maximum of differences between write timestamp and create timestamp for all messages, written during last minute. 
+     * Maximum of differences between write timestamp and create timestamp for all messages, written during last minute.
      *
      * Generated from protobuf field <code>.google.protobuf.Duration max_write_time_lag = 4;</code>
      * @param \Google\Protobuf\Duration $var
@@ -246,25 +247,29 @@ class PartitionStats extends \Google\Protobuf\Internal\Message
     }
 
     /**
-     * Host where tablet for this partition works. Useful for debugging purposes.
+     * Partition host. Useful for debugging purposes.
      *
-     * Generated from protobuf field <code>int32 partition_node_id = 8;</code>
+     * Generated from protobuf field <code>int32 partition_node_id = 8 [deprecated = true];</code>
      * @return int
+     * @deprecated
      */
     public function getPartitionNodeId()
     {
+        @trigger_error('partition_node_id is deprecated.', E_USER_DEPRECATED);
         return $this->partition_node_id;
     }
 
     /**
-     * Host where tablet for this partition works. Useful for debugging purposes.
+     * Partition host. Useful for debugging purposes.
      *
-     * Generated from protobuf field <code>int32 partition_node_id = 8;</code>
+     * Generated from protobuf field <code>int32 partition_node_id = 8 [deprecated = true];</code>
      * @param int $var
      * @return $this
+     * @deprecated
      */
     public function setPartitionNodeId($var)
     {
+        @trigger_error('partition_node_id is deprecated.', E_USER_DEPRECATED);
         GPBUtil::checkInt32($var);
         $this->partition_node_id = $var;
 

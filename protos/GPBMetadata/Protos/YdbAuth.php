@@ -17,7 +17,7 @@ class YdbAuth
         \GPBMetadata\Protos\YdbOperation::initOnce();
         $pool->internalAddGeneratedFile(
             '
-¾
+Ä
 protos/ydb_auth.protoYdb.Auth"i
 LoginRequest9
 operation_params (2.Ydb.Operations.OperationParams
@@ -26,8 +26,8 @@ class YdbAuth
 LoginResponse,
 	operation (2.Ydb.Operations.Operation"
 LoginResult
-token (	BK
-tech.ydb.authZ7github.com/ydb-platform/ydb-go-genproto/protos/Ydb_Authøbproto3'
+token (	BQ
+tech.ydb.proto.authZ7github.com/ydb-platform/ydb-go-genproto/protos/Ydb_Authøbproto3'
         , true);
 
         static::$is_initialized = true;

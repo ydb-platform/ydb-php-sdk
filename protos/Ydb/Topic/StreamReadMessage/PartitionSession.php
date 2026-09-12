@@ -17,7 +17,7 @@ use Google\Protobuf\Internal\GPBUtil;
 class PartitionSession extends \Google\Protobuf\Internal\Message
 {
     /**
-     * Identitifier of partition session. Unique inside one RPC call.
+     * Identifier of partition session. Unique inside one RPC call.
      *
      * Generated from protobuf field <code>int64 partition_session_id = 1;</code>
      */
@@ -42,7 +42,7 @@ class PartitionSession extends \Google\Protobuf\Internal\Message
      *     Optional. Data for populating the Message object.
      *
      *     @type int|string $partition_session_id
-     *           Identitifier of partition session. Unique inside one RPC call.
+     *           Identifier of partition session. Unique inside one RPC call.
      *     @type string $path
      *           Topic path of partition.
      *     @type int|string $partition_id
@@ -55,7 +55,7 @@ class PartitionSession extends \Google\Protobuf\Internal\Message
     }
 
     /**
-     * Identitifier of partition session. Unique inside one RPC call.
+     * Identifier of partition session. Unique inside one RPC call.
      *
      * Generated from protobuf field <code>int64 partition_session_id = 1;</code>
      * @return int|string
@@ -66,7 +66,7 @@ class PartitionSession extends \Google\Protobuf\Internal\Message
     }
 
     /**
-     * Identitifier of partition session. Unique inside one RPC call.
+     * Identifier of partition session. Unique inside one RPC call.
      *
      * Generated from protobuf field <code>int64 partition_session_id = 1;</code>
      * @param int|string $var

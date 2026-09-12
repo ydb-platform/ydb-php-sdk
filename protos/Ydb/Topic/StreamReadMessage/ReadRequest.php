@@ -33,7 +33,7 @@ class ReadRequest extends \Google\Protobuf\Internal\Message
      * 4) Server is free to send up to 50 + 100 = 150 bytes. But the next read message is too big,
      *    and it sends 160 bytes ReadResponse.
      * 5) Let's assume client somehow processes it, and its 200 bytes buffer is free again.
-     *    It shoud account for excess 10 bytes and send ReadRequest with bytes_size = 210.
+     *    It should account for excess 10 bytes and send ReadRequest with bytes_size = 210.
      *
      * Generated from protobuf field <code>int64 bytes_size = 1;</code>
      */
@@ -63,7 +63,7 @@ class ReadRequest extends \Google\Protobuf\Internal\Message
      *           4) Server is free to send up to 50 + 100 = 150 bytes. But the next read message is too big,
      *              and it sends 160 bytes ReadResponse.
      *           5) Let's assume client somehow processes it, and its 200 bytes buffer is free again.
-     *              It shoud account for excess 10 bytes and send ReadRequest with bytes_size = 210.
+     *              It should account for excess 10 bytes and send ReadRequest with bytes_size = 210.
      * }
      */
     public function __construct($data = NULL) {
@@ -89,7 +89,7 @@ class ReadRequest extends \Google\Protobuf\Internal\Message
      * 4) Server is free to send up to 50 + 100 = 150 bytes. But the next read message is too big,
      *    and it sends 160 bytes ReadResponse.
      * 5) Let's assume client somehow processes it, and its 200 bytes buffer is free again.
-     *    It shoud account for excess 10 bytes and send ReadRequest with bytes_size = 210.
+     *    It should account for excess 10 bytes and send ReadRequest with bytes_size = 210.
      *
      * Generated from protobuf field <code>int64 bytes_size = 1;</code>
      * @return int|string
@@ -117,7 +117,7 @@ class ReadRequest extends \Google\Protobuf\Internal\Message
      * 4) Server is free to send up to 50 + 100 = 150 bytes. But the next read message is too big,
      *    and it sends 160 bytes ReadResponse.
      * 5) Let's assume client somehow processes it, and its 200 bytes buffer is free again.
-     *    It shoud account for excess 10 bytes and send ReadRequest with bytes_size = 210.
+     *    It should account for excess 10 bytes and send ReadRequest with bytes_size = 210.
      *
      * Generated from protobuf field <code>int64 bytes_size = 1;</code>
      * @param int|string $var

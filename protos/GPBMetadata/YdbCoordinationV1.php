@@ -17,7 +17,7 @@ class YdbCoordinationV1
         \GPBMetadata\Protos\YdbCoordination::initOnce();
         $pool->internalAddGeneratedFile(
             '
-ò
+ø
 ydb_coordination_v1.protoYdb.Coordination.V12Ê
 CoordinationServiceR
 Session .Ydb.Coordination.SessionRequest!.Ydb.Coordination.SessionResponse(0W
@@ -25,8 +25,8 @@ class YdbCoordinationV1
 CreateNode#.Ydb.Coordination.CreateNodeRequest$.Ydb.Coordination.CreateNodeResponseT
 	AlterNode".Ydb.Coordination.AlterNodeRequest#.Ydb.Coordination.AlterNodeResponseQ
 DropNode!.Ydb.Coordination.DropNodeRequest".Ydb.Coordination.DropNodeResponse]
-DescribeNode%.Ydb.Coordination.DescribeNodeRequest&.Ydb.Coordination.DescribeNodeResponseBk
-tech.ydb.coordination.v1BCoordinationGrpcPZ;github.com/ydb-platform/ydb-go-genproto/Ydb_Coordination_V1bproto3'
+DescribeNode%.Ydb.Coordination.DescribeNodeRequest&.Ydb.Coordination.DescribeNodeResponseBq
+tech.ydb.proto.coordination.v1BCoordinationGrpcPZ;github.com/ydb-platform/ydb-go-genproto/Ydb_Coordination_V1bproto3'
         , true);
 
         static::$is_initialized = true;

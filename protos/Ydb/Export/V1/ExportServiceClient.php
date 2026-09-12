@@ -48,4 +48,20 @@ class ExportServiceClient extends \Grpc\BaseStub {
         $metadata, $options);
     }
 
+    /**
+     * Exports data to file system.
+     * Method starts an asynchronous operation that can be cancelled while it is in progress.
+     * @param \Ydb\Export\ExportToFsRequest $argument input argument
+     * @param array $metadata metadata
+     * @param array $options call options
+     * @return \Grpc\UnaryCall
+     */
+    public function ExportToFs(\Ydb\Export\ExportToFsRequest $argument,
+      $metadata = [], $options = []) {
+        return $this->_simpleRequest('/Ydb.Export.V1.ExportService/ExportToFs',
+        $argument,
+        ['\Ydb\Export\ExportToFsResponse', 'decode'],
+        $metadata, $options);
+    }
+
 }
