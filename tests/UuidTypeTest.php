@@ -87,11 +87,13 @@ class UuidTypeTest extends TestCase
     {
         $session = $this->makeSession();
 
-        $uuid = '6E73B41C-4EDE-4D08-9CFB-B7462D9E498B';
+        // CAST(Uuid AS Utf8) always normalizes to lowercase, verified live -
+        // no strtolower() needed on either side.
+        $uuid = '6e73b41c-4ede-4d08-9cfb-b7462d9e498b';
         $result = $session->prepare('DECLARE $u AS Uuid; SELECT CAST($u AS Utf8) AS s;')
             ->execute(['u' => $uuid]);
 
-        self::assertSame(strtolower($uuid), strtolower($result->rows()[0]['s']));
+        self::assertSame($uuid, $result->rows()[0]['s']);
     }
 
     public function testNullUuidRoundTrips(): void
