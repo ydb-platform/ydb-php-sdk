@@ -4,6 +4,12 @@
 #   docker build -t ydb-app-current -f slo-workload/Dockerfile .
 FROM php:8.2-cli
 
+# git and unzip are used by composer: to extract the packages it downloads and to
+# determine the version of the SDK, which is required as a path repository.
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends git unzip \
+    && rm -rf /var/lib/apt/lists/*
+
 COPY --from=mlocati/php-extension-installer:2 /usr/bin/install-php-extensions /usr/local/bin/
 RUN install-php-extensions bcmath grpc pcntl protobuf sysvmsg
 
@@ -18,6 +24,9 @@ RUN { \
 
 COPY . /src
 WORKDIR /src/slo-workload
+
+# The repository is copied as root, git refuses to read it otherwise.
+RUN git config --global --add safe.directory /src
 
 # The lock file is not committed, and the SDK is required as a path repository.
 RUN composer update --no-dev --no-interaction --no-progress --prefer-dist
