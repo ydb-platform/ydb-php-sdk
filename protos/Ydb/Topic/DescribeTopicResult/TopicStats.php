@@ -26,7 +26,7 @@ class TopicStats extends \Google\Protobuf\Internal\Message
      */
     protected $min_last_write_time = null;
     /**
-     * Maximum of differences between write timestamp and create timestamp for all messages, written during last minute. 
+     * Maximum of differences between write timestamp and create timestamp for all messages, written during last minute.
      *
      * Generated from protobuf field <code>.google.protobuf.Duration max_write_time_lag = 3;</code>
      */
@@ -49,7 +49,7 @@ class TopicStats extends \Google\Protobuf\Internal\Message
      *     @type \Google\Protobuf\Timestamp $min_last_write_time
      *           Minimum of timestamps of last write among all partitions.
      *     @type \Google\Protobuf\Duration $max_write_time_lag
-     *           Maximum of differences between write timestamp and create timestamp for all messages, written during last minute. 
+     *           Maximum of differences between write timestamp and create timestamp for all messages, written during last minute.
      *     @type \Ydb\Topic\MultipleWindowsStat $bytes_written
      *           How much bytes were written statistics.
      * }
@@ -122,7 +122,7 @@ class TopicStats extends \Google\Protobuf\Internal\Message
     }
 
     /**
-     * Maximum of differences between write timestamp and create timestamp for all messages, written during last minute. 
+     * Maximum of differences between write timestamp and create timestamp for all messages, written during last minute.
      *
      * Generated from protobuf field <code>.google.protobuf.Duration max_write_time_lag = 3;</code>
      * @return \Google\Protobuf\Duration|null
@@ -143,7 +143,7 @@ class TopicStats extends \Google\Protobuf\Internal\Message
     }
 
     /**
-     * Maximum of differences between write timestamp and create timestamp for all messages, written during last minute. 
+     * Maximum of differences between write timestamp and create timestamp for all messages, written during last minute.
      *
      * Generated from protobuf field <code>.google.protobuf.Duration max_write_time_lag = 3;</code>
      * @param \Google\Protobuf\Duration $var

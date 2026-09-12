@@ -9,7 +9,7 @@ use Google\Protobuf\Internal\RepeatedField;
 use Google\Protobuf\Internal\GPBUtil;
 
 /**
- * Response for status request.
+ * Response to status request.
  *
  * Generated from protobuf message <code>Ydb.Topic.StreamReadMessage.PartitionSessionStatusResponse</code>
  */
@@ -39,6 +39,12 @@ class PartitionSessionStatusResponse extends \Google\Protobuf\Internal\Message
      * Generated from protobuf field <code>.google.protobuf.Timestamp write_time_high_watermark = 4;</code>
      */
     protected $write_time_high_watermark = null;
+    /**
+     * Messages with offsets up to and including (read_offset - 1) was read.
+     *
+     * Generated from protobuf field <code>int64 read_offset = 5;</code>
+     */
+    protected $read_offset = 0;
 
     /**
      * Constructor.
@@ -54,6 +60,8 @@ class PartitionSessionStatusResponse extends \Google\Protobuf\Internal\Message
      *           Each offset up to and including (committed_offset - 1) was fully processed.
      *     @type \Google\Protobuf\Timestamp $write_time_high_watermark
      *           Write timestamp of next message written to this partition will be no less than write_time_high_watermark.
+     *     @type int|string $read_offset
+     *           Messages with offsets up to and including (read_offset - 1) was read.
      * }
      */
     public function __construct($data = NULL) {
@@ -181,6 +189,32 @@ class PartitionSessionStatusResponse extends \Google\Protobuf\Internal\Message
     {
         GPBUtil::checkMessage($var, \Google\Protobuf\Timestamp::class);
         $this->write_time_high_watermark = $var;
+
+        return $this;
+    }
+
+    /**
+     * Messages with offsets up to and including (read_offset - 1) was read.
+     *
+     * Generated from protobuf field <code>int64 read_offset = 5;</code>
+     * @return int|string
+     */
+    public function getReadOffset()
+    {
+        return $this->read_offset;
+    }
+
+    /**
+     * Messages with offsets up to and including (read_offset - 1) was read.
+     *
+     * Generated from protobuf field <code>int64 read_offset = 5;</code>
+     * @param int|string $var
+     * @return $this
+     */
+    public function setReadOffset($var)
+    {
+        GPBUtil::checkInt64($var);
+        $this->read_offset = $var;
 
         return $this;
     }

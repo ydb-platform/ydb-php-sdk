@@ -17,19 +17,21 @@ class YdbTopicV1
         \GPBMetadata\Protos\YdbTopic::initOnce();
         $pool->internalAddGeneratedFile(
             '
-æ
-ydb_topic_v1.protoYdb.Topic.V12ë
+¸
+ydb_topic_v1.protoYdb.Topic.V12·
 TopicServicee
 StreamWrite(.Ydb.Topic.StreamWriteMessage.FromClient(.Ydb.Topic.StreamWriteMessage.FromServer(0b
 
-StreamRead\'.Ydb.Topic.StreamReadMessage.FromClient\'.Ydb.Topic.StreamReadMessage.FromServer(0L
+StreamRead\'.Ydb.Topic.StreamReadMessage.FromClient\'.Ydb.Topic.StreamReadMessage.FromServer(0O
+CommitOffset.Ydb.Topic.CommitOffsetRequest.Ydb.Topic.CommitOffsetResponsey
+UpdateOffsetsInTransaction,.Ydb.Topic.UpdateOffsetsInTransactionRequest-.Ydb.Topic.UpdateOffsetsInTransactionResponseL
 CreateTopic.Ydb.Topic.CreateTopicRequest.Ydb.Topic.CreateTopicResponseR
 DescribeTopic.Ydb.Topic.DescribeTopicRequest .Ydb.Topic.DescribeTopicResponse[
 DescribeConsumer".Ydb.Topic.DescribeConsumerRequest#.Ydb.Topic.DescribeConsumerResponseI
 
 AlterTopic.Ydb.Topic.AlterTopicRequest.Ydb.Topic.AlterTopicResponseF
-	DropTopic.Ydb.Topic.DropTopicRequest.Ydb.Topic.DropTopicResponseBL
-tech.ydb.topic.v1Z4github.com/ydb-platform/ydb-go-genproto/Ydb_Topic_V1øbproto3'
+	DropTopic.Ydb.Topic.DropTopicRequest.Ydb.Topic.DropTopicResponseBR
+tech.ydb.proto.topic.v1Z4github.com/ydb-platform/ydb-go-genproto/Ydb_Topic_V1øbproto3'
         , true);
 
         static::$is_initialized = true;

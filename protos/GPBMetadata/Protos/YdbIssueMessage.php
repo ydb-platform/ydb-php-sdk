@@ -16,7 +16,7 @@ class YdbIssueMessage
         }
         $pool->internalAddGeneratedFile(
             '
-ê
+ñ
 protos/ydb_issue_message.proto	Ydb.Issue"ë
 IssueMessage2
 position (2 .Ydb.Issue.IssueMessage.Position
@@ -29,8 +29,8 @@ issue_code (
 Position
 row (
 column (
-file (	BG
-tech.ydbZ8github.com/ydb-platform/ydb-go-genproto/protos/Ydb_Issue¯bproto3'
+file (	BM
+tech.ydb.protoZ8github.com/ydb-platform/ydb-go-genproto/protos/Ydb_Issue¯bproto3'
         , true);
 
         static::$is_initialized = true;
