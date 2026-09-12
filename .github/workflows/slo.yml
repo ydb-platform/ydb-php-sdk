@@ -150,3 +150,56 @@ jobs:
             -read-rps ${{ inputs.slo_workload_read_max_rps || '1000' }}
             -write-rps ${{ inputs.slo_workload_write_max_rps || '100' }}
           disable_compose_profiles: ${{ steps.baseline-workload.outputs.available != 'true' && 'workload-baseline' || '' }}
+
+  # Pull requests from forks get their report from slo-report.yml: their token is
+  # read-only and cannot publish anything.
+  publish-slo-report:
+    needs: ydb-slo-action
+    if: >-
+      !cancelled() &&
+      (github.event_name != 'pull_request' ||
+       github.event.pull_request.head.repo.full_name == github.repository)
+
+    name: Publish YDB SLO Report
+    runs-on: ubuntu-latest
+    permissions:
+      checks: write
+      contents: read
+      pull-requests: write
+
+    steps:
+      - name: Publish YDB SLO Report
+        uses: ydb-platform/ydb-slo-action/report@v2
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          github_run_id: ${{ github.run_id }}
+
+  remove-slo-label:
+    needs: publish-slo-report
+    if: always() && github.event_name == 'pull_request'
+
+    name: Remove SLO Label
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+
+    steps:
+      - name: Remove SLO label from PR
+        uses: actions/github-script@v7
+        with:
+          script: |
+            try {
+              await github.rest.issues.removeLabel({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                name: 'SLO'
+              });
+              console.log(`Removed SLO label from PR #${context.issue.number}`);
+            } catch (error) {
+              if (error.status === 404) {
+                console.log(`SLO label not found on PR #${context.issue.number}, skipping`);
+              } else {
+                throw error;
+              }
+            }

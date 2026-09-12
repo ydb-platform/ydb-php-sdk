@@ -1,7 +1,10 @@
 name: slo-report
 
-# Reporting runs in a separate workflow: `workflow_run` gives it write access
-# to the repository even when the SLO tests themselves ran for a fork pull request.
+# Reporting for pull requests from forks: their `pull_request` token is read-only,
+# so the SLO workflow cannot publish the report itself. `workflow_run` runs in the
+# base repository and has the permissions to do it.
+#
+# Everything else is reported by the SLO workflow directly, see slo.yml.
 on:
   workflow_run:
     workflows: ["SLO"]
@@ -16,7 +19,9 @@ jobs:
       checks: write
       contents: read
       pull-requests: write
-    if: github.event.workflow_run.conclusion != 'cancelled'
+    if: >-
+      github.event.workflow_run.conclusion != 'cancelled' &&
+      github.event.workflow_run.head_repository.full_name != github.repository
     steps:
       - name: Publish YDB SLO Report
         uses: ydb-platform/ydb-slo-action/report@v2
@@ -26,7 +31,9 @@ jobs:
 
   remove-slo-label:
     needs: publish-slo-report
-    if: always() && github.event.workflow_run.event == 'pull_request'
+    if: >-
+      always() && github.event.workflow_run.event == 'pull_request' &&
+      github.event.workflow_run.head_repository.full_name != github.repository
     runs-on: ubuntu-latest
     name: Remove SLO Label
     permissions:
