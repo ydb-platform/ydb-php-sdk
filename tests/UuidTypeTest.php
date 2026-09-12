@@ -47,7 +47,7 @@ class UuidTypeTest extends TestCase
     {
         self::assertSame(
             '6e73b41c-4ede-4d08-9cfb-b7462d9e498b',
-            UuidType::fromParts('5550773257976919068', '10036727161869040540'),
+            UuidType::fromParts('5550773257976919068', '10036727161869040540')
         );
     }
 

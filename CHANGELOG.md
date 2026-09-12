@@ -1,4 +1,4 @@
-* fixed `Uuid` values being written/read incorrectly - writing went through `StringType` (wrong wire type entirely, `STRING` instead of `UUID`, raw dashed text as `bytes_value`) and reading only looked at `low_128` via `dechex()`, discarding `high_128` and mangling byte order. Added `Types\UuidType`, matching the `low_128`/`high_128` split ("bytes_le") convention the official SDKs use, verified against a real server response.
+* fixed `Uuid` values being written/read incorrectly - writing went through `StringType` (wrong wire type entirely, `STRING` instead of `UUID`, raw dashed text as `bytes_value`) and reading only looked at `low_128` via `dechex()`, discarding `high_128` and mangling byte order. Added `Types\UuidType`, matching the `low_128`/`high_128` split ("bytes_le") convention the official SDKs use, verified against a real server response. Also fixed a trailing comma in a function call argument list (PHP 7.3+ only), a syntax error on this SDK's own stated PHP 7.2 minimum - found via this fork's own GitHub Actions run against the real CI matrix.
 
 ## 1.16.3
 * improve log
