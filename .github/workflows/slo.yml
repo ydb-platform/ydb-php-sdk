@@ -156,7 +156,7 @@ jobs:
   publish-slo-report:
     needs: ydb-slo-action
     if: >-
-      !cancelled() &&
+      !cancelled() && needs.ydb-slo-action.result != 'skipped' &&
       (github.event_name != 'pull_request' ||
        github.event.pull_request.head.repo.full_name == github.repository)
 
@@ -175,8 +175,10 @@ jobs:
           github_run_id: ${{ github.run_id }}
 
   remove-slo-label:
-    needs: publish-slo-report
-    if: always() && github.event_name == 'pull_request'
+    needs: [ydb-slo-action, publish-slo-report]
+    if: >-
+      always() && needs.ydb-slo-action.result != 'skipped' &&
+      github.event_name == 'pull_request'
 
     name: Remove SLO Label
     runs-on: ubuntu-latest
