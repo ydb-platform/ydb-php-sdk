@@ -93,6 +93,10 @@ class StatusCode
      * Generated from protobuf enum <code>SESSION_BUSY = 400190;</code>
      */
     const SESSION_BUSY = 400190;
+    /**
+     * Generated from protobuf enum <code>EXTERNAL_ERROR = 400200;</code>
+     */
+    const EXTERNAL_ERROR = 400200;
 
     private static $valueToName = [
         self::STATUS_CODE_UNSPECIFIED => 'STATUS_CODE_UNSPECIFIED',
@@ -115,6 +119,7 @@ class StatusCode
         self::UNDETERMINED => 'UNDETERMINED',
         self::UNSUPPORTED => 'UNSUPPORTED',
         self::SESSION_BUSY => 'SESSION_BUSY',
+        self::EXTERNAL_ERROR => 'EXTERNAL_ERROR',
     ];
 
     public static function name($value)

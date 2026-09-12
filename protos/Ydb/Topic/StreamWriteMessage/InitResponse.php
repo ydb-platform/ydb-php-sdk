@@ -9,7 +9,7 @@ use Google\Protobuf\Internal\RepeatedField;
 use Google\Protobuf\Internal\GPBUtil;
 
 /**
- * Response for handshake.
+ * Response to the handshake.
  *
  * Generated from protobuf message <code>Ydb.Topic.StreamWriteMessage.InitResponse</code>
  */

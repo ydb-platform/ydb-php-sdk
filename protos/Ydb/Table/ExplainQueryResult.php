@@ -21,6 +21,10 @@ class ExplainQueryResult extends \Google\Protobuf\Internal\Message
      * Generated from protobuf field <code>string query_plan = 2;</code>
      */
     protected $query_plan = '';
+    /**
+     * Generated from protobuf field <code>string query_full_diagnostics = 3;</code>
+     */
+    protected $query_full_diagnostics = '';
 
     /**
      * Constructor.
@@ -30,6 +34,7 @@ class ExplainQueryResult extends \Google\Protobuf\Internal\Message
      *
      *     @type string $query_ast
      *     @type string $query_plan
+     *     @type string $query_full_diagnostics
      * }
      */
     public function __construct($data = NULL) {
@@ -77,6 +82,28 @@ class ExplainQueryResult extends \Google\Protobuf\Internal\Message
     {
         GPBUtil::checkString($var, True);
         $this->query_plan = $var;
+
+        return $this;
+    }
+
+    /**
+     * Generated from protobuf field <code>string query_full_diagnostics = 3;</code>
+     * @return string
+     */
+    public function getQueryFullDiagnostics()
+    {
+        return $this->query_full_diagnostics;
+    }
+
+    /**
+     * Generated from protobuf field <code>string query_full_diagnostics = 3;</code>
+     * @param string $var
+     * @return $this
+     */
+    public function setQueryFullDiagnostics($var)
+    {
+        GPBUtil::checkString($var, True);
+        $this->query_full_diagnostics = $var;
 
         return $this;
     }

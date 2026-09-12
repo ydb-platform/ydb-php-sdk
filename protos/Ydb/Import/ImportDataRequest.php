@@ -28,7 +28,7 @@ class ImportDataRequest extends \Google\Protobuf\Internal\Message
      * - sorted by primary key;
      * - all keys must be from the same partition;
      * - table has no global secondary indexes;
-     * - size of serialized data is limited to 8 MB.
+     * - size of serialized data is limited to 16 MB.
      *
      * Generated from protobuf field <code>bytes data = 3 [(.Ydb.length) = {</code>
      */
@@ -49,7 +49,7 @@ class ImportDataRequest extends \Google\Protobuf\Internal\Message
      *           - sorted by primary key;
      *           - all keys must be from the same partition;
      *           - table has no global secondary indexes;
-     *           - size of serialized data is limited to 8 MB.
+     *           - size of serialized data is limited to 16 MB.
      *     @type \Ydb\Import\YdbDumpFormat $ydb_dump
      *           Result of `ydb tools dump`
      * }
@@ -122,7 +122,7 @@ class ImportDataRequest extends \Google\Protobuf\Internal\Message
      * - sorted by primary key;
      * - all keys must be from the same partition;
      * - table has no global secondary indexes;
-     * - size of serialized data is limited to 8 MB.
+     * - size of serialized data is limited to 16 MB.
      *
      * Generated from protobuf field <code>bytes data = 3 [(.Ydb.length) = {</code>
      * @return string
@@ -137,7 +137,7 @@ class ImportDataRequest extends \Google\Protobuf\Internal\Message
      * - sorted by primary key;
      * - all keys must be from the same partition;
      * - table has no global secondary indexes;
-     * - size of serialized data is limited to 8 MB.
+     * - size of serialized data is limited to 16 MB.
      *
      * Generated from protobuf field <code>bytes data = 3 [(.Ydb.length) = {</code>
      * @param string $var

@@ -37,6 +37,12 @@ class DescribeConsumerRequest extends \Google\Protobuf\Internal\Message
      * Generated from protobuf field <code>bool include_stats = 4;</code>
      */
     protected $include_stats = false;
+    /**
+     * Include partition location.
+     *
+     * Generated from protobuf field <code>bool include_location = 5;</code>
+     */
+    protected $include_location = false;
 
     /**
      * Constructor.
@@ -51,6 +57,8 @@ class DescribeConsumerRequest extends \Google\Protobuf\Internal\Message
      *           Consumer name;
      *     @type bool $include_stats
      *           Include consumer statistics.
+     *     @type bool $include_location
+     *           Include partition location.
      * }
      */
     public function __construct($data = NULL) {
@@ -164,6 +172,32 @@ class DescribeConsumerRequest extends \Google\Protobuf\Internal\Message
     {
         GPBUtil::checkBool($var);
         $this->include_stats = $var;
+
+        return $this;
+    }
+
+    /**
+     * Include partition location.
+     *
+     * Generated from protobuf field <code>bool include_location = 5;</code>
+     * @return bool
+     */
+    public function getIncludeLocation()
+    {
+        return $this->include_location;
+    }
+
+    /**
+     * Include partition location.
+     *
+     * Generated from protobuf field <code>bool include_location = 5;</code>
+     * @param bool $var
+     * @return $this
+     */
+    public function setIncludeLocation($var)
+    {
+        GPBUtil::checkBool($var);
+        $this->include_location = $var;
 
         return $this;
     }

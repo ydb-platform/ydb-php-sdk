@@ -32,7 +32,13 @@ class ConsumerStats extends \Google\Protobuf\Internal\Message
      */
     protected $max_write_time_lag = null;
     /**
-     * Bytes read stastics.
+     * The difference between the write timestamp of the last commited message and the current time.
+     *
+     * Generated from protobuf field <code>.google.protobuf.Duration max_committed_time_lag = 5;</code>
+     */
+    protected $max_committed_time_lag = null;
+    /**
+     * Bytes read statistics.
      *
      * Generated from protobuf field <code>.Ydb.Topic.MultipleWindowsStat bytes_read = 4;</code>
      */
@@ -50,8 +56,10 @@ class ConsumerStats extends \Google\Protobuf\Internal\Message
      *           Maximum of differences between timestamp of read and write timestamp for all messages, read during last minute.
      *     @type \Google\Protobuf\Duration $max_write_time_lag
      *           Maximum of differences between write timestamp and create timestamp for all messages, read during last minute.
+     *     @type \Google\Protobuf\Duration $max_committed_time_lag
+     *           The difference between the write timestamp of the last commited message and the current time.
      *     @type \Ydb\Topic\MultipleWindowsStat $bytes_read
-     *           Bytes read stastics.
+     *           Bytes read statistics.
      * }
      */
     public function __construct($data = NULL) {
@@ -168,7 +176,43 @@ class ConsumerStats extends \Google\Protobuf\Internal\Message
     }
 
     /**
-     * Bytes read stastics.
+     * The difference between the write timestamp of the last commited message and the current time.
+     *
+     * Generated from protobuf field <code>.google.protobuf.Duration max_committed_time_lag = 5;</code>
+     * @return \Google\Protobuf\Duration|null
+     */
+    public function getMaxCommittedTimeLag()
+    {
+        return $this->max_committed_time_lag;
+    }
+
+    public function hasMaxCommittedTimeLag()
+    {
+        return isset($this->max_committed_time_lag);
+    }
+
+    public function clearMaxCommittedTimeLag()
+    {
+        unset($this->max_committed_time_lag);
+    }
+
+    /**
+     * The difference between the write timestamp of the last commited message and the current time.
+     *
+     * Generated from protobuf field <code>.google.protobuf.Duration max_committed_time_lag = 5;</code>
+     * @param \Google\Protobuf\Duration $var
+     * @return $this
+     */
+    public function setMaxCommittedTimeLag($var)
+    {
+        GPBUtil::checkMessage($var, \Google\Protobuf\Duration::class);
+        $this->max_committed_time_lag = $var;
+
+        return $this;
+    }
+
+    /**
+     * Bytes read statistics.
      *
      * Generated from protobuf field <code>.Ydb.Topic.MultipleWindowsStat bytes_read = 4;</code>
      * @return \Ydb\Topic\MultipleWindowsStat|null
@@ -189,7 +233,7 @@ class ConsumerStats extends \Google\Protobuf\Internal\Message
     }
 
     /**
-     * Bytes read stastics.
+     * Bytes read statistics.
      *
      * Generated from protobuf field <code>.Ydb.Topic.MultipleWindowsStat bytes_read = 4;</code>
      * @param \Ydb\Topic\MultipleWindowsStat $var
