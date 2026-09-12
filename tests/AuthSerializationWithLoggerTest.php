@@ -17,11 +17,13 @@ class AuthSerializationWithLoggerTest extends TestCase
     private function loggerWithClosure(): AbstractLogger
     {
         return new class extends AbstractLogger {
-            private \Closure $formatter;
+            private $formatter;
 
             public function __construct()
             {
-                $this->formatter = fn($message) => (string) $message;
+                $this->formatter = function ($message) {
+                    return (string) $message;
+                };
             }
 
             public function log($level, $message, array $context = []): void
