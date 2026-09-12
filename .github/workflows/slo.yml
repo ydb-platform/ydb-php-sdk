@@ -53,8 +53,14 @@ jobs:
     steps:
       - name: Install dependencies
         run: |
+          YQ_VERSION=v4.48.2
           BUILDX_VERSION=0.30.1
           COMPOSE_VERSION=2.40.3
+
+          # The action reads its metrics configuration with yq.
+          sudo curl -fLo /usr/local/bin/yq \
+            "https://github.com/mikefarah/yq/releases/download/${YQ_VERSION}/yq_linux_amd64"
+          sudo chmod +x /usr/local/bin/yq
 
           sudo mkdir -p /usr/local/lib/docker/cli-plugins
 

@@ -39,6 +39,10 @@ class RunCommand extends Command
     protected $queue;
     /** @var bool set by the SIGTERM/SIGINT handler */
     protected $stopped = false;
+    /** @var bool set when the workers had to be killed at the shutdown deadline */
+    protected $timedOut = false;
+    /** @var float no operation may be started, or retried, after this point */
+    protected $operationDeadline = 0.0;
 
     public function execute(Config $config)
     {
@@ -87,7 +91,8 @@ class RunCommand extends Command
         // A process stuck in an operation must not hold the container: the action
         // gives the whole container only the workload duration plus a minute.
         pcntl_signal(SIGALRM, function () use ($pids, $logger) {
-            $logger->error("Workload processes did not finish in time, killing them");
+            $this->timedOut = true;
+            $logger->warning("Workload processes did not finish in time, killing them");
             foreach ($pids as $pid) {
                 posix_kill($pid, SIGKILL);
             }
@@ -105,8 +110,16 @@ class RunCommand extends Command
 
         $this->queue->remove();
 
-        if ($failed) {
+        if ($failed && !$this->timedOut) {
             throw new Exception("workload processes failed: " . implode(", ", $failed));
+        }
+
+        if ($failed) {
+            // Killing a worker that is in the middle of a retry is a normal end of the
+            // workload, not a failure: the metrics of the whole run are already pushed.
+            $logger->warning("Workload processes killed at the shutdown deadline", [
+                "pids" => implode(", ", $failed),
+            ]);
         }
 
         $logger->info("Workload finished");
@@ -128,6 +141,7 @@ class RunCommand extends Command
 
     protected function readJob(Config $config, int $index, float $deadline)
     {
+        $this->operationDeadline = $config->hardDeadline();
         $ydb = Utils::initDriver($config, "read-$index");
         $table = $ydb->table();
         $query = sprintf(Defaults::READ_QUERY, $config->tableName);
@@ -146,6 +160,7 @@ class RunCommand extends Command
 
     protected function writeJob(Config $config, int $index, float $deadline)
     {
+        $this->operationDeadline = $config->hardDeadline();
         $ydb = Utils::initDriver($config, "write-$index");
         $table = $ydb->table();
         $query = sprintf(Defaults::WRITE_QUERY, $config->tableName);
@@ -169,6 +184,9 @@ class RunCommand extends Command
     {
         $attempts = 1;
         $begin = microtime(true);
+        // Retries must not outlive the shutdown deadline, or the worker gets killed
+        // in the middle of an operation and the container overruns its time budget.
+        $timeoutMs = (int)max(100, min($timeoutMs, ($this->operationDeadline - $begin) * 1000));
         try {
             $table->retryTransaction($userFunc, true, new RetryParams($timeoutMs), [
                 'callback_on_error' => function (Exception $e) use (&$attempts, $type) {

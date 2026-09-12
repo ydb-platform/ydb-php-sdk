@@ -72,7 +72,7 @@ class Config
      */
     public function hardDeadline(): float
     {
-        return $this->runDeadline() + $this->shutdownTime / 3;
+        return $this->runDeadline() + $this->shutdownTime * 2 / 3;
     }
 
     /**
