@@ -29,6 +29,14 @@ WORKDIR /src/slo-workload
 RUN git config --global --add safe.directory /src
 
 # The lock file is not committed, and the SDK is required as a path repository.
-RUN composer update --no-dev --no-interaction --no-progress --prefer-dist
+# Packagist occasionally times out from the CI runners, so the install is retried.
+RUN for attempt in 1 2 3; do \
+        if composer update --no-dev --no-interaction --no-progress --prefer-dist; then \
+            exit 0; \
+        fi; \
+        echo "composer update failed (attempt ${attempt}), retrying in 10s"; \
+        sleep 10; \
+    done; \
+    exit 1
 
 ENTRYPOINT ["php", "application.php"]
