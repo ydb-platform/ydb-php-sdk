@@ -1,3 +1,4 @@
+* raised the `google/protobuf` constraint from `~3.15.8` to `^3.22` (ydb-platform/ydb-php-sdk#135) - the old version emits a stream of PHP 8.1/8.2 deprecation warnings (dynamic properties, internal method return types) on every request; the new range resolves to a version with none of them, verified with the full test suite
 
 ## 1.16.3
 * improve log
