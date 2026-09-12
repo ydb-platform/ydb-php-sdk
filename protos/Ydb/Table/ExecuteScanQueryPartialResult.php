@@ -21,6 +21,20 @@ class ExecuteScanQueryPartialResult extends \Google\Protobuf\Internal\Message
      * Generated from protobuf field <code>.Ydb.TableStats.QueryStats query_stats = 6;</code>
      */
     protected $query_stats = null;
+    /**
+     * works only in mode: MODE_EXPLAIN,
+     * collects additional diagnostics about query compilation, including query plan and scheme
+     *
+     * Generated from protobuf field <code>string query_full_diagnostics = 7 [deprecated = true];</code>
+     * @deprecated
+     */
+    protected $query_full_diagnostics = '';
+    /**
+     * Optional snapshot that corresponds to the returned data
+     *
+     * Generated from protobuf field <code>.Ydb.VirtualTimestamp snapshot = 8;</code>
+     */
+    protected $snapshot = null;
 
     /**
      * Constructor.
@@ -30,6 +44,11 @@ class ExecuteScanQueryPartialResult extends \Google\Protobuf\Internal\Message
      *
      *     @type \Ydb\ResultSet $result_set
      *     @type \Ydb\TableStats\QueryStats $query_stats
+     *     @type string $query_full_diagnostics
+     *           works only in mode: MODE_EXPLAIN,
+     *           collects additional diagnostics about query compilation, including query plan and scheme
+     *     @type \Ydb\VirtualTimestamp $snapshot
+     *           Optional snapshot that corresponds to the returned data
      * }
      */
     public function __construct($data = NULL) {
@@ -97,6 +116,74 @@ class ExecuteScanQueryPartialResult extends \Google\Protobuf\Internal\Message
     {
         GPBUtil::checkMessage($var, \Ydb\TableStats\QueryStats::class);
         $this->query_stats = $var;
+
+        return $this;
+    }
+
+    /**
+     * works only in mode: MODE_EXPLAIN,
+     * collects additional diagnostics about query compilation, including query plan and scheme
+     *
+     * Generated from protobuf field <code>string query_full_diagnostics = 7 [deprecated = true];</code>
+     * @return string
+     * @deprecated
+     */
+    public function getQueryFullDiagnostics()
+    {
+        @trigger_error('query_full_diagnostics is deprecated.', E_USER_DEPRECATED);
+        return $this->query_full_diagnostics;
+    }
+
+    /**
+     * works only in mode: MODE_EXPLAIN,
+     * collects additional diagnostics about query compilation, including query plan and scheme
+     *
+     * Generated from protobuf field <code>string query_full_diagnostics = 7 [deprecated = true];</code>
+     * @param string $var
+     * @return $this
+     * @deprecated
+     */
+    public function setQueryFullDiagnostics($var)
+    {
+        @trigger_error('query_full_diagnostics is deprecated.', E_USER_DEPRECATED);
+        GPBUtil::checkString($var, True);
+        $this->query_full_diagnostics = $var;
+
+        return $this;
+    }
+
+    /**
+     * Optional snapshot that corresponds to the returned data
+     *
+     * Generated from protobuf field <code>.Ydb.VirtualTimestamp snapshot = 8;</code>
+     * @return \Ydb\VirtualTimestamp|null
+     */
+    public function getSnapshot()
+    {
+        return $this->snapshot;
+    }
+
+    public function hasSnapshot()
+    {
+        return isset($this->snapshot);
+    }
+
+    public function clearSnapshot()
+    {
+        unset($this->snapshot);
+    }
+
+    /**
+     * Optional snapshot that corresponds to the returned data
+     *
+     * Generated from protobuf field <code>.Ydb.VirtualTimestamp snapshot = 8;</code>
+     * @param \Ydb\VirtualTimestamp $var
+     * @return $this
+     */
+    public function setSnapshot($var)
+    {
+        GPBUtil::checkMessage($var, \Ydb\VirtualTimestamp::class);
+        $this->snapshot = $var;
 
         return $this;
     }

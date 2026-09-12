@@ -25,6 +25,9 @@ class TransactionSettings extends \Google\Protobuf\Internal\Message
      *     @type \Ydb\Table\OnlineModeSettings $online_read_only
      *     @type \Ydb\Table\StaleModeSettings $stale_read_only
      *     @type \Ydb\Table\SnapshotModeSettings $snapshot_read_only
+     *     @type \Ydb\Table\SnapshotRWModeSettings $snapshot_read_write
+     *     @type \Ydb\Table\ReadCommittedRWModeSettings $read_committed_read_write
+     *     @type \Ydb\Table\StrictSerializableRWModeSettings $strict_serializable_read_write
      * }
      */
     public function __construct($data = NULL) {
@@ -136,6 +139,87 @@ class TransactionSettings extends \Google\Protobuf\Internal\Message
     {
         GPBUtil::checkMessage($var, \Ydb\Table\SnapshotModeSettings::class);
         $this->writeOneof(4, $var);
+
+        return $this;
+    }
+
+    /**
+     * Generated from protobuf field <code>.Ydb.Table.SnapshotRWModeSettings snapshot_read_write = 5;</code>
+     * @return \Ydb\Table\SnapshotRWModeSettings|null
+     */
+    public function getSnapshotReadWrite()
+    {
+        return $this->readOneof(5);
+    }
+
+    public function hasSnapshotReadWrite()
+    {
+        return $this->hasOneof(5);
+    }
+
+    /**
+     * Generated from protobuf field <code>.Ydb.Table.SnapshotRWModeSettings snapshot_read_write = 5;</code>
+     * @param \Ydb\Table\SnapshotRWModeSettings $var
+     * @return $this
+     */
+    public function setSnapshotReadWrite($var)
+    {
+        GPBUtil::checkMessage($var, \Ydb\Table\SnapshotRWModeSettings::class);
+        $this->writeOneof(5, $var);
+
+        return $this;
+    }
+
+    /**
+     * Generated from protobuf field <code>.Ydb.Table.ReadCommittedRWModeSettings read_committed_read_write = 6;</code>
+     * @return \Ydb\Table\ReadCommittedRWModeSettings|null
+     */
+    public function getReadCommittedReadWrite()
+    {
+        return $this->readOneof(6);
+    }
+
+    public function hasReadCommittedReadWrite()
+    {
+        return $this->hasOneof(6);
+    }
+
+    /**
+     * Generated from protobuf field <code>.Ydb.Table.ReadCommittedRWModeSettings read_committed_read_write = 6;</code>
+     * @param \Ydb\Table\ReadCommittedRWModeSettings $var
+     * @return $this
+     */
+    public function setReadCommittedReadWrite($var)
+    {
+        GPBUtil::checkMessage($var, \Ydb\Table\ReadCommittedRWModeSettings::class);
+        $this->writeOneof(6, $var);
+
+        return $this;
+    }
+
+    /**
+     * Generated from protobuf field <code>.Ydb.Table.StrictSerializableRWModeSettings strict_serializable_read_write = 7;</code>
+     * @return \Ydb\Table\StrictSerializableRWModeSettings|null
+     */
+    public function getStrictSerializableReadWrite()
+    {
+        return $this->readOneof(7);
+    }
+
+    public function hasStrictSerializableReadWrite()
+    {
+        return $this->hasOneof(7);
+    }
+
+    /**
+     * Generated from protobuf field <code>.Ydb.Table.StrictSerializableRWModeSettings strict_serializable_read_write = 7;</code>
+     * @param \Ydb\Table\StrictSerializableRWModeSettings $var
+     * @return $this
+     */
+    public function setStrictSerializableReadWrite($var)
+    {
+        GPBUtil::checkMessage($var, \Ydb\Table\StrictSerializableRWModeSettings::class);
+        $this->writeOneof(7, $var);
 
         return $this;
     }

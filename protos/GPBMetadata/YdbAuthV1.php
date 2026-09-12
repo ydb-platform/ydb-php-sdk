@@ -17,11 +17,11 @@ class YdbAuthV1
         \GPBMetadata\Protos\YdbAuth::initOnce();
         $pool->internalAddGeneratedFile(
             '
-º
+À
 ydb_auth_v1.protoYdb.Auth.V12G
 AuthService8
-Login.Ydb.Auth.LoginRequest.Ydb.Auth.LoginResponseBG
-tech.ydb.auth.v1Z3github.com/ydb-platform/ydb-go-genproto/Ydb_Auth_V1bproto3'
+Login.Ydb.Auth.LoginRequest.Ydb.Auth.LoginResponseBM
+tech.ydb.proto.auth.v1Z3github.com/ydb-platform/ydb-go-genproto/Ydb_Auth_V1bproto3'
         , true);
 
         static::$is_initialized = true;

@@ -21,7 +21,7 @@ class MessageData extends \Google\Protobuf\Internal\Message
      */
     protected $seq_no = 0;
     /**
-     * Creation timestamp
+     * Creation timestamp.
      *
      * Generated from protobuf field <code>.google.protobuf.Timestamp created_at = 2;</code>
      */
@@ -38,6 +38,12 @@ class MessageData extends \Google\Protobuf\Internal\Message
      * Generated from protobuf field <code>int64 uncompressed_size = 4;</code>
      */
     protected $uncompressed_size = 0;
+    /**
+     * Message metadata. Overall size is limited to 4096 symbols (all keys and values combined).
+     *
+     * Generated from protobuf field <code>repeated .Ydb.Topic.MetadataItem metadata_items = 7 [(.Ydb.size) = {</code>
+     */
+    private $metadata_items;
     protected $partitioning;
 
     /**
@@ -50,7 +56,7 @@ class MessageData extends \Google\Protobuf\Internal\Message
      *           Message sequence number, provided by client for deduplication.
      *           Starts at 1
      *     @type \Google\Protobuf\Timestamp $created_at
-     *           Creation timestamp
+     *           Creation timestamp.
      *     @type string $data
      *           Compressed client message body.
      *     @type int|string $uncompressed_size
@@ -59,6 +65,10 @@ class MessageData extends \Google\Protobuf\Internal\Message
      *           All messages with given pair (producer_id, message_group_id) go to single partition in order of writes.
      *     @type int|string $partition_id
      *           Explicit partition id to write to.
+     *     @type \Ydb\Topic\PartitionWithGeneration $partition_with_generation
+     *           Explicit partition location to write to.
+     *     @type array<\Ydb\Topic\MetadataItem>|\Google\Protobuf\Internal\RepeatedField $metadata_items
+     *           Message metadata. Overall size is limited to 4096 symbols (all keys and values combined).
      * }
      */
     public function __construct($data = NULL) {
@@ -95,7 +105,7 @@ class MessageData extends \Google\Protobuf\Internal\Message
     }
 
     /**
-     * Creation timestamp
+     * Creation timestamp.
      *
      * Generated from protobuf field <code>.google.protobuf.Timestamp created_at = 2;</code>
      * @return \Google\Protobuf\Timestamp|null
@@ -116,7 +126,7 @@ class MessageData extends \Google\Protobuf\Internal\Message
     }
 
     /**
-     * Creation timestamp
+     * Creation timestamp.
      *
      * Generated from protobuf field <code>.google.protobuf.Timestamp created_at = 2;</code>
      * @param \Google\Protobuf\Timestamp $var
@@ -185,7 +195,7 @@ class MessageData extends \Google\Protobuf\Internal\Message
     /**
      * All messages with given pair (producer_id, message_group_id) go to single partition in order of writes.
      *
-     * Generated from protobuf field <code>string message_group_id = 5;</code>
+     * Generated from protobuf field <code>string message_group_id = 5 [(.Ydb.length) = {</code>
      * @return string
      */
     public function getMessageGroupId()
@@ -201,7 +211,7 @@ class MessageData extends \Google\Protobuf\Internal\Message
     /**
      * All messages with given pair (producer_id, message_group_id) go to single partition in order of writes.
      *
-     * Generated from protobuf field <code>string message_group_id = 5;</code>
+     * Generated from protobuf field <code>string message_group_id = 5 [(.Ydb.length) = {</code>
      * @param string $var
      * @return $this
      */
@@ -240,6 +250,63 @@ class MessageData extends \Google\Protobuf\Internal\Message
     {
         GPBUtil::checkInt64($var);
         $this->writeOneof(6, $var);
+
+        return $this;
+    }
+
+    /**
+     * Explicit partition location to write to.
+     *
+     * Generated from protobuf field <code>.Ydb.Topic.PartitionWithGeneration partition_with_generation = 8;</code>
+     * @return \Ydb\Topic\PartitionWithGeneration|null
+     */
+    public function getPartitionWithGeneration()
+    {
+        return $this->readOneof(8);
+    }
+
+    public function hasPartitionWithGeneration()
+    {
+        return $this->hasOneof(8);
+    }
+
+    /**
+     * Explicit partition location to write to.
+     *
+     * Generated from protobuf field <code>.Ydb.Topic.PartitionWithGeneration partition_with_generation = 8;</code>
+     * @param \Ydb\Topic\PartitionWithGeneration $var
+     * @return $this
+     */
+    public function setPartitionWithGeneration($var)
+    {
+        GPBUtil::checkMessage($var, \Ydb\Topic\PartitionWithGeneration::class);
+        $this->writeOneof(8, $var);
+
+        return $this;
+    }
+
+    /**
+     * Message metadata. Overall size is limited to 4096 symbols (all keys and values combined).
+     *
+     * Generated from protobuf field <code>repeated .Ydb.Topic.MetadataItem metadata_items = 7 [(.Ydb.size) = {</code>
+     * @return \Google\Protobuf\Internal\RepeatedField
+     */
+    public function getMetadataItems()
+    {
+        return $this->metadata_items;
+    }
+
+    /**
+     * Message metadata. Overall size is limited to 4096 symbols (all keys and values combined).
+     *
+     * Generated from protobuf field <code>repeated .Ydb.Topic.MetadataItem metadata_items = 7 [(.Ydb.size) = {</code>
+     * @param array<\Ydb\Topic\MetadataItem>|\Google\Protobuf\Internal\RepeatedField $var
+     * @return $this
+     */
+    public function setMetadataItems($var)
+    {
+        $arr = GPBUtil::checkRepeatedField($var, \Google\Protobuf\Internal\GPBType::MESSAGE, \Ydb\Topic\MetadataItem::class);
+        $this->metadata_items = $arr;
 
         return $this;
     }

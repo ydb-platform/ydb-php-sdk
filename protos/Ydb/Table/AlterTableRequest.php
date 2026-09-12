@@ -50,13 +50,13 @@ class AlterTableRequest extends \Google\Protobuf\Internal\Message
      */
     private $alter_columns;
     /**
-     * Add secondary indexes
+     * Add table indexes
      *
      * Generated from protobuf field <code>repeated .Ydb.Table.TableIndex add_indexes = 9;</code>
      */
     private $add_indexes;
     /**
-     * Remove secondary indexes
+     * Remove table indexes
      *
      * Generated from protobuf field <code>repeated string drop_indexes = 10;</code>
      */
@@ -128,6 +128,7 @@ class AlterTableRequest extends \Google\Protobuf\Internal\Message
      */
     private $rename_indexes;
     protected $ttl_action;
+    protected $tiering_action;
 
     /**
      * Constructor.
@@ -149,9 +150,9 @@ class AlterTableRequest extends \Google\Protobuf\Internal\Message
      *     @type \Ydb\Table\TtlSettings $set_ttl_settings
      *     @type \Google\Protobuf\GPBEmpty $drop_ttl_settings
      *     @type array<\Ydb\Table\TableIndex>|\Google\Protobuf\Internal\RepeatedField $add_indexes
-     *           Add secondary indexes
+     *           Add table indexes
      *     @type array<string>|\Google\Protobuf\Internal\RepeatedField $drop_indexes
-     *           Remove secondary indexes
+     *           Remove table indexes
      *     @type \Ydb\Table\StorageSettings $alter_storage_settings
      *           Change table storage settings
      *     @type array<\Ydb\Table\ColumnFamily>|\Google\Protobuf\Internal\RepeatedField $add_column_families
@@ -175,6 +176,8 @@ class AlterTableRequest extends \Google\Protobuf\Internal\Message
      *           Remove change feeds (by its names)
      *     @type array<\Ydb\Table\RenameIndexItem>|\Google\Protobuf\Internal\RepeatedField $rename_indexes
      *           Rename existed index
+     *     @type string $set_tiering
+     *     @type \Google\Protobuf\GPBEmpty $drop_tiering
      * }
      */
     public function __construct($data = NULL) {
@@ -399,7 +402,7 @@ class AlterTableRequest extends \Google\Protobuf\Internal\Message
     }
 
     /**
-     * Add secondary indexes
+     * Add table indexes
      *
      * Generated from protobuf field <code>repeated .Ydb.Table.TableIndex add_indexes = 9;</code>
      * @return \Google\Protobuf\Internal\RepeatedField
@@ -410,7 +413,7 @@ class AlterTableRequest extends \Google\Protobuf\Internal\Message
     }
 
     /**
-     * Add secondary indexes
+     * Add table indexes
      *
      * Generated from protobuf field <code>repeated .Ydb.Table.TableIndex add_indexes = 9;</code>
      * @param array<\Ydb\Table\TableIndex>|\Google\Protobuf\Internal\RepeatedField $var
@@ -425,7 +428,7 @@ class AlterTableRequest extends \Google\Protobuf\Internal\Message
     }
 
     /**
-     * Remove secondary indexes
+     * Remove table indexes
      *
      * Generated from protobuf field <code>repeated string drop_indexes = 10;</code>
      * @return \Google\Protobuf\Internal\RepeatedField
@@ -436,7 +439,7 @@ class AlterTableRequest extends \Google\Protobuf\Internal\Message
     }
 
     /**
-     * Remove secondary indexes
+     * Remove table indexes
      *
      * Generated from protobuf field <code>repeated string drop_indexes = 10;</code>
      * @param array<string>|\Google\Protobuf\Internal\RepeatedField $var
@@ -767,11 +770,73 @@ class AlterTableRequest extends \Google\Protobuf\Internal\Message
     }
 
     /**
+     * Generated from protobuf field <code>string set_tiering = 22;</code>
+     * @return string
+     */
+    public function getSetTiering()
+    {
+        return $this->readOneof(22);
+    }
+
+    public function hasSetTiering()
+    {
+        return $this->hasOneof(22);
+    }
+
+    /**
+     * Generated from protobuf field <code>string set_tiering = 22;</code>
+     * @param string $var
+     * @return $this
+     */
+    public function setSetTiering($var)
+    {
+        GPBUtil::checkString($var, True);
+        $this->writeOneof(22, $var);
+
+        return $this;
+    }
+
+    /**
+     * Generated from protobuf field <code>.google.protobuf.Empty drop_tiering = 23;</code>
+     * @return \Google\Protobuf\GPBEmpty|null
+     */
+    public function getDropTiering()
+    {
+        return $this->readOneof(23);
+    }
+
+    public function hasDropTiering()
+    {
+        return $this->hasOneof(23);
+    }
+
+    /**
+     * Generated from protobuf field <code>.google.protobuf.Empty drop_tiering = 23;</code>
+     * @param \Google\Protobuf\GPBEmpty $var
+     * @return $this
+     */
+    public function setDropTiering($var)
+    {
+        GPBUtil::checkMessage($var, \Google\Protobuf\GPBEmpty::class);
+        $this->writeOneof(23, $var);
+
+        return $this;
+    }
+
+    /**
      * @return string
      */
     public function getTtlAction()
     {
         return $this->whichOneof("ttl_action");
+    }
+
+    /**
+     * @return string
+     */
+    public function getTieringAction()
+    {
+        return $this->whichOneof("tiering_action");
     }
 
 }
