@@ -34,6 +34,24 @@ class InitRequest extends \Google\Protobuf\Internal\Message
      * Generated from protobuf field <code>string reader_name = 3;</code>
      */
     protected $reader_name = '';
+    /**
+     * Direct reading from a partition node.
+     *
+     * Generated from protobuf field <code>bool direct_read = 4;</code>
+     */
+    protected $direct_read = false;
+    /**
+     * Indicates that the SDK supports auto partitioning.
+     *
+     * Generated from protobuf field <code>bool auto_partitioning_support = 5;</code>
+     */
+    protected $auto_partitioning_support = false;
+    /**
+     * Max in flight bytes per partition
+     *
+     * Generated from protobuf field <code>uint64 partition_max_in_flight_bytes = 6;</code>
+     */
+    protected $partition_max_in_flight_bytes = 0;
 
     /**
      * Constructor.
@@ -48,6 +66,12 @@ class InitRequest extends \Google\Protobuf\Internal\Message
      *           Path of consumer that is used for reading by this session.
      *     @type string $reader_name
      *           Optional name. Will be shown in debug stat.
+     *     @type bool $direct_read
+     *           Direct reading from a partition node.
+     *     @type bool $auto_partitioning_support
+     *           Indicates that the SDK supports auto partitioning.
+     *     @type int|string $partition_max_in_flight_bytes
+     *           Max in flight bytes per partition
      * }
      */
     public function __construct($data = NULL) {
@@ -131,6 +155,84 @@ class InitRequest extends \Google\Protobuf\Internal\Message
     {
         GPBUtil::checkString($var, True);
         $this->reader_name = $var;
+
+        return $this;
+    }
+
+    /**
+     * Direct reading from a partition node.
+     *
+     * Generated from protobuf field <code>bool direct_read = 4;</code>
+     * @return bool
+     */
+    public function getDirectRead()
+    {
+        return $this->direct_read;
+    }
+
+    /**
+     * Direct reading from a partition node.
+     *
+     * Generated from protobuf field <code>bool direct_read = 4;</code>
+     * @param bool $var
+     * @return $this
+     */
+    public function setDirectRead($var)
+    {
+        GPBUtil::checkBool($var);
+        $this->direct_read = $var;
+
+        return $this;
+    }
+
+    /**
+     * Indicates that the SDK supports auto partitioning.
+     *
+     * Generated from protobuf field <code>bool auto_partitioning_support = 5;</code>
+     * @return bool
+     */
+    public function getAutoPartitioningSupport()
+    {
+        return $this->auto_partitioning_support;
+    }
+
+    /**
+     * Indicates that the SDK supports auto partitioning.
+     *
+     * Generated from protobuf field <code>bool auto_partitioning_support = 5;</code>
+     * @param bool $var
+     * @return $this
+     */
+    public function setAutoPartitioningSupport($var)
+    {
+        GPBUtil::checkBool($var);
+        $this->auto_partitioning_support = $var;
+
+        return $this;
+    }
+
+    /**
+     * Max in flight bytes per partition
+     *
+     * Generated from protobuf field <code>uint64 partition_max_in_flight_bytes = 6;</code>
+     * @return int|string
+     */
+    public function getPartitionMaxInFlightBytes()
+    {
+        return $this->partition_max_in_flight_bytes;
+    }
+
+    /**
+     * Max in flight bytes per partition
+     *
+     * Generated from protobuf field <code>uint64 partition_max_in_flight_bytes = 6;</code>
+     * @param int|string $var
+     * @return $this
+     */
+    public function setPartitionMaxInFlightBytes($var)
+    {
+        GPBUtil::checkUint64($var);
+        $this->partition_max_in_flight_bytes = $var;
 
         return $this;
     }

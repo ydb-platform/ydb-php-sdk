@@ -56,7 +56,13 @@ class PartitionConsumerStats extends \Google\Protobuf\Internal\Message
      */
     protected $max_write_time_lag = null;
     /**
-     * How much bytes were read during several windows statistics from this partiton.
+     * The difference between the write timestamp of the last commited message and the current time.
+     *
+     * Generated from protobuf field <code>.google.protobuf.Duration max_committed_time_lag = 13;</code>
+     */
+    protected $max_committed_time_lag = null;
+    /**
+     * How much bytes were read during several windows statistics from this partition.
      *
      * Generated from protobuf field <code>.Ydb.Topic.MultipleWindowsStat bytes_read = 8;</code>
      */
@@ -94,8 +100,10 @@ class PartitionConsumerStats extends \Google\Protobuf\Internal\Message
      *           Maximum of differences between timestamp of read and write timestamp for all messages, read during last minute.
      *     @type \Google\Protobuf\Duration $max_write_time_lag
      *           Maximum of differences between write timestamp and create timestamp for all messages, read during last minute.
+     *     @type \Google\Protobuf\Duration $max_committed_time_lag
+     *           The difference between the write timestamp of the last commited message and the current time.
      *     @type \Ydb\Topic\MultipleWindowsStat $bytes_read
-     *           How much bytes were read during several windows statistics from this partiton.
+     *           How much bytes were read during several windows statistics from this partition.
      *     @type string $reader_name
      *           Read session name, provided by client.
      *     @type int $connection_node_id
@@ -330,7 +338,43 @@ class PartitionConsumerStats extends \Google\Protobuf\Internal\Message
     }
 
     /**
-     * How much bytes were read during several windows statistics from this partiton.
+     * The difference between the write timestamp of the last commited message and the current time.
+     *
+     * Generated from protobuf field <code>.google.protobuf.Duration max_committed_time_lag = 13;</code>
+     * @return \Google\Protobuf\Duration|null
+     */
+    public function getMaxCommittedTimeLag()
+    {
+        return $this->max_committed_time_lag;
+    }
+
+    public function hasMaxCommittedTimeLag()
+    {
+        return isset($this->max_committed_time_lag);
+    }
+
+    public function clearMaxCommittedTimeLag()
+    {
+        unset($this->max_committed_time_lag);
+    }
+
+    /**
+     * The difference between the write timestamp of the last commited message and the current time.
+     *
+     * Generated from protobuf field <code>.google.protobuf.Duration max_committed_time_lag = 13;</code>
+     * @param \Google\Protobuf\Duration $var
+     * @return $this
+     */
+    public function setMaxCommittedTimeLag($var)
+    {
+        GPBUtil::checkMessage($var, \Google\Protobuf\Duration::class);
+        $this->max_committed_time_lag = $var;
+
+        return $this;
+    }
+
+    /**
+     * How much bytes were read during several windows statistics from this partition.
      *
      * Generated from protobuf field <code>.Ydb.Topic.MultipleWindowsStat bytes_read = 8;</code>
      * @return \Ydb\Topic\MultipleWindowsStat|null
@@ -351,7 +395,7 @@ class PartitionConsumerStats extends \Google\Protobuf\Internal\Message
     }
 
     /**
-     * How much bytes were read during several windows statistics from this partiton.
+     * How much bytes were read during several windows statistics from this partition.
      *
      * Generated from protobuf field <code>.Ydb.Topic.MultipleWindowsStat bytes_read = 8;</code>
      * @param \Ydb\Topic\MultipleWindowsStat $var

@@ -38,6 +38,12 @@ class StopPartitionSessionRequest extends \Google\Protobuf\Internal\Message
      * Generated from protobuf field <code>int64 committed_offset = 3;</code>
      */
     protected $committed_offset = 0;
+    /**
+     * Upper bound for read request identifiers, filled only when InitRequest.direct_read is true and graceful is true.
+     *
+     * Generated from protobuf field <code>int64 last_direct_read_id = 4;</code>
+     */
+    protected $last_direct_read_id = 0;
 
     /**
      * Constructor.
@@ -56,6 +62,8 @@ class StopPartitionSessionRequest extends \Google\Protobuf\Internal\Message
      *           All further commits for this partition session has no effect. Server is not waiting for response.
      *     @type int|string $committed_offset
      *           Upper bound for committed offsets.
+     *     @type int|string $last_direct_read_id
+     *           Upper bound for read request identifiers, filled only when InitRequest.direct_read is true and graceful is true.
      * }
      */
     public function __construct($data = NULL) {
@@ -147,6 +155,32 @@ class StopPartitionSessionRequest extends \Google\Protobuf\Internal\Message
     {
         GPBUtil::checkInt64($var);
         $this->committed_offset = $var;
+
+        return $this;
+    }
+
+    /**
+     * Upper bound for read request identifiers, filled only when InitRequest.direct_read is true and graceful is true.
+     *
+     * Generated from protobuf field <code>int64 last_direct_read_id = 4;</code>
+     * @return int|string
+     */
+    public function getLastDirectReadId()
+    {
+        return $this->last_direct_read_id;
+    }
+
+    /**
+     * Upper bound for read request identifiers, filled only when InitRequest.direct_read is true and graceful is true.
+     *
+     * Generated from protobuf field <code>int64 last_direct_read_id = 4;</code>
+     * @param int|string $var
+     * @return $this
+     */
+    public function setLastDirectReadId($var)
+    {
+        GPBUtil::checkInt64($var);
+        $this->last_direct_read_id = $var;
 
         return $this;
     }

@@ -18,7 +18,7 @@ class ExecuteScanQueryRequest extends \Google\Protobuf\Internal\Message
      */
     protected $query = null;
     /**
-     * Generated from protobuf field <code>map<string, .Ydb.TypedValue> parameters = 4;</code>
+     * Generated from protobuf field <code>map<string, .Ydb.TypedValue> parameters = 4 [(.Ydb.sensitive) = true];</code>
      */
     private $parameters;
     /**
@@ -29,6 +29,14 @@ class ExecuteScanQueryRequest extends \Google\Protobuf\Internal\Message
      * Generated from protobuf field <code>.Ydb.Table.QueryStatsCollection.Mode collect_stats = 8;</code>
      */
     protected $collect_stats = 0;
+    /**
+     * works only in mode: MODE_EXPLAIN,
+     * collects additional diagnostics about query compilation, including query plan and scheme
+     *
+     * Generated from protobuf field <code>bool collect_full_diagnostics = 9 [deprecated = true];</code>
+     * @deprecated
+     */
+    protected $collect_full_diagnostics = false;
 
     /**
      * Constructor.
@@ -40,6 +48,9 @@ class ExecuteScanQueryRequest extends \Google\Protobuf\Internal\Message
      *     @type array|\Google\Protobuf\Internal\MapField $parameters
      *     @type int $mode
      *     @type int $collect_stats
+     *     @type bool $collect_full_diagnostics
+     *           works only in mode: MODE_EXPLAIN,
+     *           collects additional diagnostics about query compilation, including query plan and scheme
      * }
      */
     public function __construct($data = NULL) {
@@ -80,7 +91,7 @@ class ExecuteScanQueryRequest extends \Google\Protobuf\Internal\Message
     }
 
     /**
-     * Generated from protobuf field <code>map<string, .Ydb.TypedValue> parameters = 4;</code>
+     * Generated from protobuf field <code>map<string, .Ydb.TypedValue> parameters = 4 [(.Ydb.sensitive) = true];</code>
      * @return \Google\Protobuf\Internal\MapField
      */
     public function getParameters()
@@ -89,7 +100,7 @@ class ExecuteScanQueryRequest extends \Google\Protobuf\Internal\Message
     }
 
     /**
-     * Generated from protobuf field <code>map<string, .Ydb.TypedValue> parameters = 4;</code>
+     * Generated from protobuf field <code>map<string, .Ydb.TypedValue> parameters = 4 [(.Ydb.sensitive) = true];</code>
      * @param array|\Google\Protobuf\Internal\MapField $var
      * @return $this
      */
@@ -141,6 +152,38 @@ class ExecuteScanQueryRequest extends \Google\Protobuf\Internal\Message
     {
         GPBUtil::checkEnum($var, \Ydb\Table\QueryStatsCollection\Mode::class);
         $this->collect_stats = $var;
+
+        return $this;
+    }
+
+    /**
+     * works only in mode: MODE_EXPLAIN,
+     * collects additional diagnostics about query compilation, including query plan and scheme
+     *
+     * Generated from protobuf field <code>bool collect_full_diagnostics = 9 [deprecated = true];</code>
+     * @return bool
+     * @deprecated
+     */
+    public function getCollectFullDiagnostics()
+    {
+        @trigger_error('collect_full_diagnostics is deprecated.', E_USER_DEPRECATED);
+        return $this->collect_full_diagnostics;
+    }
+
+    /**
+     * works only in mode: MODE_EXPLAIN,
+     * collects additional diagnostics about query compilation, including query plan and scheme
+     *
+     * Generated from protobuf field <code>bool collect_full_diagnostics = 9 [deprecated = true];</code>
+     * @param bool $var
+     * @return $this
+     * @deprecated
+     */
+    public function setCollectFullDiagnostics($var)
+    {
+        @trigger_error('collect_full_diagnostics is deprecated.', E_USER_DEPRECATED);
+        GPBUtil::checkBool($var);
+        $this->collect_full_diagnostics = $var;
 
         return $this;
     }

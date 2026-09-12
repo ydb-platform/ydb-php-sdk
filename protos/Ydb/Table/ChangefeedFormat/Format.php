@@ -16,13 +16,29 @@ class Format
      */
     const FORMAT_UNSPECIFIED = 0;
     /**
+     * Change record in JSON format for common (row oriented) tables
+     *
      * Generated from protobuf enum <code>FORMAT_JSON = 1;</code>
      */
     const FORMAT_JSON = 1;
+    /**
+     * Change record in JSON format for document (DynamoDB-compatible) tables
+     *
+     * Generated from protobuf enum <code>FORMAT_DYNAMODB_STREAMS_JSON = 2;</code>
+     */
+    const FORMAT_DYNAMODB_STREAMS_JSON = 2;
+    /**
+     * Debezium-like change record JSON format for common (row oriented) tables
+     *
+     * Generated from protobuf enum <code>FORMAT_DEBEZIUM_JSON = 3;</code>
+     */
+    const FORMAT_DEBEZIUM_JSON = 3;
 
     private static $valueToName = [
         self::FORMAT_UNSPECIFIED => 'FORMAT_UNSPECIFIED',
         self::FORMAT_JSON => 'FORMAT_JSON',
+        self::FORMAT_DYNAMODB_STREAMS_JSON => 'FORMAT_DYNAMODB_STREAMS_JSON',
+        self::FORMAT_DEBEZIUM_JSON => 'FORMAT_DEBEZIUM_JSON',
     ];
 
     public static function name($value)

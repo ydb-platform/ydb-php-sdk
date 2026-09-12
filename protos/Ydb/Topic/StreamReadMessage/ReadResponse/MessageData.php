@@ -50,9 +50,13 @@ class MessageData extends \Google\Protobuf\Internal\Message
     /**
      * Filled if message_group_id was set on message write.
      *
-     * Generated from protobuf field <code>string message_group_id = 7;</code>
+     * Generated from protobuf field <code>string message_group_id = 7 [(.Ydb.length) = {</code>
      */
     protected $message_group_id = '';
+    /**
+     * Generated from protobuf field <code>repeated .Ydb.Topic.MetadataItem metadata_items = 8;</code>
+     */
+    private $metadata_items;
 
     /**
      * Constructor.
@@ -74,6 +78,7 @@ class MessageData extends \Google\Protobuf\Internal\Message
      *           Use it for optimization purposes only, don't trust it.
      *     @type string $message_group_id
      *           Filled if message_group_id was set on message write.
+     *     @type array<\Ydb\Topic\MetadataItem>|\Google\Protobuf\Internal\RepeatedField $metadata_items
      * }
      */
     public function __construct($data = NULL) {
@@ -228,7 +233,7 @@ class MessageData extends \Google\Protobuf\Internal\Message
     /**
      * Filled if message_group_id was set on message write.
      *
-     * Generated from protobuf field <code>string message_group_id = 7;</code>
+     * Generated from protobuf field <code>string message_group_id = 7 [(.Ydb.length) = {</code>
      * @return string
      */
     public function getMessageGroupId()
@@ -239,7 +244,7 @@ class MessageData extends \Google\Protobuf\Internal\Message
     /**
      * Filled if message_group_id was set on message write.
      *
-     * Generated from protobuf field <code>string message_group_id = 7;</code>
+     * Generated from protobuf field <code>string message_group_id = 7 [(.Ydb.length) = {</code>
      * @param string $var
      * @return $this
      */
@@ -247,6 +252,28 @@ class MessageData extends \Google\Protobuf\Internal\Message
     {
         GPBUtil::checkString($var, True);
         $this->message_group_id = $var;
+
+        return $this;
+    }
+
+    /**
+     * Generated from protobuf field <code>repeated .Ydb.Topic.MetadataItem metadata_items = 8;</code>
+     * @return \Google\Protobuf\Internal\RepeatedField
+     */
+    public function getMetadataItems()
+    {
+        return $this->metadata_items;
+    }
+
+    /**
+     * Generated from protobuf field <code>repeated .Ydb.Topic.MetadataItem metadata_items = 8;</code>
+     * @param array<\Ydb\Topic\MetadataItem>|\Google\Protobuf\Internal\RepeatedField $var
+     * @return $this
+     */
+    public function setMetadataItems($var)
+    {
+        $arr = GPBUtil::checkRepeatedField($var, \Google\Protobuf\Internal\GPBType::MESSAGE, \Ydb\Topic\MetadataItem::class);
+        $this->metadata_items = $arr;
 
         return $this;
     }

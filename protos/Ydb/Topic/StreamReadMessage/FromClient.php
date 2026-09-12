@@ -15,6 +15,7 @@ use Google\Protobuf\Internal\GPBUtil;
  *     CommitOffsetRequest - request for commit of some read data.
  *     PartitionSessionStatusRequest - request for session status
  *     UpdateTokenRequest - request to update auth token
+ *     DirectReadAck - client signals it has finished direct reading from the partition node.
  *     StartPartitionSessionResponse - Response to StreamReadServerMessage.StartPartitionSessionRequest.
  *         Client signals it is ready to get data from partition.
  *     StopPartitionSessionResponse - Response to StreamReadServerMessage.StopPartitionSessionRequest.
@@ -38,6 +39,7 @@ class FromClient extends \Google\Protobuf\Internal\Message
      *     @type \Ydb\Topic\StreamReadMessage\CommitOffsetRequest $commit_offset_request
      *     @type \Ydb\Topic\StreamReadMessage\PartitionSessionStatusRequest $partition_session_status_request
      *     @type \Ydb\Topic\UpdateTokenRequest $update_token_request
+     *     @type \Ydb\Topic\StreamReadMessage\DirectReadAck $direct_read_ack
      *     @type \Ydb\Topic\StreamReadMessage\StartPartitionSessionResponse $start_partition_session_response
      *           Responses to respective server commands.
      *     @type \Ydb\Topic\StreamReadMessage\StopPartitionSessionResponse $stop_partition_session_response
@@ -183,6 +185,33 @@ class FromClient extends \Google\Protobuf\Internal\Message
     {
         GPBUtil::checkMessage($var, \Ydb\Topic\UpdateTokenRequest::class);
         $this->writeOneof(5, $var);
+
+        return $this;
+    }
+
+    /**
+     * Generated from protobuf field <code>.Ydb.Topic.StreamReadMessage.DirectReadAck direct_read_ack = 8;</code>
+     * @return \Ydb\Topic\StreamReadMessage\DirectReadAck|null
+     */
+    public function getDirectReadAck()
+    {
+        return $this->readOneof(8);
+    }
+
+    public function hasDirectReadAck()
+    {
+        return $this->hasOneof(8);
+    }
+
+    /**
+     * Generated from protobuf field <code>.Ydb.Topic.StreamReadMessage.DirectReadAck direct_read_ack = 8;</code>
+     * @param \Ydb\Topic\StreamReadMessage\DirectReadAck $var
+     * @return $this
+     */
+    public function setDirectReadAck($var)
+    {
+        GPBUtil::checkMessage($var, \Ydb\Topic\StreamReadMessage\DirectReadAck::class);
+        $this->writeOneof(8, $var);
 
         return $this;
     }
