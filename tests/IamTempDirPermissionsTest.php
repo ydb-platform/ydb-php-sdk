@@ -30,7 +30,9 @@ class IamTempDirPermissionsTest extends TestCase
     public function testCreatedTempDirIsTraversable(): void
     {
         $this->tempDir = sys_get_temp_dir() . '/ydb-sdk-test-' . uniqid();
-        self::assertDirectoryDoesNotExist($this->tempDir);
+        // assertDirectoryDoesNotExist() only exists from PHPUnit 9.1 - this SDK's
+        // stated PHP 7.2 minimum resolves PHPUnit 8.5, which lacks it.
+        self::assertFalse(is_dir($this->tempDir));
 
         $iam = new IamTestable([
             'temp_dir' => $this->tempDir,
