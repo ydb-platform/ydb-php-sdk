@@ -50,7 +50,7 @@ class YdbQueryBeginTxCommitControlTest extends TestCase
 
         self::assertNotNull(
             $this->txId($session),
-            'beginTx($mode, false) must leave a transaction open and expose its id.',
+            'beginTx($mode, false) must leave a transaction open and expose its id.'
         );
     }
 
