@@ -56,7 +56,7 @@ class TransactionResetAfterFailedCommitOrRollbackTest extends TestCase
 
         $this->assertNull(
             $txId->getValue($session),
-            'rollBack() must reset tx_id even when its own RPC call fails.',
+            'rollBack() must reset tx_id even when its own RPC call fails.'
         );
     }
 
@@ -73,7 +73,7 @@ class TransactionResetAfterFailedCommitOrRollbackTest extends TestCase
 
         $this->assertNull(
             $txId->getValue($session),
-            'commit() must reset tx_id even when its own RPC call fails.',
+            'commit() must reset tx_id even when its own RPC call fails.'
         );
     }
 
@@ -105,7 +105,7 @@ class TransactionResetAfterFailedCommitOrRollbackTest extends TestCase
 
         $this->assertNull(
             $this->txIdProperty()->getValue($session),
-            'A failed query() must reset tx_id on its own, without requiring an explicit rollBack().',
+            'A failed query() must reset tx_id on its own, without requiring an explicit rollBack().'
         );
 
         // An unrelated follow-up statement must succeed on a fresh
