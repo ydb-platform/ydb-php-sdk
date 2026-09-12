@@ -14,7 +14,7 @@
         "ext-curl": "*",
         "ext-grpc": "*",
         "ext-json": "*",
-        "google/protobuf": "~3.15.8",
+        "google/protobuf": "^4.31",
         "grpc/grpc": "^1.35",
         "phpseclib/phpseclib": "^2.0|^3.0",
         "psr/log": "^1|^2|^3"
