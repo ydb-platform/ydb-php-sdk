@@ -24,6 +24,40 @@ abstract class Auth
     }
 
     /**
+     * Drops any object-valued property (logger, StaticAuthentication's
+     * nested Ydb instance, etc.) before serialize() - none of them are part
+     * of a config's identity, and PSR loggers commonly aren't serializable
+     * at all. See ydb-platform/ydb-php-sdk#143.
+     */
+    public function __sleep()
+    {
+        $properties = [];
+
+        foreach ((new \ReflectionObject($this))->getProperties() as $property)
+        {
+            if ($property->isStatic())
+            {
+                continue;
+            }
+
+            $property->setAccessible(true);
+
+            // ReflectionProperty::isInitialized() only exists from PHP 7.4 - guard it so
+            // this still runs on this SDK's stated PHP 7.2 minimum. No property in this
+            // hierarchy is a typed property under <7.4 anyway (that syntax wouldn't parse).
+            if ((method_exists($property, 'isInitialized') && !$property->isInitialized($this))
+                || is_object($property->getValue($this)))
+            {
+                continue;
+            }
+
+            $properties[] = $property->getName();
+        }
+
+        return $properties;
+    }
+
+    /**
      * @return float
      */
     public function getRefreshTokenRatio(): float
