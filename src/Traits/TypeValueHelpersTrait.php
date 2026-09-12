@@ -40,6 +40,7 @@ use YdbPlatform\Ydb\Types\DatetimeType;
 use YdbPlatform\Ydb\Types\TimestampType;
 use YdbPlatform\Ydb\Contracts\TypeContract;
 use YdbPlatform\Ydb\Types\YsonType;
+use YdbPlatform\Ydb\Types\UuidType;
 
 trait TypeValueHelpersTrait
 {
@@ -145,7 +146,7 @@ trait TypeValueHelpersTrait
             case 'UTF8': return new Utf8Type($value);
             case 'YSON': return new YsonType($value); // not implemented
             case 'JSON': return new JsonType($value);
-            case 'UUID': return new StringType($value);
+            case 'UUID': return new UuidType($value);
         }
 
         if (substr($_type, 0, 4) === 'LIST')
