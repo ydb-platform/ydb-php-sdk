@@ -168,6 +168,13 @@ trait TypeValueHelpersTrait
             return (new OptionalType($value))->itemType(trim(substr($type, 9, -1)));
         }
 
+        else if (substr($_type, 0, 7) === 'DECIMAL')
+        {
+            [$precision, $scale] = array_map('trim', explode(',', trim(substr($type, 8, -1))));
+
+            return (new DecimalType($value))->digits((int) $precision)->scale((int) $scale);
+        }
+
         throw new Exception('YDB: Unknown [' . $type . '] type.');
     }
 
