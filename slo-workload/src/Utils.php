@@ -9,18 +9,16 @@ use YdbPlatform\Ydb\Ydb;
 
 class Utils
 {
-    const MSG_TYPE = 1;
-    const MESSAGE_SIZE_LIMIT_BYTES = 1024;
-    public static function initDriver(string $endpoint, string $db, string $process)
+    public static function initDriver(Config $config, string $process): Ydb
     {
-        $endpointData = explode("://", $endpoint);
-        if (count($endpointData) != 2){
+        $endpointData = explode("://", $config->endpoint);
+        if (count($endpointData) != 2) {
             throw new Exception("Invalid endpoint exception");
         }
-        $config = [
+        $ydbConfig = [
 
             // Database path
-            'database' => $db,
+            'database' => $config->database,
 
             // Database endpoint
             'endpoint' => $endpointData[1],
@@ -35,72 +33,23 @@ class Utils
             "credentials" => new \YdbPlatform\Ydb\Auth\Implement\AnonymousAuthentication()
         ];
         if (file_exists("./ca.pem")) {
-            $config['iam_config']['root_cert_file'] = './ca.pem';
+            $ydbConfig['iam_config']['root_cert_file'] = './ca.pem';
         }
-        return new Ydb($config, new SimpleSloLogger(SimpleSloLogger::INFO, $process));
+        return new Ydb($ydbConfig, new SimpleSloLogger(SimpleSloLogger::INFO, $process));
     }
 
-
-    public static function metricsStart(string $job, int $queueId)
+    /**
+     * Maps an exception class name to a short error name for the `error_name` label.
+     */
+    public static function getErrorName(string $error): string
     {
-        static::postData($queueId,[
-            "type"  => "start",
-            "job"   => $job
-        ]);
-    }
-
-    public static function metricDone(string $job, int $queueId, int $attemps, float $latency)
-    {
-        static::postData($queueId, [
-            "type"  => "ok",
-            "job" => $job,
-            "attempts" => $attemps,
-            "latency" => $latency,
-        ]);
-    }
-
-    public static function metricFail(string $job, int $queueId, int $attemps, string $error, float $latency)
-    {
-        static::postData($queueId, [
-            "type"  => "err",
-            "job" => $job,
-            "attempts" => $attemps,
-            "error" => static::getErrorName($error),
-            "latency" => $latency,
-        ]);
-    }
-
-    public static function postData(int $queueId, array $data)
-    {
-        $data["sent"] = microtime(true);
-        $msgQueue = msg_get_queue($queueId);
-        msg_send($msgQueue, static::MSG_TYPE, $data);
-    }
-
-    public static function reset(int $queueId)
-    {
-        self::postData($queueId,[
-            "type"  => "reset"
-        ]);
-    }
-
-    public static function retriedError(int $queueId, string $job, string $error){
-        self::postData($queueId,[
-            "type"  => "retried",
-            "job" => $job,
-            "error" => self::getErrorName($error)
-        ]);
-    }
-
-    protected static function getErrorName(string $error)
-    {
-        if($ydbErr = array_search($error,RequestTrait::$ydbExceptions)){
-            return 'YDB_'.StatusCode::name($ydbErr);
-        } elseif ($grpcErr = array_search($error,RequestTrait::$grpcExceptions)){
-            return 'GRPC_'.RequestTrait::$grpcNames[$grpcErr];
+        if ($ydbErr = array_search($error, RequestTrait::$ydbExceptions)) {
+            return 'YDB_' . StatusCode::name($ydbErr);
+        } elseif ($grpcErr = array_search($error, RequestTrait::$grpcExceptions)) {
+            return 'GRPC_' . RequestTrait::$grpcNames[$grpcErr];
         } else {
-            return substr(strrchr($error, '\\'), 1);
+            $shortName = strrchr($error, '\\');
+            return $shortName === false ? $error : substr($shortName, 1);
         }
     }
-
 }

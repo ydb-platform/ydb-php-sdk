@@ -1,18 +1,34 @@
-# SLO tests are opt-in: they need external infrastructure (k8s cluster, docker
-# registry) configured via repository secrets. Run them manually or by adding
-# the `SLO` label to a pull request, like the other YDB SDK repositories do.
+name: SLO
+
+# SLO tests run the workload against a YDB cluster deployed by `ydb-slo-action`
+# with chaos injection, and compare the current revision with a baseline one.
+# They are opt-in: add the `SLO` label to a pull request or start them manually.
 on:
   pull_request:
     types: [opened, reopened, synchronize, labeled]
   workflow_dispatch:
-
-name: SLO
+    inputs:
+      github_issue:
+        description: "Issue or pull request number for the SLO report comment"
+        required: false
+      baseline_ref:
+        description: "Baseline commit/branch/tag to compare against (empty to auto-detect merge-base with main)"
+        required: false
+      slo_workload_duration_seconds:
+        description: "Duration of the SLO workload in seconds"
+        required: false
+        default: "600"
+      slo_workload_read_max_rps:
+        description: "Maximum read RPS for the SLO workload"
+        required: false
+        default: "1000"
+      slo_workload_write_max_rps:
+        description: "Maximum write RPS for the SLO workload"
+        required: false
+        default: "100"
 
 jobs:
-  test-slo:
-    concurrency:
-      group: slo-${{ github.ref }}
-      cancel-in-progress: true
+  ydb-slo-action:
     # On `labeled` events run only when the `SLO` label itself was just added:
     # otherwise any unrelated label change on a PR that already carries `SLO`
     # would start a fresh run and cancel the in-progress one via `cancel-in-progress`.
@@ -21,55 +37,110 @@ jobs:
       (github.event.action == 'labeled' && github.event.label.name == 'SLO') ||
       (github.event.action != 'labeled' && contains(github.event.pull_request.labels.*.name, 'SLO'))
 
-    runs-on: ubuntu-latest
-    name: SLO test
-    permissions:
-      checks: write
-      pull-requests: write
-      contents: read
-      issues: write
+    name: Run YDB SLO Tests
+    runs-on: "large-runner-php-sdk"
+
+    strategy:
+      fail-fast: false
+      matrix:
+        sdk:
+          - name: php-table
+
+    concurrency:
+      group: slo-${{ github.ref }}-${{ matrix.sdk.name }}
+      cancel-in-progress: true
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        if: env.DOCKER_REPO != null # check permissions
-        env:
-          DOCKER_REPO: ${{ secrets.SLO_DOCKER_REPO }}
+      - name: Install dependencies
+        run: |
+          BUILDX_VERSION=0.30.1
+          COMPOSE_VERSION=2.40.3
 
-      - name: Run SLO
-        uses: ydb-platform/slo-tests@main
-        if: env.DOCKER_REPO != null # check permissions
-        env:
-          DOCKER_REPO: ${{ secrets.SLO_DOCKER_REPO }}
+          sudo mkdir -p /usr/local/lib/docker/cli-plugins
+
+          echo "Installing Docker Buildx ${BUILDX_VERSION}..."
+          sudo curl -fLo /usr/local/lib/docker/cli-plugins/docker-buildx \
+            "https://github.com/docker/buildx/releases/download/v${BUILDX_VERSION}/buildx-v${BUILDX_VERSION}.linux-amd64"
+          sudo chmod +x /usr/local/lib/docker/cli-plugins/docker-buildx
+
+          echo "Installing Docker Compose ${COMPOSE_VERSION}..."
+          sudo curl -fLo /usr/local/lib/docker/cli-plugins/docker-compose \
+            "https://github.com/docker/compose/releases/download/v${COMPOSE_VERSION}/docker-compose-linux-x86_64"
+          sudo chmod +x /usr/local/lib/docker/cli-plugins/docker-compose
+
+          echo "Installed versions:"
+          docker --version
+          docker buildx version
+          docker compose version
+
+      - name: Checkout current version
+        uses: actions/checkout@v5
         with:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          KUBECONFIG_B64: ${{ secrets.SLO_KUBE_CONFIG }}
-          AWS_CREDENTIALS_B64: ${{ secrets.SLO_AWS_CREDENTIALS }}
-          AWS_CONFIG_B64: ${{ secrets.SLO_AWS_CONFIG }}
-          DOCKER_USERNAME: ${{ secrets.SLO_DOCKER_USERNAME }}
-          DOCKER_PASSWORD: ${{ secrets.SLO_DOCKER_PASSWORD }}
-          DOCKER_REPO: ${{ secrets.SLO_DOCKER_REPO }}
-          DOCKER_FOLDER: ${{ secrets.SLO_DOCKER_FOLDER }}
-          s3_endpoint: ${{ secrets.SLO_S3_ENDPOINT }}
-          s3_images_folder: ${{ vars.SLO_S3_IMAGES_FOLDER }}
-          grafana_domain: ${{ vars.SLO_GRAFANA_DOMAIN }}
-          grafana_dashboard: dca60386-0d3d-43f5-a2af-5f3fd3e3b295
-          grafana_dashboard_width: 2000
-          grafana_dashboard_height: 2600
-          ydb_version: 'newest'
-          timeBetweenPhases: 30
-          shutdownTime: 30
+          path: current
+          fetch-depth: 0
 
-          language_id0: 'php'
-          workload_path0: 'slo-workload'
-          language0: 'php'
-          workload_build_context0: ../.
-          workload_build_options0: -f Dockerfile
+      - name: Determine baseline commit
+        id: baseline
+        working-directory: current
+        run: |
+          if [[ -n "${{ inputs.baseline_ref }}" ]]; then
+            BASELINE="${{ inputs.baseline_ref }}"
+          else
+            BASELINE=$(git merge-base HEAD origin/main)
+          fi
+          echo "sha=$BASELINE" >> $GITHUB_OUTPUT
 
-      - uses: actions/upload-artifact@v4
-        if: always() && env.DOCKER_REPO != null # check permissions and execute, even if the previous stage was failed
-        env:
-          DOCKER_REPO: ${{ secrets.SLO_DOCKER_REPO }}
+          if [ "$(git rev-parse origin/main)" = "$(git rev-parse $BASELINE)" ]; then
+            BASELINE_REF="main"
+          else
+            BASELINE_REF="$(git rev-parse --short $BASELINE)"
+          fi
+          echo "ref=$BASELINE_REF" >> $GITHUB_OUTPUT
+
+      - name: Checkout baseline version
+        uses: actions/checkout@v5
         with:
-          name: slo-logs
-          path: logs/
+          ref: ${{ steps.baseline.outputs.sha }}
+          path: baseline
+          fetch-depth: 1
+
+      - name: Check baseline workload availability
+        id: baseline-workload
+        run: |
+          # Revisions older than the migration to ydb-slo-action cannot report the
+          # metrics the report is built from, so they are not used as a baseline.
+          if [[ -f "$GITHUB_WORKSPACE/baseline/slo-workload/src/Metrics/Metrics.php" ]]; then
+            echo "available=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "available=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Build current workload image
+        working-directory: current
+        run: docker build --platform linux/amd64 -f slo-workload/Dockerfile -t ydb-app-current .
+
+      - name: Build baseline workload image
+        if: steps.baseline-workload.outputs.available == 'true'
+        working-directory: baseline
+        run: docker build --platform linux/amd64 -f slo-workload/Dockerfile -t ydb-app-baseline .
+
+      - name: Run SLO Tests
+        uses: ydb-platform/ydb-slo-action/init@v2
+        timeout-minutes: 30
+        with:
+          github_issue: ${{ github.event.inputs.github_issue }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          workload_name: ${{ matrix.sdk.name }}
+          workload_duration: ${{ inputs.slo_workload_duration_seconds || '600' }}
+          fail_on_workload_error: "true"
+          workload_current_ref: ${{ github.head_ref || github.ref_name }}
+          workload_current_image: ydb-app-current
+          workload_current_command: >-
+            -read-rps ${{ inputs.slo_workload_read_max_rps || '1000' }}
+            -write-rps ${{ inputs.slo_workload_write_max_rps || '100' }}
+          workload_baseline_ref: ${{ steps.baseline-workload.outputs.available == 'true' && steps.baseline.outputs.ref || '' }}
+          workload_baseline_image: ${{ steps.baseline-workload.outputs.available == 'true' && 'ydb-app-baseline' || '' }}
+          workload_baseline_command: >-
+            -read-rps ${{ inputs.slo_workload_read_max_rps || '1000' }}
+            -write-rps ${{ inputs.slo_workload_write_max_rps || '100' }}
+          disable_compose_profiles: ${{ steps.baseline-workload.outputs.available != 'true' && 'workload-baseline' || '' }}

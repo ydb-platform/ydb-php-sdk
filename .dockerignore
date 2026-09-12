@@ -1,0 +1,7 @@
+# .git is intentionally kept: composer guesses the version of the SDK, required as
+# a path repository by the SLO workload, from the git branch.
+.claude
+.github
+.idea
+vendor
+slo-workload/vendor
