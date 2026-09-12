@@ -1,3 +1,4 @@
+* fixed `temp_dir` being created with `0600` permissions instead of `0700` (ydb-platform/ydb-php-sdk#128) - a directory needs the executable bit to be entered/traversed, not just read/write, so every `file_put_contents()` into a freshly auto-created `temp_dir` failed with "Permission denied". Also fixed the new test's use of `assertDirectoryDoesNotExist()` (PHPUnit 9.1+ only) - this SDK's stated PHP 7.2 minimum resolves PHPUnit 8.5, which lacks it - found via this fork's own GitHub Actions run against the real CI matrix.
 
 ## 1.16.3
 * improve log
