@@ -1,3 +1,4 @@
+* fixed `ResourceExhausted` from an oversized outgoing message being retried forever (ydb-platform/ydb-php-sdk#258) - grpc-core rejects a message over the local send-size limit with the same `RESOURCE_EXHAUSTED` (8) code as a retryable server-side quota error, so `Table::retryTransaction()`/`Ydb::retryTransaction()` kept retrying a payload that could never shrink. `handleGrpcStatus()` now recognizes the "message larger than max" detail text and throws the existing (but previously unused) `ClientResourceExhaustedException`, which is non-retryable, instead
 
 ## 1.16.3
 * improve log

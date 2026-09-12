@@ -6,6 +6,7 @@ use Ydb\StatusIds\StatusCode;
 
 use YdbPlatform\Ydb\Issue;
 use YdbPlatform\Ydb\Exception;
+use YdbPlatform\Ydb\Exceptions\Ydb\ClientResourceExhaustedException;
 use YdbPlatform\Ydb\QueryResult;
 use YdbPlatform\Ydb\Ydb;
 
@@ -205,6 +206,10 @@ trait RequestTrait
                 $endpoint = $this->ydb->cluster()->all()[array_rand($this->ydb->cluster()->all())]->endpoint();
             }
             $this->client = new $this->client($endpoint, $this->ydb->grpcOpts());
+            // grpc-core rejects an oversized message locally as RESOURCE_EXHAUSTED (8) too - retrying won't shrink it.
+            if ($status->code === 8 && stripos($status->details ?? '', 'message larger than max') !== false) {
+                throw new ClientResourceExhaustedException($message);
+            }
             if (isset(self::$grpcExceptions[$status->code])) {
                 throw new self::$grpcExceptions[$status->code]($message);
             } else {
