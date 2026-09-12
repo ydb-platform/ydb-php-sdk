@@ -38,6 +38,7 @@ class Consumer extends \Google\Protobuf\Internal\Message
     /**
      * List of supported codecs by this consumer.
      * supported_codecs on topic must be contained inside this list.
+     * If empty, codec compatibility check for the consumer is disabled.
      *
      * Generated from protobuf field <code>.Ydb.Topic.SupportedCodecs supported_codecs = 5;</code>
      */
@@ -54,6 +55,12 @@ class Consumer extends \Google\Protobuf\Internal\Message
      * Generated from protobuf field <code>.Ydb.Topic.Consumer.ConsumerStats consumer_stats = 7;</code>
      */
     protected $consumer_stats = null;
+    /**
+     * Message for this consumer will not expire due to retention for at least `availability_period` if they aren't commited.
+     *
+     * Generated from protobuf field <code>optional .google.protobuf.Duration availability_period = 8;</code>
+     */
+    protected $availability_period = null;
 
     /**
      * Constructor.
@@ -72,10 +79,13 @@ class Consumer extends \Google\Protobuf\Internal\Message
      *     @type \Ydb\Topic\SupportedCodecs $supported_codecs
      *           List of supported codecs by this consumer.
      *           supported_codecs on topic must be contained inside this list.
+     *           If empty, codec compatibility check for the consumer is disabled.
      *     @type array|\Google\Protobuf\Internal\MapField $attributes
      *           Attributes of consumer
      *     @type \Ydb\Topic\Consumer\ConsumerStats $consumer_stats
      *           Filled only when requested statistics in Describe*Request.
+     *     @type \Google\Protobuf\Duration $availability_period
+     *           Message for this consumer will not expire due to retention for at least `availability_period` if they aren't commited.
      * }
      */
     public function __construct($data = NULL) {
@@ -178,6 +188,7 @@ class Consumer extends \Google\Protobuf\Internal\Message
     /**
      * List of supported codecs by this consumer.
      * supported_codecs on topic must be contained inside this list.
+     * If empty, codec compatibility check for the consumer is disabled.
      *
      * Generated from protobuf field <code>.Ydb.Topic.SupportedCodecs supported_codecs = 5;</code>
      * @return \Ydb\Topic\SupportedCodecs|null
@@ -200,6 +211,7 @@ class Consumer extends \Google\Protobuf\Internal\Message
     /**
      * List of supported codecs by this consumer.
      * supported_codecs on topic must be contained inside this list.
+     * If empty, codec compatibility check for the consumer is disabled.
      *
      * Generated from protobuf field <code>.Ydb.Topic.SupportedCodecs supported_codecs = 5;</code>
      * @param \Ydb\Topic\SupportedCodecs $var
@@ -271,6 +283,42 @@ class Consumer extends \Google\Protobuf\Internal\Message
     {
         GPBUtil::checkMessage($var, \Ydb\Topic\Consumer\ConsumerStats::class);
         $this->consumer_stats = $var;
+
+        return $this;
+    }
+
+    /**
+     * Message for this consumer will not expire due to retention for at least `availability_period` if they aren't commited.
+     *
+     * Generated from protobuf field <code>optional .google.protobuf.Duration availability_period = 8;</code>
+     * @return \Google\Protobuf\Duration|null
+     */
+    public function getAvailabilityPeriod()
+    {
+        return $this->availability_period;
+    }
+
+    public function hasAvailabilityPeriod()
+    {
+        return isset($this->availability_period);
+    }
+
+    public function clearAvailabilityPeriod()
+    {
+        unset($this->availability_period);
+    }
+
+    /**
+     * Message for this consumer will not expire due to retention for at least `availability_period` if they aren't commited.
+     *
+     * Generated from protobuf field <code>optional .google.protobuf.Duration availability_period = 8;</code>
+     * @param \Google\Protobuf\Duration $var
+     * @return $this
+     */
+    public function setAvailabilityPeriod($var)
+    {
+        GPBUtil::checkMessage($var, \Google\Protobuf\Duration::class);
+        $this->availability_period = $var;
 
         return $this;
     }

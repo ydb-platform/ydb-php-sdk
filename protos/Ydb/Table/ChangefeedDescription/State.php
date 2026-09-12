@@ -16,18 +16,31 @@ class State
      */
     const STATE_UNSPECIFIED = 0;
     /**
+     * Normal state, from this state changefeed can be disabled
+     *
      * Generated from protobuf enum <code>STATE_ENABLED = 1;</code>
      */
     const STATE_ENABLED = 1;
     /**
+     * No new change records are generated, but the old ones remain available
+     * From this state changefeed cannot be switched to any other state
+     *
      * Generated from protobuf enum <code>STATE_DISABLED = 2;</code>
      */
     const STATE_DISABLED = 2;
+    /**
+     * An initial scan is being performed.
+     * After its completion changefeed will switch to the normal state
+     *
+     * Generated from protobuf enum <code>STATE_INITIAL_SCAN = 3;</code>
+     */
+    const STATE_INITIAL_SCAN = 3;
 
     private static $valueToName = [
         self::STATE_UNSPECIFIED => 'STATE_UNSPECIFIED',
         self::STATE_ENABLED => 'STATE_ENABLED',
         self::STATE_DISABLED => 'STATE_DISABLED',
+        self::STATE_INITIAL_SCAN => 'STATE_INITIAL_SCAN',
     ];
 
     public static function name($value)

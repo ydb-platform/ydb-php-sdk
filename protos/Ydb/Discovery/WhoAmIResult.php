@@ -25,6 +25,42 @@ class WhoAmIResult extends \Google\Protobuf\Internal\Message
      * Generated from protobuf field <code>repeated string groups = 2;</code>
      */
     private $groups;
+    /**
+     * Whether user is allowed to perform administration operations
+     *
+     * Generated from protobuf field <code>bool is_administration_allowed = 3;</code>
+     */
+    protected $is_administration_allowed = false;
+    /**
+     * Whether user is allowed to perform monitoring operations
+     *
+     * Generated from protobuf field <code>bool is_monitoring_allowed = 4;</code>
+     */
+    protected $is_monitoring_allowed = false;
+    /**
+     * Whether user is allowed to view data
+     *
+     * Generated from protobuf field <code>bool is_viewer_allowed = 5;</code>
+     */
+    protected $is_viewer_allowed = false;
+    /**
+     * Whether user is allowed to access database
+     *
+     * Generated from protobuf field <code>bool is_database_allowed = 6;</code>
+     */
+    protected $is_database_allowed = false;
+    /**
+     * Whether user is allowed to register dynamic node
+     *
+     * Generated from protobuf field <code>bool is_register_node_allowed = 7;</code>
+     */
+    protected $is_register_node_allowed = false;
+    /**
+     * Whether user is allowed to bootstrap
+     *
+     * Generated from protobuf field <code>bool is_bootstrap_allowed = 8;</code>
+     */
+    protected $is_bootstrap_allowed = false;
 
     /**
      * Constructor.
@@ -36,6 +72,18 @@ class WhoAmIResult extends \Google\Protobuf\Internal\Message
      *           User SID (Security ID)
      *     @type array<string>|\Google\Protobuf\Internal\RepeatedField $groups
      *           List of group SIDs (Security IDs) for the user
+     *     @type bool $is_administration_allowed
+     *           Whether user is allowed to perform administration operations
+     *     @type bool $is_monitoring_allowed
+     *           Whether user is allowed to perform monitoring operations
+     *     @type bool $is_viewer_allowed
+     *           Whether user is allowed to view data
+     *     @type bool $is_database_allowed
+     *           Whether user is allowed to access database
+     *     @type bool $is_register_node_allowed
+     *           Whether user is allowed to register dynamic node
+     *     @type bool $is_bootstrap_allowed
+     *           Whether user is allowed to bootstrap
      * }
      */
     public function __construct($data = NULL) {
@@ -91,6 +139,162 @@ class WhoAmIResult extends \Google\Protobuf\Internal\Message
     {
         $arr = GPBUtil::checkRepeatedField($var, \Google\Protobuf\Internal\GPBType::STRING);
         $this->groups = $arr;
+
+        return $this;
+    }
+
+    /**
+     * Whether user is allowed to perform administration operations
+     *
+     * Generated from protobuf field <code>bool is_administration_allowed = 3;</code>
+     * @return bool
+     */
+    public function getIsAdministrationAllowed()
+    {
+        return $this->is_administration_allowed;
+    }
+
+    /**
+     * Whether user is allowed to perform administration operations
+     *
+     * Generated from protobuf field <code>bool is_administration_allowed = 3;</code>
+     * @param bool $var
+     * @return $this
+     */
+    public function setIsAdministrationAllowed($var)
+    {
+        GPBUtil::checkBool($var);
+        $this->is_administration_allowed = $var;
+
+        return $this;
+    }
+
+    /**
+     * Whether user is allowed to perform monitoring operations
+     *
+     * Generated from protobuf field <code>bool is_monitoring_allowed = 4;</code>
+     * @return bool
+     */
+    public function getIsMonitoringAllowed()
+    {
+        return $this->is_monitoring_allowed;
+    }
+
+    /**
+     * Whether user is allowed to perform monitoring operations
+     *
+     * Generated from protobuf field <code>bool is_monitoring_allowed = 4;</code>
+     * @param bool $var
+     * @return $this
+     */
+    public function setIsMonitoringAllowed($var)
+    {
+        GPBUtil::checkBool($var);
+        $this->is_monitoring_allowed = $var;
+
+        return $this;
+    }
+
+    /**
+     * Whether user is allowed to view data
+     *
+     * Generated from protobuf field <code>bool is_viewer_allowed = 5;</code>
+     * @return bool
+     */
+    public function getIsViewerAllowed()
+    {
+        return $this->is_viewer_allowed;
+    }
+
+    /**
+     * Whether user is allowed to view data
+     *
+     * Generated from protobuf field <code>bool is_viewer_allowed = 5;</code>
+     * @param bool $var
+     * @return $this
+     */
+    public function setIsViewerAllowed($var)
+    {
+        GPBUtil::checkBool($var);
+        $this->is_viewer_allowed = $var;
+
+        return $this;
+    }
+
+    /**
+     * Whether user is allowed to access database
+     *
+     * Generated from protobuf field <code>bool is_database_allowed = 6;</code>
+     * @return bool
+     */
+    public function getIsDatabaseAllowed()
+    {
+        return $this->is_database_allowed;
+    }
+
+    /**
+     * Whether user is allowed to access database
+     *
+     * Generated from protobuf field <code>bool is_database_allowed = 6;</code>
+     * @param bool $var
+     * @return $this
+     */
+    public function setIsDatabaseAllowed($var)
+    {
+        GPBUtil::checkBool($var);
+        $this->is_database_allowed = $var;
+
+        return $this;
+    }
+
+    /**
+     * Whether user is allowed to register dynamic node
+     *
+     * Generated from protobuf field <code>bool is_register_node_allowed = 7;</code>
+     * @return bool
+     */
+    public function getIsRegisterNodeAllowed()
+    {
+        return $this->is_register_node_allowed;
+    }
+
+    /**
+     * Whether user is allowed to register dynamic node
+     *
+     * Generated from protobuf field <code>bool is_register_node_allowed = 7;</code>
+     * @param bool $var
+     * @return $this
+     */
+    public function setIsRegisterNodeAllowed($var)
+    {
+        GPBUtil::checkBool($var);
+        $this->is_register_node_allowed = $var;
+
+        return $this;
+    }
+
+    /**
+     * Whether user is allowed to bootstrap
+     *
+     * Generated from protobuf field <code>bool is_bootstrap_allowed = 8;</code>
+     * @return bool
+     */
+    public function getIsBootstrapAllowed()
+    {
+        return $this->is_bootstrap_allowed;
+    }
+
+    /**
+     * Whether user is allowed to bootstrap
+     *
+     * Generated from protobuf field <code>bool is_bootstrap_allowed = 8;</code>
+     * @param bool $var
+     * @return $this
+     */
+    public function setIsBootstrapAllowed($var)
+    {
+        GPBUtil::checkBool($var);
+        $this->is_bootstrap_allowed = $var;
 
         return $this;
     }

@@ -31,6 +31,10 @@ class ExplainDataQueryRequest extends \Google\Protobuf\Internal\Message
      * Generated from protobuf field <code>.Ydb.Operations.OperationParams operation_params = 3;</code>
      */
     protected $operation_params = null;
+    /**
+     * Generated from protobuf field <code>bool collect_full_diagnostics = 4;</code>
+     */
+    protected $collect_full_diagnostics = false;
 
     /**
      * Constructor.
@@ -43,6 +47,7 @@ class ExplainDataQueryRequest extends \Google\Protobuf\Internal\Message
      *     @type string $yql_text
      *           SQL text to explain
      *     @type \Ydb\Operations\OperationParams $operation_params
+     *     @type bool $collect_full_diagnostics
      * }
      */
     public function __construct($data = NULL) {
@@ -130,6 +135,28 @@ class ExplainDataQueryRequest extends \Google\Protobuf\Internal\Message
     {
         GPBUtil::checkMessage($var, \Ydb\Operations\OperationParams::class);
         $this->operation_params = $var;
+
+        return $this;
+    }
+
+    /**
+     * Generated from protobuf field <code>bool collect_full_diagnostics = 4;</code>
+     * @return bool
+     */
+    public function getCollectFullDiagnostics()
+    {
+        return $this->collect_full_diagnostics;
+    }
+
+    /**
+     * Generated from protobuf field <code>bool collect_full_diagnostics = 4;</code>
+     * @param bool $var
+     * @return $this
+     */
+    public function setCollectFullDiagnostics($var)
+    {
+        GPBUtil::checkBool($var);
+        $this->collect_full_diagnostics = $var;
 
         return $this;
     }

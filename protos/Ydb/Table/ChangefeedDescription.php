@@ -43,6 +43,36 @@ class ChangefeedDescription extends \Google\Protobuf\Internal\Message
      * Generated from protobuf field <code>bool virtual_timestamps = 5;</code>
      */
     protected $virtual_timestamps = false;
+    /**
+     * Attributes
+     *
+     * Generated from protobuf field <code>map<string, string> attributes = 6;</code>
+     */
+    private $attributes;
+    /**
+     * Value that will be emitted in the `awsRegion` field of the record in DYNAMODB_STREAMS_JSON format
+     *
+     * Generated from protobuf field <code>string aws_region = 7;</code>
+     */
+    protected $aws_region = '';
+    /**
+     * Interval of emitting of resolved timestamps. If unspecified, resolved timestamps are not emitted.
+     *
+     * Generated from protobuf field <code>.google.protobuf.Duration resolved_timestamps_interval = 8;</code>
+     */
+    protected $resolved_timestamps_interval = null;
+    /**
+     * Progress of initial scan. If unspecified, initial scan was not launched.
+     *
+     * Generated from protobuf field <code>.Ydb.Table.ChangefeedDescription.InitialScanProgress initial_scan_progress = 9;</code>
+     */
+    protected $initial_scan_progress = null;
+    /**
+     * State of emitting of schema change events
+     *
+     * Generated from protobuf field <code>bool schema_changes = 10;</code>
+     */
+    protected $schema_changes = false;
 
     /**
      * Constructor.
@@ -60,6 +90,16 @@ class ChangefeedDescription extends \Google\Protobuf\Internal\Message
      *           State of the feed
      *     @type bool $virtual_timestamps
      *           State of emitting of virtual timestamps along with data
+     *     @type array|\Google\Protobuf\Internal\MapField $attributes
+     *           Attributes
+     *     @type string $aws_region
+     *           Value that will be emitted in the `awsRegion` field of the record in DYNAMODB_STREAMS_JSON format
+     *     @type \Google\Protobuf\Duration $resolved_timestamps_interval
+     *           Interval of emitting of resolved timestamps. If unspecified, resolved timestamps are not emitted.
+     *     @type \Ydb\Table\ChangefeedDescription\InitialScanProgress $initial_scan_progress
+     *           Progress of initial scan. If unspecified, initial scan was not launched.
+     *     @type bool $schema_changes
+     *           State of emitting of schema change events
      * }
      */
     public function __construct($data = NULL) {
@@ -193,6 +233,156 @@ class ChangefeedDescription extends \Google\Protobuf\Internal\Message
     {
         GPBUtil::checkBool($var);
         $this->virtual_timestamps = $var;
+
+        return $this;
+    }
+
+    /**
+     * Attributes
+     *
+     * Generated from protobuf field <code>map<string, string> attributes = 6;</code>
+     * @return \Google\Protobuf\Internal\MapField
+     */
+    public function getAttributes()
+    {
+        return $this->attributes;
+    }
+
+    /**
+     * Attributes
+     *
+     * Generated from protobuf field <code>map<string, string> attributes = 6;</code>
+     * @param array|\Google\Protobuf\Internal\MapField $var
+     * @return $this
+     */
+    public function setAttributes($var)
+    {
+        $arr = GPBUtil::checkMapField($var, \Google\Protobuf\Internal\GPBType::STRING, \Google\Protobuf\Internal\GPBType::STRING);
+        $this->attributes = $arr;
+
+        return $this;
+    }
+
+    /**
+     * Value that will be emitted in the `awsRegion` field of the record in DYNAMODB_STREAMS_JSON format
+     *
+     * Generated from protobuf field <code>string aws_region = 7;</code>
+     * @return string
+     */
+    public function getAwsRegion()
+    {
+        return $this->aws_region;
+    }
+
+    /**
+     * Value that will be emitted in the `awsRegion` field of the record in DYNAMODB_STREAMS_JSON format
+     *
+     * Generated from protobuf field <code>string aws_region = 7;</code>
+     * @param string $var
+     * @return $this
+     */
+    public function setAwsRegion($var)
+    {
+        GPBUtil::checkString($var, True);
+        $this->aws_region = $var;
+
+        return $this;
+    }
+
+    /**
+     * Interval of emitting of resolved timestamps. If unspecified, resolved timestamps are not emitted.
+     *
+     * Generated from protobuf field <code>.google.protobuf.Duration resolved_timestamps_interval = 8;</code>
+     * @return \Google\Protobuf\Duration|null
+     */
+    public function getResolvedTimestampsInterval()
+    {
+        return $this->resolved_timestamps_interval;
+    }
+
+    public function hasResolvedTimestampsInterval()
+    {
+        return isset($this->resolved_timestamps_interval);
+    }
+
+    public function clearResolvedTimestampsInterval()
+    {
+        unset($this->resolved_timestamps_interval);
+    }
+
+    /**
+     * Interval of emitting of resolved timestamps. If unspecified, resolved timestamps are not emitted.
+     *
+     * Generated from protobuf field <code>.google.protobuf.Duration resolved_timestamps_interval = 8;</code>
+     * @param \Google\Protobuf\Duration $var
+     * @return $this
+     */
+    public function setResolvedTimestampsInterval($var)
+    {
+        GPBUtil::checkMessage($var, \Google\Protobuf\Duration::class);
+        $this->resolved_timestamps_interval = $var;
+
+        return $this;
+    }
+
+    /**
+     * Progress of initial scan. If unspecified, initial scan was not launched.
+     *
+     * Generated from protobuf field <code>.Ydb.Table.ChangefeedDescription.InitialScanProgress initial_scan_progress = 9;</code>
+     * @return \Ydb\Table\ChangefeedDescription\InitialScanProgress|null
+     */
+    public function getInitialScanProgress()
+    {
+        return $this->initial_scan_progress;
+    }
+
+    public function hasInitialScanProgress()
+    {
+        return isset($this->initial_scan_progress);
+    }
+
+    public function clearInitialScanProgress()
+    {
+        unset($this->initial_scan_progress);
+    }
+
+    /**
+     * Progress of initial scan. If unspecified, initial scan was not launched.
+     *
+     * Generated from protobuf field <code>.Ydb.Table.ChangefeedDescription.InitialScanProgress initial_scan_progress = 9;</code>
+     * @param \Ydb\Table\ChangefeedDescription\InitialScanProgress $var
+     * @return $this
+     */
+    public function setInitialScanProgress($var)
+    {
+        GPBUtil::checkMessage($var, \Ydb\Table\ChangefeedDescription\InitialScanProgress::class);
+        $this->initial_scan_progress = $var;
+
+        return $this;
+    }
+
+    /**
+     * State of emitting of schema change events
+     *
+     * Generated from protobuf field <code>bool schema_changes = 10;</code>
+     * @return bool
+     */
+    public function getSchemaChanges()
+    {
+        return $this->schema_changes;
+    }
+
+    /**
+     * State of emitting of schema change events
+     *
+     * Generated from protobuf field <code>bool schema_changes = 10;</code>
+     * @param bool $var
+     * @return $this
+     */
+    public function setSchemaChanges($var)
+    {
+        GPBUtil::checkBool($var);
+        $this->schema_changes = $var;
 
         return $this;
     }

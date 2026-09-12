@@ -9,7 +9,7 @@ use Google\Protobuf\Internal\RepeatedField;
 use Google\Protobuf\Internal\GPBUtil;
 
 /**
- * message representing statistics by seleveral windows
+ * message representing statistics by several windows
  *
  * Generated from protobuf message <code>Ydb.Topic.MultipleWindowsStat</code>
  */

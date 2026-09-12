@@ -57,6 +57,23 @@ class ReadTableRequest extends \Google\Protobuf\Internal\Message
      * Generated from protobuf field <code>.Ydb.FeatureFlag.Status use_snapshot = 7;</code>
      */
     protected $use_snapshot = 0;
+    /**
+     * Server-side best-effort policy. Can be used as a hint to limit the size
+     * of batches sent from a server. If both are specified, the server chooses
+     * the smaller one. The limits are not strict, so batch size can be slightly
+     * greater than any of the limits
+     *
+     * Generated from protobuf field <code>uint64 batch_limit_bytes = 8;</code>
+     */
+    protected $batch_limit_bytes = 0;
+    /**
+     * Generated from protobuf field <code>uint64 batch_limit_rows = 9;</code>
+     */
+    protected $batch_limit_rows = 0;
+    /**
+     * Generated from protobuf field <code>.Ydb.FeatureFlag.Status return_not_null_data_as_optional = 10;</code>
+     */
+    protected $return_not_null_data_as_optional = 0;
 
     /**
      * Constructor.
@@ -78,6 +95,13 @@ class ReadTableRequest extends \Google\Protobuf\Internal\Message
      *           Limits row count to read
      *     @type int $use_snapshot
      *           Use a server-side snapshot
+     *     @type int|string $batch_limit_bytes
+     *           Server-side best-effort policy. Can be used as a hint to limit the size
+     *           of batches sent from a server. If both are specified, the server chooses
+     *           the smaller one. The limits are not strict, so batch size can be slightly
+     *           greater than any of the limits
+     *     @type int|string $batch_limit_rows
+     *     @type int $return_not_null_data_as_optional
      * }
      */
     public function __construct($data = NULL) {
@@ -273,6 +297,82 @@ class ReadTableRequest extends \Google\Protobuf\Internal\Message
     {
         GPBUtil::checkEnum($var, \Ydb\FeatureFlag\Status::class);
         $this->use_snapshot = $var;
+
+        return $this;
+    }
+
+    /**
+     * Server-side best-effort policy. Can be used as a hint to limit the size
+     * of batches sent from a server. If both are specified, the server chooses
+     * the smaller one. The limits are not strict, so batch size can be slightly
+     * greater than any of the limits
+     *
+     * Generated from protobuf field <code>uint64 batch_limit_bytes = 8;</code>
+     * @return int|string
+     */
+    public function getBatchLimitBytes()
+    {
+        return $this->batch_limit_bytes;
+    }
+
+    /**
+     * Server-side best-effort policy. Can be used as a hint to limit the size
+     * of batches sent from a server. If both are specified, the server chooses
+     * the smaller one. The limits are not strict, so batch size can be slightly
+     * greater than any of the limits
+     *
+     * Generated from protobuf field <code>uint64 batch_limit_bytes = 8;</code>
+     * @param int|string $var
+     * @return $this
+     */
+    public function setBatchLimitBytes($var)
+    {
+        GPBUtil::checkUint64($var);
+        $this->batch_limit_bytes = $var;
+
+        return $this;
+    }
+
+    /**
+     * Generated from protobuf field <code>uint64 batch_limit_rows = 9;</code>
+     * @return int|string
+     */
+    public function getBatchLimitRows()
+    {
+        return $this->batch_limit_rows;
+    }
+
+    /**
+     * Generated from protobuf field <code>uint64 batch_limit_rows = 9;</code>
+     * @param int|string $var
+     * @return $this
+     */
+    public function setBatchLimitRows($var)
+    {
+        GPBUtil::checkUint64($var);
+        $this->batch_limit_rows = $var;
+
+        return $this;
+    }
+
+    /**
+     * Generated from protobuf field <code>.Ydb.FeatureFlag.Status return_not_null_data_as_optional = 10;</code>
+     * @return int
+     */
+    public function getReturnNotNullDataAsOptional()
+    {
+        return $this->return_not_null_data_as_optional;
+    }
+
+    /**
+     * Generated from protobuf field <code>.Ydb.FeatureFlag.Status return_not_null_data_as_optional = 10;</code>
+     * @param int $var
+     * @return $this
+     */
+    public function setReturnNotNullDataAsOptional($var)
+    {
+        GPBUtil::checkEnum($var, \Ydb\FeatureFlag\Status::class);
+        $this->return_not_null_data_as_optional = $var;
 
         return $this;
     }
