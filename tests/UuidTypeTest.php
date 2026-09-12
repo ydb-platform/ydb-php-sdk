@@ -67,7 +67,10 @@ class UuidTypeTest extends TestCase
 
         $result = $session->query('SELECT u FROM uuid_type_test WHERE id = 1');
 
-        self::assertSame(strtolower($uuid), strtolower($result->rows()[0]['u']));
+        // Reading a Uuid column always decodes to lowercase (QueryResult's
+        // UuidType::fromParts() -> bin2hex()), verified live - only the
+        // uppercase input side needs normalizing.
+        self::assertSame(strtolower($uuid), $result->rows()[0]['u']);
 
         $session->schemeQuery('DROP TABLE `/local/uuid_type_test`');
     }
@@ -80,7 +83,7 @@ class UuidTypeTest extends TestCase
 
         $result = $session->query('SELECT CAST("6E73B41C-4EDE-4D08-9CFB-B7462D9E498B" AS Uuid) AS u');
 
-        self::assertSame('6e73b41c-4ede-4d08-9cfb-b7462d9e498b', strtolower($result->rows()[0]['u']));
+        self::assertSame('6e73b41c-4ede-4d08-9cfb-b7462d9e498b', $result->rows()[0]['u']);
     }
 
     public function testCastingAnSdkWrittenUuidBackToUtf8ProducesTheOriginalString(): void
