@@ -30,11 +30,20 @@ Everything essential comes from the environment, as set by the action:
 | `YDB_ENDPOINT`, `YDB_DATABASE`        | used when `YDB_CONNECTION_STRING` is not set                    |
 | `WORKLOAD_REF`                        | value of the `ref` label in metrics: `current` or `baseline`     |
 | `WORKLOAD_NAME`                       | workload name, the table lives in `<database>/<name>/<ref>`      |
-| `WORKLOAD_DURATION`                   | workload duration in seconds                                    |
+| `WORKLOAD_DURATION`                   | budget of the whole run in seconds, see below                   |
 | `OTEL_EXPORTER_OTLP_METRICS_ENDPOINT` | OTLP metrics endpoint; metrics are not pushed when it is not set |
 | `OTEL_EXPORTER_OTLP_ENDPOINT`         | base OTLP endpoint, `/v1/metrics` is appended to it              |
 
 Authentication uses anonymous credentials.
+
+`WORKLOAD_DURATION` bounds the whole container run, not only the workload itself: the action
+waits `WORKLOAD_DURATION + 60s` for the container to exit. Creating the table and filling it
+happens inside that budget, and the last `-shutdown-time` seconds of it are reserved for
+stopping the workers and dropping the table.
+
+PHP has no threads and the gRPC core does not survive a fork, so the main process never opens a
+connection: every phase, and every read, write and metrics worker inside `run`, is a separate
+forked process.
 
 ## Options
 

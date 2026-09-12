@@ -11,6 +11,7 @@ use YdbPlatform\Ydb\Slo\Config;
 use YdbPlatform\Ydb\Slo\DataGenerator;
 use YdbPlatform\Ydb\Slo\Defaults;
 use YdbPlatform\Ydb\Slo\EventQueue;
+use YdbPlatform\Ydb\Slo\Fork;
 use YdbPlatform\Ydb\Slo\Metrics\Metrics;
 use YdbPlatform\Ydb\Slo\Metrics\OtlpExporter;
 use YdbPlatform\Ydb\Slo\SimpleSloLogger;
@@ -41,8 +42,7 @@ class RunCommand extends Command
 
     public function execute(Config $config)
     {
-        $startTime = microtime(true);
-        $deadline = $startTime + $config->duration;
+        $deadline = $config->runDeadline();
 
         // The queue is created before the workers are forked, see EventQueue.
         $this->queue = EventQueue::create(__FILE__);
@@ -52,15 +52,15 @@ class RunCommand extends Command
         $logger->info("Start workload", [
             "ref" => $config->ref,
             "tableName" => $config->tableName,
-            "duration" => $config->duration,
+            "duration" => max(0, (int)round($deadline - microtime(true))),
             "readRps" => $config->readRps,
             "writeRps" => $config->writeRps,
             "otlpEndpoint" => $config->otlpEndpoint,
         ]);
 
         $pids = [];
-        $pids[] = $this->fork(function () use ($config, $workersCount, $startTime, $deadline) {
-            $this->metricsJob($config, $workersCount, $startTime, $deadline);
+        $pids[] = $this->fork(function () use ($config, $workersCount, $deadline) {
+            $this->metricsJob($config, $workersCount, $deadline);
         });
         for ($i = 0; $i < $config->readForks; $i++) {
             $index = $i;
@@ -84,10 +84,20 @@ class RunCommand extends Command
             });
         }
 
+        // A process stuck in an operation must not hold the container: the action
+        // gives the whole container only the workload duration plus a minute.
+        pcntl_signal(SIGALRM, function () use ($pids, $logger) {
+            $logger->error("Workload processes did not finish in time, killing them");
+            foreach ($pids as $pid) {
+                posix_kill($pid, SIGKILL);
+            }
+        });
+        pcntl_alarm(max(1, (int)ceil($config->hardDeadline() - microtime(true))));
+
         $failed = [];
         foreach ($pids as $pid) {
             pcntl_waitpid($pid, $status);
-            $exitCode = pcntl_wifexited($status) ? pcntl_wexitstatus($status) : 1;
+            $exitCode = Fork::exitCode($status);
             if ($exitCode != 0) {
                 $failed[] = $pid;
             }
@@ -104,28 +114,16 @@ class RunCommand extends Command
 
     protected function fork(Closure $job): int
     {
-        $pid = pcntl_fork();
-        if ($pid == -1) {
-            throw new Exception("unable to fork a workload process");
-        }
-        if ($pid != 0) {
-            return $pid;
-        }
+        return Fork::start(function () use ($job) {
+            pcntl_async_signals(true);
+            foreach ([SIGTERM, SIGINT] as $signal) {
+                pcntl_signal($signal, function () {
+                    $this->stopped = true;
+                });
+            }
 
-        pcntl_async_signals(true);
-        foreach ([SIGTERM, SIGINT] as $signal) {
-            pcntl_signal($signal, function () {
-                $this->stopped = true;
-            });
-        }
-
-        try {
             $job();
-        } catch (\Throwable $e) {
-            fwrite(STDERR, "workload process failed: " . $e->getMessage() . "\n");
-            exit(1);
-        }
-        exit(0);
+        });
     }
 
     protected function readJob(Config $config, int $index, float $deadline)
@@ -211,7 +209,7 @@ class RunCommand extends Command
     /**
      * Aggregates the events of all workers and pushes the metrics over OTLP.
      */
-    protected function metricsJob(Config $config, int $workersCount, float $startTime, float $deadline)
+    protected function metricsJob(Config $config, int $workersCount, float $deadline)
     {
         $logger = new SimpleSloLogger(SimpleSloLogger::INFO, "metrics");
         $metrics = new Metrics($config->ref);
@@ -220,15 +218,15 @@ class RunCommand extends Command
             'ref' => $config->ref,
             'sdk' => 'php',
             'sdk_version' => Ydb::VERSION,
-        ], $startTime);
+        ], $config->startTime);
 
         $workersLeft = $workersCount;
         $lastPush = 0.0;
         $pushed = 0;
         $pushFailed = 0;
 
-        // The workers are given the shutdown time on top of the deadline to finish.
-        $hardDeadline = $deadline + $config->shutdownTime;
+        // The workers are given some extra time on top of the deadline to finish.
+        $hardDeadline = $config->hardDeadline();
 
         while (true) {
             $message = null;

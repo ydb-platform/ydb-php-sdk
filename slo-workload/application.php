@@ -7,6 +7,7 @@ use YdbPlatform\Ydb\Slo\Commands\CleanupCommand;
 use YdbPlatform\Ydb\Slo\Commands\CreateCommand;
 use YdbPlatform\Ydb\Slo\Commands\RunCommand;
 use YdbPlatform\Ydb\Slo\Config;
+use YdbPlatform\Ydb\Slo\Fork;
 
 /**
  * @var Command[] $commands
@@ -66,24 +67,32 @@ try {
     exit(1);
 }
 
+// Every phase runs in its own process: the gRPC core does not survive a fork, so the
+// main process must never open a channel — the workload forks its workers itself.
+$runPhase = function (string $phase) use ($commands, $config) {
+    $exitCode = Fork::runAndWait(function () use ($commands, $phase, $config) {
+        $commands[$phase]->execute($config);
+    });
+
+    if ($exitCode != 0) {
+        fwrite(STDERR, sprintf("%s failed with exit code %d\n", $phase, $exitCode));
+    }
+
+    return $exitCode;
+};
+
 // The whole lifecycle always drops the table, even when the workload itself failed:
 // a leftover table would break the next run against the same database.
 $cleanupOnFailure = count($phases) > 1 && in_array('cleanup', $phases);
 
 foreach ($phases as $phase) {
-    try {
-        $commands[$phase]->execute($config);
-    } catch (Throwable $e) {
-        fwrite(STDERR, sprintf("%s failed: %s\n", $phase, $e->getMessage()));
-
-        if ($cleanupOnFailure && $phase != 'cleanup') {
-            try {
-                $commands['cleanup']->execute($config);
-            } catch (Throwable $cleanupError) {
-                fwrite(STDERR, sprintf("cleanup failed: %s\n", $cleanupError->getMessage()));
-            }
-        }
-
-        exit(1);
+    if ($runPhase($phase) == 0) {
+        continue;
     }
+
+    if ($cleanupOnFailure && $phase != 'cleanup') {
+        $runPhase('cleanup');
+    }
+
+    exit(1);
 }

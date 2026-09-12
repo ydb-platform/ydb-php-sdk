@@ -52,8 +52,28 @@ class Config
 
     /** @var int metrics push period in milliseconds */
     public $reportPeriod;
-    /** @var int seconds reserved for the graceful shutdown */
+    /** @var int seconds reserved for the graceful shutdown and the cleanup */
     public $shutdownTime;
+    /** @var float unix time the workload has been started at */
+    public $startTime;
+
+    /**
+     * The action waits `WORKLOAD_DURATION + 60s` for the container to exit, so the
+     * whole lifecycle has to fit into the duration: the workload stops early enough
+     * to leave the shutdown time for dropping the table.
+     */
+    public function runDeadline(): float
+    {
+        return $this->startTime + $this->duration - $this->shutdownTime;
+    }
+
+    /**
+     * Deadline for the workers to finish the operation they are in the middle of.
+     */
+    public function hardDeadline(): float
+    {
+        return $this->runDeadline() + $this->shutdownTime / 3;
+    }
 
     /**
      * @param array $options parsed CLI options, see Config::parseOptions()
@@ -62,6 +82,7 @@ class Config
     public static function fromEnv(array $options = []): Config
     {
         $config = new Config();
+        $config->startTime = microtime(true);
 
         list($endpoint, $database) = self::connectionFromEnv();
         $config->endpoint = $options['endpoint'] ?? $endpoint;
