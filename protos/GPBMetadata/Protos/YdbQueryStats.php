@@ -16,7 +16,7 @@ class YdbQueryStats
         }
         $pool->internalAddGeneratedFile(
             '
-ö
+ü
 protos/ydb_query_stats.protoYdb.TableStats"-
 OperationStats
 rows (
@@ -47,8 +47,8 @@ QueryStats5
 query_plan (	
 	query_ast (	
 total_duration_us (
-total_cpu_time_us (BL
-tech.ydbZ=github.com/ydb-platform/ydb-go-genproto/protos/Ydb_TableStatsøbproto3'
+total_cpu_time_us (BR
+tech.ydb.protoZ=github.com/ydb-platform/ydb-go-genproto/protos/Ydb_TableStatsøbproto3'
         , true);
 
         static::$is_initialized = true;

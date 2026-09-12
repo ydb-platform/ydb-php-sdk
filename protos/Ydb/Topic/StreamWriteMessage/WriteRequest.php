@@ -26,6 +26,10 @@ class WriteRequest extends \Google\Protobuf\Internal\Message
      * Generated from protobuf field <code>int32 codec = 2;</code>
      */
     protected $codec = 0;
+    /**
+     * Generated from protobuf field <code>optional .Ydb.Topic.TransactionIdentity tx = 3;</code>
+     */
+    protected $tx = null;
 
     /**
      * Constructor.
@@ -37,6 +41,7 @@ class WriteRequest extends \Google\Protobuf\Internal\Message
      *     @type int $codec
      *           Codec that is used for data compression.
      *           See enum Codec above for values.
+     *     @type \Ydb\Topic\TransactionIdentity $tx
      * }
      */
     public function __construct($data = NULL) {
@@ -90,6 +95,38 @@ class WriteRequest extends \Google\Protobuf\Internal\Message
     {
         GPBUtil::checkInt32($var);
         $this->codec = $var;
+
+        return $this;
+    }
+
+    /**
+     * Generated from protobuf field <code>optional .Ydb.Topic.TransactionIdentity tx = 3;</code>
+     * @return \Ydb\Topic\TransactionIdentity|null
+     */
+    public function getTx()
+    {
+        return $this->tx;
+    }
+
+    public function hasTx()
+    {
+        return isset($this->tx);
+    }
+
+    public function clearTx()
+    {
+        unset($this->tx);
+    }
+
+    /**
+     * Generated from protobuf field <code>optional .Ydb.Topic.TransactionIdentity tx = 3;</code>
+     * @param \Ydb\Topic\TransactionIdentity $var
+     * @return $this
+     */
+    public function setTx($var)
+    {
+        GPBUtil::checkMessage($var, \Ydb\Topic\TransactionIdentity::class);
+        $this->tx = $var;
 
         return $this;
     }

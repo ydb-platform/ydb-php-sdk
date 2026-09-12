@@ -23,12 +23,27 @@ class AlterPartitioningSettings extends \Google\Protobuf\Internal\Message
      */
     protected $set_min_active_partitions = null;
     /**
+     * Maximum partition count auto merge would stop working at.
+     * Zero value means default - 1.
+     *
+     * Generated from protobuf field <code>optional int64 set_max_active_partitions = 3 [(.Ydb.value) = ">= 0"];</code>
+     */
+    protected $set_max_active_partitions = null;
+    /**
      * Limit for total partition count, including active (open for write) and read-only partitions.
      * Zero value means default - 100.
+     * Use set_max_active_partitions
      *
-     * Generated from protobuf field <code>optional int64 set_partition_count_limit = 2 [(.Ydb.value) = ">= 0"];</code>
+     * Generated from protobuf field <code>optional int64 set_partition_count_limit = 2 [deprecated = true, (.Ydb.value) = ">= 0"];</code>
+     * @deprecated
      */
     protected $set_partition_count_limit = null;
+    /**
+     * Settings for auto partitioning the partition number
+     *
+     * Generated from protobuf field <code>optional .Ydb.Topic.AlterAutoPartitioningSettings alter_auto_partitioning_settings = 4;</code>
+     */
+    protected $alter_auto_partitioning_settings = null;
 
     /**
      * Constructor.
@@ -39,9 +54,15 @@ class AlterPartitioningSettings extends \Google\Protobuf\Internal\Message
      *     @type int|string $set_min_active_partitions
      *           Minimum partition count auto merge would stop working at.
      *           Zero value means default - 1.
+     *     @type int|string $set_max_active_partitions
+     *           Maximum partition count auto merge would stop working at.
+     *           Zero value means default - 1.
      *     @type int|string $set_partition_count_limit
      *           Limit for total partition count, including active (open for write) and read-only partitions.
      *           Zero value means default - 100.
+     *           Use set_max_active_partitions
+     *     @type \Ydb\Topic\AlterAutoPartitioningSettings $alter_auto_partitioning_settings
+     *           Settings for auto partitioning the partition number
      * }
      */
     public function __construct($data = NULL) {
@@ -88,39 +109,121 @@ class AlterPartitioningSettings extends \Google\Protobuf\Internal\Message
     }
 
     /**
+     * Maximum partition count auto merge would stop working at.
+     * Zero value means default - 1.
+     *
+     * Generated from protobuf field <code>optional int64 set_max_active_partitions = 3 [(.Ydb.value) = ">= 0"];</code>
+     * @return int|string
+     */
+    public function getSetMaxActivePartitions()
+    {
+        return isset($this->set_max_active_partitions) ? $this->set_max_active_partitions : 0;
+    }
+
+    public function hasSetMaxActivePartitions()
+    {
+        return isset($this->set_max_active_partitions);
+    }
+
+    public function clearSetMaxActivePartitions()
+    {
+        unset($this->set_max_active_partitions);
+    }
+
+    /**
+     * Maximum partition count auto merge would stop working at.
+     * Zero value means default - 1.
+     *
+     * Generated from protobuf field <code>optional int64 set_max_active_partitions = 3 [(.Ydb.value) = ">= 0"];</code>
+     * @param int|string $var
+     * @return $this
+     */
+    public function setSetMaxActivePartitions($var)
+    {
+        GPBUtil::checkInt64($var);
+        $this->set_max_active_partitions = $var;
+
+        return $this;
+    }
+
+    /**
      * Limit for total partition count, including active (open for write) and read-only partitions.
      * Zero value means default - 100.
+     * Use set_max_active_partitions
      *
-     * Generated from protobuf field <code>optional int64 set_partition_count_limit = 2 [(.Ydb.value) = ">= 0"];</code>
+     * Generated from protobuf field <code>optional int64 set_partition_count_limit = 2 [deprecated = true, (.Ydb.value) = ">= 0"];</code>
      * @return int|string
+     * @deprecated
      */
     public function getSetPartitionCountLimit()
     {
+        @trigger_error('set_partition_count_limit is deprecated.', E_USER_DEPRECATED);
         return isset($this->set_partition_count_limit) ? $this->set_partition_count_limit : 0;
     }
 
     public function hasSetPartitionCountLimit()
     {
+        @trigger_error('set_partition_count_limit is deprecated.', E_USER_DEPRECATED);
         return isset($this->set_partition_count_limit);
     }
 
     public function clearSetPartitionCountLimit()
     {
+        @trigger_error('set_partition_count_limit is deprecated.', E_USER_DEPRECATED);
         unset($this->set_partition_count_limit);
     }
 
     /**
      * Limit for total partition count, including active (open for write) and read-only partitions.
      * Zero value means default - 100.
+     * Use set_max_active_partitions
      *
-     * Generated from protobuf field <code>optional int64 set_partition_count_limit = 2 [(.Ydb.value) = ">= 0"];</code>
+     * Generated from protobuf field <code>optional int64 set_partition_count_limit = 2 [deprecated = true, (.Ydb.value) = ">= 0"];</code>
      * @param int|string $var
      * @return $this
+     * @deprecated
      */
     public function setSetPartitionCountLimit($var)
     {
+        @trigger_error('set_partition_count_limit is deprecated.', E_USER_DEPRECATED);
         GPBUtil::checkInt64($var);
         $this->set_partition_count_limit = $var;
+
+        return $this;
+    }
+
+    /**
+     * Settings for auto partitioning the partition number
+     *
+     * Generated from protobuf field <code>optional .Ydb.Topic.AlterAutoPartitioningSettings alter_auto_partitioning_settings = 4;</code>
+     * @return \Ydb\Topic\AlterAutoPartitioningSettings|null
+     */
+    public function getAlterAutoPartitioningSettings()
+    {
+        return $this->alter_auto_partitioning_settings;
+    }
+
+    public function hasAlterAutoPartitioningSettings()
+    {
+        return isset($this->alter_auto_partitioning_settings);
+    }
+
+    public function clearAlterAutoPartitioningSettings()
+    {
+        unset($this->alter_auto_partitioning_settings);
+    }
+
+    /**
+     * Settings for auto partitioning the partition number
+     *
+     * Generated from protobuf field <code>optional .Ydb.Topic.AlterAutoPartitioningSettings alter_auto_partitioning_settings = 4;</code>
+     * @param \Ydb\Topic\AlterAutoPartitioningSettings $var
+     * @return $this
+     */
+    public function setAlterAutoPartitioningSettings($var)
+    {
+        GPBUtil::checkMessage($var, \Ydb\Topic\AlterAutoPartitioningSettings::class);
+        $this->alter_auto_partitioning_settings = $var;
 
         return $this;
     }

@@ -63,6 +63,12 @@ class EndpointInfo extends \Google\Protobuf\Internal\Message
      * Generated from protobuf field <code>string ssl_target_name_override = 10;</code>
      */
     protected $ssl_target_name_override = '';
+    /**
+     * Optional name of the bridge pile this endpoint belongs to.
+     *
+     * Generated from protobuf field <code>string bridge_pile_name = 11;</code>
+     */
+    protected $bridge_pile_name = '';
 
     /**
      * Constructor.
@@ -87,6 +93,8 @@ class EndpointInfo extends \Google\Protobuf\Internal\Message
      *           used when connecting to this endpoint. This may be specified when an ssl
      *           endpoint is using certificate chain valid for a balancer hostname, and
      *           not this specific node hostname.
+     *     @type string $bridge_pile_name
+     *           Optional name of the bridge pile this endpoint belongs to.
      * }
      */
     public function __construct($data = NULL) {
@@ -330,6 +338,32 @@ class EndpointInfo extends \Google\Protobuf\Internal\Message
     {
         GPBUtil::checkString($var, True);
         $this->ssl_target_name_override = $var;
+
+        return $this;
+    }
+
+    /**
+     * Optional name of the bridge pile this endpoint belongs to.
+     *
+     * Generated from protobuf field <code>string bridge_pile_name = 11;</code>
+     * @return string
+     */
+    public function getBridgePileName()
+    {
+        return $this->bridge_pile_name;
+    }
+
+    /**
+     * Optional name of the bridge pile this endpoint belongs to.
+     *
+     * Generated from protobuf field <code>string bridge_pile_name = 11;</code>
+     * @param string $var
+     * @return $this
+     */
+    public function setBridgePileName($var)
+    {
+        GPBUtil::checkString($var, True);
+        $this->bridge_pile_name = $var;
 
         return $this;
     }

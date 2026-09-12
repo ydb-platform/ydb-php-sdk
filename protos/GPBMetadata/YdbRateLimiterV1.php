@@ -17,7 +17,7 @@ class YdbRateLimiterV1
         \GPBMetadata\Protos\YdbRateLimiter::initOnce();
         $pool->internalAddGeneratedFile(
             '
-ˆ
+Ž
 ydb_rate_limiter_v1.protoYdb.RateLimiter.V12ã
 RateLimiterServicea
 CreateResource&.Ydb.RateLimiter.CreateResourceRequest\'.Ydb.RateLimiter.CreateResourceResponse^
@@ -25,8 +25,8 @@ class YdbRateLimiterV1
 DropResource$.Ydb.RateLimiter.DropResourceRequest%.Ydb.RateLimiter.DropResourceResponse^
 ListResources%.Ydb.RateLimiter.ListResourcesRequest&.Ydb.RateLimiter.ListResourcesResponseg
 DescribeResource(.Ydb.RateLimiter.DescribeResourceRequest).Ydb.RateLimiter.DescribeResourceResponsed
-AcquireResource\'.Ydb.RateLimiter.AcquireResourceRequest(.Ydb.RateLimiter.AcquireResourceResponseBi
-tech.ydb.rate_limiter.v1BRateLimiterGrpcPZ:github.com/ydb-platform/ydb-go-genproto/Ydb_RateLimiter_V1bproto3'
+AcquireResource\'.Ydb.RateLimiter.AcquireResourceRequest(.Ydb.RateLimiter.AcquireResourceResponseBo
+tech.ydb.proto.rate_limiter.v1BRateLimiterGrpcPZ:github.com/ydb-platform/ydb-go-genproto/Ydb_RateLimiter_V1bproto3'
         , true);
 
         static::$is_initialized = true;
