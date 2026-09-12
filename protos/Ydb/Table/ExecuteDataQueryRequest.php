@@ -30,7 +30,7 @@ class ExecuteDataQueryRequest extends \Google\Protobuf\Internal\Message
     /**
      * Map of query parameters (optional)
      *
-     * Generated from protobuf field <code>map<string, .Ydb.TypedValue> parameters = 4;</code>
+     * Generated from protobuf field <code>map<string, .Ydb.TypedValue> parameters = 4 [(.Ydb.sensitive) = true];</code>
      */
     private $parameters;
     /**
@@ -161,7 +161,7 @@ class ExecuteDataQueryRequest extends \Google\Protobuf\Internal\Message
     /**
      * Map of query parameters (optional)
      *
-     * Generated from protobuf field <code>map<string, .Ydb.TypedValue> parameters = 4;</code>
+     * Generated from protobuf field <code>map<string, .Ydb.TypedValue> parameters = 4 [(.Ydb.sensitive) = true];</code>
      * @return \Google\Protobuf\Internal\MapField
      */
     public function getParameters()
@@ -172,7 +172,7 @@ class ExecuteDataQueryRequest extends \Google\Protobuf\Internal\Message
     /**
      * Map of query parameters (optional)
      *
-     * Generated from protobuf field <code>map<string, .Ydb.TypedValue> parameters = 4;</code>
+     * Generated from protobuf field <code>map<string, .Ydb.TypedValue> parameters = 4 [(.Ydb.sensitive) = true];</code>
      * @param array|\Google\Protobuf\Internal\MapField $var
      * @return $this
      */

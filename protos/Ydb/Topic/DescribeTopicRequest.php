@@ -31,6 +31,12 @@ class DescribeTopicRequest extends \Google\Protobuf\Internal\Message
      * Generated from protobuf field <code>bool include_stats = 3;</code>
      */
     protected $include_stats = false;
+    /**
+     * Include partition location.
+     *
+     * Generated from protobuf field <code>bool include_location = 4;</code>
+     */
+    protected $include_location = false;
 
     /**
      * Constructor.
@@ -43,6 +49,8 @@ class DescribeTopicRequest extends \Google\Protobuf\Internal\Message
      *           Topic path.
      *     @type bool $include_stats
      *           Include topic statistics.
+     *     @type bool $include_location
+     *           Include partition location.
      * }
      */
     public function __construct($data = NULL) {
@@ -130,6 +138,32 @@ class DescribeTopicRequest extends \Google\Protobuf\Internal\Message
     {
         GPBUtil::checkBool($var);
         $this->include_stats = $var;
+
+        return $this;
+    }
+
+    /**
+     * Include partition location.
+     *
+     * Generated from protobuf field <code>bool include_location = 4;</code>
+     * @return bool
+     */
+    public function getIncludeLocation()
+    {
+        return $this->include_location;
+    }
+
+    /**
+     * Include partition location.
+     *
+     * Generated from protobuf field <code>bool include_location = 4;</code>
+     * @param bool $var
+     * @return $this
+     */
+    public function setIncludeLocation($var)
+    {
+        GPBUtil::checkBool($var);
+        $this->include_location = $var;
 
         return $this;
     }

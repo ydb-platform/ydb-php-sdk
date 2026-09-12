@@ -43,6 +43,16 @@ class PartitionInfo extends \Google\Protobuf\Internal\Message
      * Generated from protobuf field <code>.Ydb.Topic.PartitionStats partition_stats = 5;</code>
      */
     protected $partition_stats = null;
+    /**
+     * Partition location, filled only when include_location in request is true.
+     *
+     * Generated from protobuf field <code>.Ydb.Topic.PartitionLocation partition_location = 6;</code>
+     */
+    protected $partition_location = null;
+    /**
+     * Generated from protobuf field <code>.Ydb.Topic.PartitionKeyRange key_range = 7;</code>
+     */
+    protected $key_range = null;
 
     /**
      * Constructor.
@@ -60,6 +70,9 @@ class PartitionInfo extends \Google\Protobuf\Internal\Message
      *           Ids of partitions from which this partition was formed by split or merge.
      *     @type \Ydb\Topic\PartitionStats $partition_stats
      *           Stats for partition, filled only when include_stats in request is true.
+     *     @type \Ydb\Topic\PartitionLocation $partition_location
+     *           Partition location, filled only when include_location in request is true.
+     *     @type \Ydb\Topic\PartitionKeyRange $key_range
      * }
      */
     public function __construct($data = NULL) {
@@ -203,6 +216,74 @@ class PartitionInfo extends \Google\Protobuf\Internal\Message
     {
         GPBUtil::checkMessage($var, \Ydb\Topic\PartitionStats::class);
         $this->partition_stats = $var;
+
+        return $this;
+    }
+
+    /**
+     * Partition location, filled only when include_location in request is true.
+     *
+     * Generated from protobuf field <code>.Ydb.Topic.PartitionLocation partition_location = 6;</code>
+     * @return \Ydb\Topic\PartitionLocation|null
+     */
+    public function getPartitionLocation()
+    {
+        return $this->partition_location;
+    }
+
+    public function hasPartitionLocation()
+    {
+        return isset($this->partition_location);
+    }
+
+    public function clearPartitionLocation()
+    {
+        unset($this->partition_location);
+    }
+
+    /**
+     * Partition location, filled only when include_location in request is true.
+     *
+     * Generated from protobuf field <code>.Ydb.Topic.PartitionLocation partition_location = 6;</code>
+     * @param \Ydb\Topic\PartitionLocation $var
+     * @return $this
+     */
+    public function setPartitionLocation($var)
+    {
+        GPBUtil::checkMessage($var, \Ydb\Topic\PartitionLocation::class);
+        $this->partition_location = $var;
+
+        return $this;
+    }
+
+    /**
+     * Generated from protobuf field <code>.Ydb.Topic.PartitionKeyRange key_range = 7;</code>
+     * @return \Ydb\Topic\PartitionKeyRange|null
+     */
+    public function getKeyRange()
+    {
+        return $this->key_range;
+    }
+
+    public function hasKeyRange()
+    {
+        return isset($this->key_range);
+    }
+
+    public function clearKeyRange()
+    {
+        unset($this->key_range);
+    }
+
+    /**
+     * Generated from protobuf field <code>.Ydb.Topic.PartitionKeyRange key_range = 7;</code>
+     * @param \Ydb\Topic\PartitionKeyRange $var
+     * @return $this
+     */
+    public function setKeyRange($var)
+    {
+        GPBUtil::checkMessage($var, \Ydb\Topic\PartitionKeyRange::class);
+        $this->key_range = $var;
 
         return $this;
     }

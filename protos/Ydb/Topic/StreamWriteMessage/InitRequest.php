@@ -25,7 +25,7 @@ class InitRequest extends \Google\Protobuf\Internal\Message
      * Producer identifier of client data stream.
      * Used for message deduplication by sequence numbers.
      *
-     * Generated from protobuf field <code>string producer_id = 2;</code>
+     * Generated from protobuf field <code>string producer_id = 2 [(.Ydb.length) = {</code>
      */
     protected $producer_id = '';
     /**
@@ -62,6 +62,8 @@ class InitRequest extends \Google\Protobuf\Internal\Message
      *           All messages with given pair (producer_id, message_group_id) go to single partition in order of writes.
      *     @type int|string $partition_id
      *           Explicit partition id to write to.
+     *     @type \Ydb\Topic\PartitionWithGeneration $partition_with_generation
+     *           Explicit partition location to write to.
      *     @type bool $get_last_seq_no
      *           Explicitly request for last sequential number
      *           It may be expensive, if producer wrote to many partitions before.
@@ -102,7 +104,7 @@ class InitRequest extends \Google\Protobuf\Internal\Message
      * Producer identifier of client data stream.
      * Used for message deduplication by sequence numbers.
      *
-     * Generated from protobuf field <code>string producer_id = 2;</code>
+     * Generated from protobuf field <code>string producer_id = 2 [(.Ydb.length) = {</code>
      * @return string
      */
     public function getProducerId()
@@ -114,7 +116,7 @@ class InitRequest extends \Google\Protobuf\Internal\Message
      * Producer identifier of client data stream.
      * Used for message deduplication by sequence numbers.
      *
-     * Generated from protobuf field <code>string producer_id = 2;</code>
+     * Generated from protobuf field <code>string producer_id = 2 [(.Ydb.length) = {</code>
      * @param string $var
      * @return $this
      */
@@ -157,7 +159,7 @@ class InitRequest extends \Google\Protobuf\Internal\Message
     /**
      * All messages with given pair (producer_id, message_group_id) go to single partition in order of writes.
      *
-     * Generated from protobuf field <code>string message_group_id = 4;</code>
+     * Generated from protobuf field <code>string message_group_id = 4 [(.Ydb.length) = {</code>
      * @return string
      */
     public function getMessageGroupId()
@@ -173,7 +175,7 @@ class InitRequest extends \Google\Protobuf\Internal\Message
     /**
      * All messages with given pair (producer_id, message_group_id) go to single partition in order of writes.
      *
-     * Generated from protobuf field <code>string message_group_id = 4;</code>
+     * Generated from protobuf field <code>string message_group_id = 4 [(.Ydb.length) = {</code>
      * @param string $var
      * @return $this
      */
@@ -212,6 +214,37 @@ class InitRequest extends \Google\Protobuf\Internal\Message
     {
         GPBUtil::checkInt64($var);
         $this->writeOneof(5, $var);
+
+        return $this;
+    }
+
+    /**
+     * Explicit partition location to write to.
+     *
+     * Generated from protobuf field <code>.Ydb.Topic.PartitionWithGeneration partition_with_generation = 7;</code>
+     * @return \Ydb\Topic\PartitionWithGeneration|null
+     */
+    public function getPartitionWithGeneration()
+    {
+        return $this->readOneof(7);
+    }
+
+    public function hasPartitionWithGeneration()
+    {
+        return $this->hasOneof(7);
+    }
+
+    /**
+     * Explicit partition location to write to.
+     *
+     * Generated from protobuf field <code>.Ydb.Topic.PartitionWithGeneration partition_with_generation = 7;</code>
+     * @param \Ydb\Topic\PartitionWithGeneration $var
+     * @return $this
+     */
+    public function setPartitionWithGeneration($var)
+    {
+        GPBUtil::checkMessage($var, \Ydb\Topic\PartitionWithGeneration::class);
+        $this->writeOneof(7, $var);
 
         return $this;
     }

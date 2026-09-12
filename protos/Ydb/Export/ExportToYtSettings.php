@@ -43,6 +43,14 @@ class ExportToYtSettings extends \Google\Protobuf\Internal\Message
      * Generated from protobuf field <code>bool use_type_v3 = 7;</code>
      */
     protected $use_type_v3 = false;
+    /**
+     * Patterns (PCRE) for paths excluded from export operation.
+     * - Patterns are matched against the object path relative to database root path.
+     * - Object is excluded from export operation if it matches any of the specified exclude regexps.
+     *
+     * Generated from protobuf field <code>repeated string exclude_regexps = 8;</code>
+     */
+    private $exclude_regexps;
 
     /**
      * Constructor.
@@ -57,6 +65,10 @@ class ExportToYtSettings extends \Google\Protobuf\Internal\Message
      *     @type string $description
      *     @type int $number_of_retries
      *     @type bool $use_type_v3
+     *     @type array<string>|\Google\Protobuf\Internal\RepeatedField $exclude_regexps
+     *           Patterns (PCRE) for paths excluded from export operation.
+     *           - Patterns are matched against the object path relative to database root path.
+     *           - Object is excluded from export operation if it matches any of the specified exclude regexps.
      * }
      */
     public function __construct($data = NULL) {
@@ -214,6 +226,36 @@ class ExportToYtSettings extends \Google\Protobuf\Internal\Message
     {
         GPBUtil::checkBool($var);
         $this->use_type_v3 = $var;
+
+        return $this;
+    }
+
+    /**
+     * Patterns (PCRE) for paths excluded from export operation.
+     * - Patterns are matched against the object path relative to database root path.
+     * - Object is excluded from export operation if it matches any of the specified exclude regexps.
+     *
+     * Generated from protobuf field <code>repeated string exclude_regexps = 8;</code>
+     * @return \Google\Protobuf\Internal\RepeatedField
+     */
+    public function getExcludeRegexps()
+    {
+        return $this->exclude_regexps;
+    }
+
+    /**
+     * Patterns (PCRE) for paths excluded from export operation.
+     * - Patterns are matched against the object path relative to database root path.
+     * - Object is excluded from export operation if it matches any of the specified exclude regexps.
+     *
+     * Generated from protobuf field <code>repeated string exclude_regexps = 8;</code>
+     * @param array<string>|\Google\Protobuf\Internal\RepeatedField $var
+     * @return $this
+     */
+    public function setExcludeRegexps($var)
+    {
+        $arr = GPBUtil::checkRepeatedField($var, \Google\Protobuf\Internal\GPBType::STRING);
+        $this->exclude_regexps = $arr;
 
         return $this;
     }
