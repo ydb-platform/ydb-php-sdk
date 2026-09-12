@@ -43,9 +43,9 @@ stopping the workers and dropping the table.
 
 ## Options
 
-Every setting of [src/config.php](src/config.php) can be overridden with the option of the same name, with underscores
-replaced by dashes: `read_rps` <- `-read-rps`. The options are passed through `workload_current_command` /
-`workload_baseline_command` of the action, the most useful ones are:
+Every setting of [src/Config.php](src/Config.php) can be overridden with the option listed next to it in
+`Config::OPTIONS`. The options are passed through `workload_current_command` / `workload_baseline_command` of the
+action, the most useful ones are:
 
 ```
   -table-name             <string> table path relative to the database
@@ -66,16 +66,20 @@ replaced by dashes: `read_rps` <- `-read-rps`. The options are passed through `w
 
 ## What's inside
 
-The workload is plain PHP functions, one file per topic:
+Data is classes, everything else is plain functions:
 
-| File                                     | What is in it                                                  |
-|------------------------------------------|----------------------------------------------------------------|
-| [application.php](application.php)       | command line: the options and the phases to run                |
-| [src/config.php](src/config.php)         | settings: defaults, the environment and the options on top     |
-| [src/processes.php](src/processes.php)   | forking and the message queue the processes talk over          |
-| [src/ydb.php](src/ydb.php)               | connecting to the database and the queries                     |
-| [src/workload.php](src/workload.php)     | the phases themselves: create, run, cleanup                    |
-| [src/metrics.php](src/metrics.php)       | counting the operations and pushing the metrics                |
+| File                                       | What is in it                                                |
+|--------------------------------------------|--------------------------------------------------------------|
+| [application.php](application.php)         | command line: the options and the phases to run              |
+| [src/Config.php](src/Config.php)           | settings: defaults, the environment and the options on top   |
+| [src/Connection.php](src/Connection.php)   | endpoint and database path                                   |
+| [src/Event.php](src/Event.php)             | what a worker reports about an operation                     |
+| [src/EventQueue.php](src/EventQueue.php)   | the message queue the processes talk over                    |
+| [src/Metrics.php](src/Metrics.php)         | counting the events into the metrics                         |
+| [src/Otlp.php](src/Otlp.php)               | encoding the metrics as OTLP/JSON and pushing them           |
+| [src/processes.php](src/processes.php)     | forking and stopping the processes                           |
+| [src/ydb.php](src/ydb.php)                 | connecting to the database and the queries                   |
+| [src/workload.php](src/workload.php)       | the phases themselves: create, run, cleanup                  |
 
 PHP has no threads, so `run` forks a set of processes: `-read-forks` read processes, `-write-forks` write processes
 and one metrics process. Workers send every finished operation to the metrics process over a System V message queue,

@@ -35,11 +35,7 @@
             "YdbPlatform\\Ydb\\Test\\": "tests",
             "App\\": "examples/",
             "YdbPlatform\\Ydb\\Slo\\": "slo-workload/src"
-        },
-        "files": [
-            "slo-workload/src/config.php",
-            "slo-workload/src/metrics.php"
-        ]
+        }
     },
     "config": {
         "policy": {

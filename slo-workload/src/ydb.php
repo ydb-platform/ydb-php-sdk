@@ -1,8 +1,10 @@
 <?php
 
+namespace YdbPlatform\Ydb\Slo;
+
+use Exception;
 use Ydb\StatusIds\StatusCode;
 use YdbPlatform\Ydb\Auth\Implement\AnonymousAuthentication;
-use YdbPlatform\Ydb\Slo\SimpleSloLogger;
 use YdbPlatform\Ydb\Traits\RequestTrait;
 use YdbPlatform\Ydb\Types\DoubleType;
 use YdbPlatform\Ydb\Types\TimestampType;
@@ -11,20 +13,24 @@ use YdbPlatform\Ydb\Types\Utf8Type;
 use YdbPlatform\Ydb\Ydb;
 
 /**
- * Connects to the database. The connection must be opened in the process that uses
- * it: the gRPC core does not survive a fork, see src/processes.php.
+ * Connecting to the database and the queries of the workload.
+ */
+
+/**
+ * The connection must be opened in the process that uses it, see src/processes.php.
  *
  * @param string $process name of the process, it prefixes every log line
+ * @throws Exception on a malformed endpoint
  */
-function slo_connect(array $config, $process)
+function connect(Config $config, string $process): Ydb
 {
-    $endpoint = explode('://', $config['endpoint']);
+    $endpoint = explode('://', $config->endpoint);
     if (count($endpoint) != 2) {
-        throw new Exception('invalid endpoint: ' . $config['endpoint']);
+        throw new Exception('invalid endpoint: ' . $config->endpoint);
     }
 
     $ydbConfig = [
-        'database' => $config['database'],
+        'database' => $config->database,
         'endpoint' => $endpoint[1],
         'discovery' => true,
         'iam_config' => [
@@ -39,9 +45,9 @@ function slo_connect(array $config, $process)
     return new Ydb($ydbConfig, new SimpleSloLogger(SimpleSloLogger::INFO, $process));
 }
 
-function slo_create_table_query(array $config)
+function createTableQuery(Config $config): string
 {
-    return "CREATE TABLE IF NOT EXISTS `$config[table_name]`
+    return "CREATE TABLE IF NOT EXISTS `$config->tableName`
 (
     `hash` Uint64,
     `id` Uint64,
@@ -52,13 +58,13 @@ function slo_create_table_query(array $config)
     PRIMARY KEY (`hash`, `id`)
 )
 WITH(
-    AUTO_PARTITIONING_MIN_PARTITIONS_COUNT = $config[min_partitions_count],
-    AUTO_PARTITIONING_MAX_PARTITIONS_COUNT = $config[max_partitions_count],
-    AUTO_PARTITIONING_PARTITION_SIZE_MB = $config[partition_size]
+    AUTO_PARTITIONING_MIN_PARTITIONS_COUNT = $config->minPartitionsCount,
+    AUTO_PARTITIONING_MAX_PARTITIONS_COUNT = $config->maxPartitionsCount,
+    AUTO_PARTITIONING_PARTITION_SIZE_MB = $config->partitionSize
 );";
 }
 
-function slo_write_query($tableName)
+function writeQuery(string $tableName): string
 {
     return "DECLARE \$id AS Uint64;
 DECLARE \$payload_str AS Utf8;
@@ -71,7 +77,7 @@ UPSERT INTO `$tableName` (
 );";
 }
 
-function slo_read_query($tableName)
+function readQuery(string $tableName): string
 {
     return "DECLARE \$id AS Uint64;
 SELECT id, payload_str, payload_double, payload_timestamp, payload_hash
@@ -79,9 +85,11 @@ FROM `$tableName` WHERE id = \$id AND hash = Digest::NumericHash(\$id);";
 }
 
 /**
- * Parameters of a row to write, see slo_write_query().
+ * Parameters of a row to write, see writeQuery().
+ *
+ * @return array query parameter name => typed value of the SDK
  */
-function slo_write_params($id)
+function writeParams(int $id): array
 {
     $payload = base64_encode(bin2hex(random_bytes((int)round(lcg_value() * 20 + 20))));
 
@@ -94,9 +102,11 @@ function slo_write_params($id)
 }
 
 /**
- * Parameters of a row to read, see slo_read_query().
+ * Parameters of a row to read, see readQuery().
+ *
+ * @return array query parameter name => typed value of the SDK
  */
-function slo_read_params($id)
+function readParams(int $id): array
 {
     return ['$id' => (new Uint64Type($id))->toTypedValue()];
 }
@@ -104,7 +114,7 @@ function slo_read_params($id)
 /**
  * Maps an exception class name to a short error name for the `error_name` label.
  */
-function slo_error_name($exceptionClass)
+function errorName(string $exceptionClass): string
 {
     if ($ydbError = array_search($exceptionClass, RequestTrait::$ydbExceptions)) {
         return 'YDB_' . StatusCode::name($ydbError);

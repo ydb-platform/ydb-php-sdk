@@ -1,82 +1,92 @@
 <?php
 
+namespace YdbPlatform\Ydb\Slo;
+
+use Closure;
+use Exception;
 use YdbPlatform\Ydb\Retry\RetryParams;
 use YdbPlatform\Ydb\Session;
-use YdbPlatform\Ydb\Slo\SimpleSloLogger;
 use YdbPlatform\Ydb\Table;
 use YdbPlatform\Ydb\Ydb;
 
-/** ids of the writer number N start at prefill_count + N * SLO_WRITER_ID_RANGE */
-const SLO_WRITER_ID_RANGE = 1000000000;
+/**
+ * The phases of the workload: create, run, cleanup.
+ */
+
+/** ids of the writer number N start at prefillCount + N * WRITER_ID_RANGE */
+const WRITER_ID_RANGE = 1000000000;
 
 /**
  * Creates the table and fills it with the initial data.
  */
-function slo_create(array $config)
+function create(Config $config)
 {
-    $table = slo_connect($config, 'create')->table();
+    $table = connect($config, 'create')->table();
     $logger = $table->getLogger();
 
-    $logger->info('Create table', ['tableName' => $config['table_name']]);
+    $logger->info('Create table', ['tableName' => $config->tableName]);
     $table->retrySession(function (Session $session) use ($config) {
-        $session->schemeQuery(slo_create_table_query($config));
-    }, true, new RetryParams($config['write_timeout']));
+        $session->schemeQuery(createTableQuery($config));
+    }, true, new RetryParams($config->writeTimeout));
 
-    $query = slo_write_query($config['table_name']);
+    $query = writeQuery($config->tableName);
     $table->retryTransaction(function (Session $session) use ($query, $config) {
         $prepared = $session->prepare($query);
-        for ($id = 1; $id <= $config['prefill_count']; $id++) {
-            $prepared->execute(slo_write_params($id));
+        for ($id = 1; $id <= $config->prefillCount; $id++) {
+            $prepared->execute(writeParams($id));
         }
-    }, false, new RetryParams($config['write_timeout']));
+    }, false, new RetryParams($config->writeTimeout));
 
-    $logger->info('Table created', ['rows' => $config['prefill_count']]);
+    $logger->info('Table created', ['rows' => $config->prefillCount]);
 }
 
 /**
  * Drops the table.
  */
-function slo_cleanup(array $config)
+function cleanup(Config $config)
 {
-    $table = slo_connect($config, 'cleanup')->table();
+    $table = connect($config, 'cleanup')->table();
 
     $table->retrySession(function (Session $session) use ($config) {
-        $session->dropTable($config['table_name']);
-    }, true, new RetryParams($config['write_timeout']));
+        $session->dropTable($config->tableName);
+    }, true, new RetryParams($config->writeTimeout));
 
-    $table->getLogger()->info('Dropped table', ['tableName' => $config['table_name']]);
+    $table->getLogger()->info('Dropped table', ['tableName' => $config->tableName]);
 }
 
 /**
  * Runs the workload: read and write processes do the operations, one more process
- * collects their events and pushes the metrics.
+ * counts their events and pushes the metrics.
+ *
+ * @throws Exception when a process failed before the shutdown deadline
  */
-function slo_run(array $config)
+function run(Config $config)
 {
-    // The queue is created before the workers are forked, see slo_queue_create().
-    $queue = slo_queue_create();
+    // The queue is created before the workers are forked, see EventQueue.
+    $queue = EventQueue::create();
     $logger = new SimpleSloLogger(SimpleSloLogger::INFO, 'run');
     $logger->info('Start workload', [
-        'ref' => $config['ref'],
-        'tableName' => $config['table_name'],
-        'duration' => max(0, (int)round($config['run_deadline'] - microtime(true))),
-        'readRps' => $config['read_rps'],
-        'writeRps' => $config['write_rps'],
-        'otlpEndpoint' => $config['otlp_endpoint'],
+        'ref' => $config->ref,
+        'tableName' => $config->tableName,
+        'duration' => max(0, (int)round($config->runDeadline - microtime(true))),
+        'readRps' => $config->readRps,
+        'writeRps' => $config->writeRps,
+        'otlpEndpoint' => $config->otlpEndpoint,
     ]);
 
-    $workersCount = $config['read_forks'] + $config['write_forks'];
+    $workersCount = $config->readForks + $config->writeForks;
 
     $pids = [];
-    $pids[] = slo_fork(function () use ($config, $queue, $workersCount) {
-        slo_stop_on_signals();
-        slo_metrics_worker($config, $queue, $workersCount);
+    $pids[] = forkProcess(function () use ($config, $queue, $workersCount) {
+        stopOnSignals();
+        metricsWorker($config, $queue, $workersCount);
     });
-    foreach (['read', 'write'] as $operation) {
-        for ($index = 0; $index < $config[$operation . '_forks']; $index++) {
-            $pids[] = slo_fork(function () use ($config, $queue, $operation, $index) {
-                slo_stop_on_signals();
-                slo_worker($config, $queue, $operation, $index);
+    foreach ([Metrics::READ, Metrics::WRITE] as $operation) {
+        $forks = $operation == Metrics::READ ? $config->readForks : $config->writeForks;
+        for ($index = 0; $index < $forks; $index++) {
+            $pids[] = forkProcess(function () use ($config, $queue, $operation, $index) {
+                stopOnSignals();
+                worker($config, $queue, $operation, $index);
             });
         }
     }
@@ -101,15 +111,15 @@ function slo_run(array $config)
             posix_kill($pid, SIGKILL);
         }
     });
-    pcntl_alarm(max(1, (int)ceil($config['kill_deadline'] - microtime(true))));
+    pcntl_alarm(max(1, (int)ceil($config->killDeadline - microtime(true))));
 
     $failed = [];
     foreach ($pids as $pid) {
-        if (slo_wait($pid) != 0) {
+        if (waitForProcess($pid) != 0) {
             $failed[] = $pid;
         }
     }
-    slo_queue_remove($queue);
+    $queue->remove();
 
     if ($failed && !$killed) {
         throw new Exception('workload processes failed: ' . implode(', ', $failed));
@@ -129,37 +139,35 @@ function slo_run(array $config)
  * Reads or writes rows until the deadline, keeping the per-process share of the
  * requested RPS as an upper bound: a slower process simply runs at its own pace.
  *
- * @param string $operation `read` or `write`
+ * @param string $operation Metrics::READ or Metrics::WRITE
  * @param int $index number of the process among the ones doing the same operation
  */
-function slo_worker(array $config, $queue, $operation, $index)
+function worker(Config $config, EventQueue $queue, string $operation, int $index)
 {
-    $table = slo_connect($config, "$operation-$index")->table();
-    $timeout = $config[$operation . '_timeout'];
-    $rps = $config[$operation . '_rps'];
-    $forks = $config[$operation . '_forks'];
+    $table = connect($config, "$operation-$index")->table();
+    $reading = $operation == Metrics::READ;
 
-    if ($operation == 'read') {
-        $query = slo_read_query($config['table_name']);
-        $maxId = max(1, $config['prefill_count']);
-    } else {
-        $query = slo_write_query($config['table_name']);
-        // Every writer gets its own range of ids, to avoid overwriting rows of the others.
-        $id = $config['prefill_count'] + $index * SLO_WRITER_ID_RANGE;
-    }
+    $timeout = $reading ? $config->readTimeout : $config->writeTimeout;
+    $rps = $reading ? $config->readRps : $config->writeRps;
+    $forks = $reading ? $config->readForks : $config->writeForks;
+    $query = $reading ? readQuery($config->tableName) : writeQuery($config->tableName);
+
+    $maxId = max(1, $config->prefillCount);
+    // Every writer gets its own range of ids, to avoid overwriting rows of the others.
+    $id = $config->prefillCount + $index * WRITER_ID_RANGE;
 
     $interval = $rps > 0 ? $forks / $rps : 0.0;
     $next = microtime(true);
 
-    while (!slo_stopped() && microtime(true) < $config['run_deadline']) {
-        if ($operation == 'read') {
-            $params = slo_read_params(mt_rand(1, $maxId));
+    while (!stopRequested() && microtime(true) < $config->runDeadline) {
+        if ($reading) {
+            $params = readParams(mt_rand(1, $maxId));
         } else {
             $id++;
-            $params = slo_write_params($id);
+            $params = writeParams($id);
         }
 
-        slo_operation($config, $queue, $table, $operation, $timeout, function (Session $session) use ($query, $params) {
+        operation($config, $queue, $table, $operation, $timeout, function (Session $session) use ($query, $params) {
             $session->query($query, $params);
         });
 
@@ -173,60 +181,52 @@ function slo_worker(array $config, $queue, $operation, $index)
         }
     }
 
-    slo_queue_send($queue, ['type' => 'done']);
+    $queue->send(Event::workerDone());
 }
 
 /**
  * Runs one operation with retries and reports it to the metrics process.
+ *
+ * @param string $operation Metrics::READ or Metrics::WRITE
+ * @param int $timeout operation timeout in milliseconds
+ * @param Closure $call the operation itself, `function (Session $session)`
  */
-function slo_operation(array $config, $queue, Table $table, $operation, $timeout, Closure $call)
+function operation(Config $config, EventQueue $queue, Table $table, string $operation, int $timeout, Closure $call)
 {
     $begin = microtime(true);
     $attempts = 1;
 
     // Retries must not outlive the shutdown deadline, or the worker gets killed in
     // the middle of an operation and the container overruns its time budget.
-    $timeout = (int)max(100, min($timeout, ($config['kill_deadline'] - $begin) * 1000));
+    $timeout = (int)max(100, min($timeout, ($config->killDeadline - $begin) * 1000));
 
     try {
         $table->retryTransaction($call, true, new RetryParams($timeout), [
             'callback_on_error' => function (Exception $e) use (&$attempts, $queue, $operation) {
                 $attempts++;
-                slo_queue_send($queue, [
-                    'type' => 'retried',
-                    'operation' => $operation,
-                    'error' => slo_error_name(get_class($e)),
-                ]);
+                $queue->send(Event::retried($operation, errorName(get_class($e))));
             },
         ]);
-        slo_queue_send($queue, [
-            'type' => 'ok',
-            'operation' => $operation,
-            'attempts' => $attempts,
-            'latency' => microtime(true) - $begin,
-        ]);
+        $queue->send(Event::succeeded($operation, $attempts, microtime(true) - $begin));
     } catch (Exception $e) {
         $table->getLogger()->error("$operation failed: " . $e->getMessage());
-        slo_queue_send($queue, [
-            'type' => 'err',
-            'operation' => $operation,
-            'attempts' => $attempts,
-            'error' => slo_error_name(get_class($e)),
-            'latency' => microtime(true) - $begin,
-        ]);
+        $queue->send(Event::failed($operation, $attempts, microtime(true) - $begin, errorName(get_class($e))));
     }
 }
 
 /**
  * Counts the events of all workers and pushes the metrics every report period.
+ *
+ * @param int $workersCount how many workers have to finish for the workload to end
+ * @throws Exception when not a single metrics push succeeded
  */
-function slo_metrics_worker(array $config, $queue, $workersCount)
+function metricsWorker(Config $config, EventQueue $queue, int $workersCount)
 {
     $logger = new SimpleSloLogger(SimpleSloLogger::INFO, 'metrics');
-    $metrics = slo_metrics_new($config['ref']);
+    $metrics = new Metrics($config->ref);
     $resourceAttributes = [
-        'service.name' => $config['workload_name'],
-        'ref' => $config['ref'],
+        'service.name' => $config->workloadName,
+        'ref' => $config->ref,
         'sdk' => 'php',
         'sdk_version' => Ydb::VERSION,
     ];
@@ -238,27 +238,28 @@ function slo_metrics_worker(array $config, $queue, $workersCount)
     $lastError = '';
 
     while (true) {
-        $event = null;
-        $received = slo_queue_receive($queue, $event);
-        if ($received && is_array($event)) {
-            if ($event['type'] == 'done') {
+        $event = $queue->receive();
+        if ($event !== null) {
+            if ($event->type == Event::WORKER_DONE) {
                 $workersLeft--;
             } else {
-                slo_metrics_add($metrics, $event);
+                $metrics->add($event);
             }
         }
 
         // Everyone has finished, the workload is being stopped, or the time is up:
         // the last push carries the final counters.
         $now = microtime(true);
-        $finished = $workersLeft <= 0 || (slo_stopped() && !$received) || $now > $config['kill_deadline'];
+        $finished = $workersLeft <= 0
+            || (stopRequested() && $event === null)
+            || $now > $config->killDeadline;
 
-        if ($finished || $now - $lastPush >= $config['report_period'] / 1000) {
+        if ($finished || $now - $lastPush >= $config->reportPeriod / 1000) {
             $lastPush = $now;
-            $payload = slo_metrics_payload($metrics, $resourceAttributes, $config['start_time']);
+            $payload = $metrics->payload($resourceAttributes, $config->startTime);
 
-            if ($config['otlp_endpoint'] !== '') {
-                $lastError = slo_metrics_push($config['otlp_endpoint'], $payload);
+            if ($config->otlpEndpoint !== '') {
+                $lastError = Otlp::push($config->otlpEndpoint, $payload);
                 if ($lastError === '') {
                     $pushed++;
                 } else {
@@ -271,12 +272,12 @@ function slo_metrics_worker(array $config, $queue, $workersCount)
         if ($finished) {
             break;
         }
-        if (!$received) {
+        if ($event === null) {
             usleep(1000);
         }
     }
 
-    if ($config['otlp_endpoint'] !== '') {
+    if ($config->otlpEndpoint !== '') {
         $logger->info('Metrics pushed', ['successful' => $pushed, 'failed' => $pushFailed]);
         if ($pushed == 0) {
             throw new Exception('every metrics push failed: ' . $lastError);

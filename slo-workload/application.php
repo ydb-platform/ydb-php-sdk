@@ -1,10 +1,12 @@
 <?php
 
+namespace YdbPlatform\Ydb\Slo;
+
+use Exception;
+
 require_once __DIR__ . '/vendor/autoload.php';
-require_once __DIR__ . '/src/config.php';
 require_once __DIR__ . '/src/processes.php';
 require_once __DIR__ . '/src/ydb.php';
-require_once __DIR__ . '/src/metrics.php';
 require_once __DIR__ . '/src/workload.php';
 
 $usage = "Usage: php application.php [create|run|cleanup] [options]
@@ -18,7 +20,7 @@ Commands:
   run       runs the workload (reads and writes rows with the given RPS)
   cleanup   drops the table
 
-Options (every setting of src/config.php can be overridden, the most useful ones):
+Options (every setting of src/Config.php can be overridden, the most useful ones):
   -table-name             <string> table path relative to the database
   -prefill-count          <int>    amount of rows written before the workload starts
 
@@ -48,7 +50,7 @@ if ($args && substr($args[0], 0, 1) != '-') {
 }
 
 try {
-    $config = slo_config($args);
+    $config = Config::fromEnv($args);
 } catch (Exception $e) {
     fwrite(STDERR, $e->getMessage() . "\n\n" . $usage);
     exit(1);
@@ -61,10 +63,20 @@ try {
  *
  * @return int exit code of the phase
  */
-function slo_phase($phase, array $config)
+function runPhase(string $phase, Config $config): int
 {
-    $exitCode = slo_wait(slo_fork(function () use ($phase, $config) {
-        call_user_func('slo_' . $phase, $config);
+    $exitCode = waitForProcess(forkProcess(function () use ($phase, $config) {
+        switch ($phase) {
+            case 'create':
+                create($config);
+                break;
+            case 'run':
+                run($config);
+                break;
+            case 'cleanup':
+                cleanup($config);
+                break;
+        }
     }));
 
     if ($exitCode != 0) {
@@ -75,14 +87,14 @@ function slo_phase($phase, array $config)
 }
 
 foreach ($phases as $phase) {
-    if (slo_phase($phase, $config) == 0) {
+    if (runPhase($phase, $config) == 0) {
         continue;
     }
 
     // The whole lifecycle always drops the table, even when the workload itself failed:
     // a leftover table would break the next run against the same database.
     if (count($phases) > 1 && $phase != 'cleanup') {
-        slo_phase('cleanup', $config);
+        runPhase('cleanup', $config);
     }
 
     exit(1);

@@ -3,6 +3,10 @@
 namespace YdbPlatform\Ydb\Test;
 
 use PHPUnit\Framework\TestCase;
+use YdbPlatform\Ydb\Slo\Config;
+use YdbPlatform\Ydb\Slo\Event;
+use YdbPlatform\Ydb\Slo\Metrics;
+use YdbPlatform\Ydb\Slo\Otlp;
 
 /**
  * The SLO workload reports metrics to `ydb-platform/ydb-slo-action`, which reads them
@@ -12,41 +16,34 @@ class SloWorkloadTest extends TestCase
 {
     public function testSplitConnectionString()
     {
-        $this->assertEquals(
-            ['grpc://ydb:2136', '/Root/testdb'],
-            slo_split_connection_string('grpc://ydb:2136/Root/testdb')
-        );
-        $this->assertEquals(
-            ['grpcs://ydb.example.com:2135', '/some/database'],
-            slo_split_connection_string('grpcs://ydb.example.com:2135?database=/some/database')
-        );
+        $connection = Config::splitConnectionString('grpc://ydb:2136/Root/testdb');
+        $this->assertEquals('grpc://ydb:2136', $connection->endpoint);
+        $this->assertEquals('/Root/testdb', $connection->database);
+
+        $connection = Config::splitConnectionString('grpcs://ydb.example.com:2135?database=/some/database');
+        $this->assertEquals('grpcs://ydb.example.com:2135', $connection->endpoint);
+        $this->assertEquals('/some/database', $connection->database);
     }
 
-    public function testOptions()
+    public function testParseOptions()
     {
-        $options = slo_options(['-table-name', 'php-table/current', '--read-rps', '500', '--write-rps=50']);
+        $options = Config::parseOptions(['-table-name', 'php-table/current', '--read-rps', '500', '--write-rps=50']);
 
         $this->assertEquals([
-            'table_name' => 'php-table/current',
-            'read_rps' => '500',
-            'write_rps' => '50',
+            'table-name' => 'php-table/current',
+            'read-rps' => '500',
+            'write-rps' => '50',
         ], $options);
     }
 
     public function testMetrics()
     {
-        $metrics = slo_metrics_new('current');
-        slo_metrics_add($metrics, ['type' => 'ok', 'operation' => 'read', 'attempts' => 1, 'latency' => 0.01]);
-        slo_metrics_add($metrics, ['type' => 'ok', 'operation' => 'read', 'attempts' => 2, 'latency' => 0.02]);
-        slo_metrics_add($metrics, [
-            'type' => 'err',
-            'operation' => 'write',
-            'attempts' => 3,
-            'latency' => 0.5,
-            'error' => 'YDB_UNAVAILABLE',
-        ]);
+        $metrics = new Metrics('current');
+        $metrics->add(Event::succeeded(Metrics::READ, 1, 0.01));
+        $metrics->add(Event::succeeded(Metrics::READ, 2, 0.02));
+        $metrics->add(Event::failed(Metrics::WRITE, 3, 0.5, 'YDB_UNAVAILABLE'));
 
-        $series = $this->series(slo_metrics_payload($metrics, ['service.name' => 'php-table'], microtime(true)));
+        $series = $this->series($metrics->payload(['service.name' => 'php-table'], microtime(true)));
 
         // Counters are cumulative and include the zero-initialized series.
         $this->assertEquals(2, $series['sdk_operations_total']['read|success']['asInt']);
@@ -61,18 +58,33 @@ class SloWorkloadTest extends TestCase
         $this->assertEquals(0.02, $series['sdk_operation_latency_p99_seconds']['read|success']['asDouble']);
         $this->assertEquals(0.5, $series['sdk_operation_latency_p50_seconds']['write|failure']['asDouble']);
 
-        // Samples are consumed by the push, the next window starts empty.
-        $next = $this->series(slo_metrics_payload($metrics, [], microtime(true)));
+        // Samples are consumed by the payload, the next window starts empty.
+        $next = $this->series($metrics->payload([], microtime(true)));
         $this->assertArrayNotHasKey('sdk_operation_latency_p50_seconds', $next);
         $this->assertEquals(2, $next['sdk_operations_total']['read|success']['asInt']);
     }
 
+    /**
+     * A retried attempt is counted as an error, but not as a finished operation.
+     */
+    public function testRetriedAttempt()
+    {
+        $metrics = new Metrics('current');
+        $metrics->add(Event::retried(Metrics::READ, 'GRPC_UNAVAILABLE'));
+
+        $series = $this->series($metrics->payload([], microtime(true)));
+
+        $this->assertEquals(1, $series['sdk_errors_total']['read|failure']['asInt']);
+        $this->assertEquals(0, $series['sdk_operations_total']['read|success']['asInt']);
+        $this->assertEquals(0, $series['sdk_operations_total']['read|failure']['asInt']);
+    }
+
     public function testPayloadFormat()
     {
-        $metrics = slo_metrics_new('baseline');
-        slo_metrics_add($metrics, ['type' => 'ok', 'operation' => 'read', 'attempts' => 1, 'latency' => 0.01]);
+        $metrics = new Metrics('baseline');
+        $metrics->add(Event::succeeded(Metrics::READ, 1, 0.01));
 
-        $payload = slo_metrics_payload($metrics, ['ref' => 'baseline'], 1.5);
+        $payload = $metrics->payload(['ref' => 'baseline'], 1.5);
         $resource = $payload['resourceMetrics'][0];
 
         $this->assertEquals(
@@ -87,7 +99,7 @@ class SloWorkloadTest extends TestCase
 
         $sum = $encoded['sdk_operations_total']['sum'];
         $this->assertTrue($sum['isMonotonic']);
-        $this->assertEquals(SLO_CUMULATIVE, $sum['aggregationTemporality']);
+        $this->assertEquals(Otlp::AGGREGATION_TEMPORALITY_CUMULATIVE, $sum['aggregationTemporality']);
         // Nanoseconds of a 64-bit protobuf field are encoded as strings.
         $this->assertEquals('1500000000', $sum['dataPoints'][0]['startTimeUnixNano']);
 
@@ -98,7 +110,7 @@ class SloWorkloadTest extends TestCase
     /**
      * @return array metric name => "operation_type|operation_status" => data point
      */
-    protected function series(array $payload)
+    protected function series(array $payload): array
     {
         $series = [];
         foreach ($payload['resourceMetrics'][0]['scopeMetrics'][0]['metrics'] as $metric) {
