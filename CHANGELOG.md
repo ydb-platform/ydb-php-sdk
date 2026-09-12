@@ -1,3 +1,4 @@
+* added `YdbQuery::beginTx($mode, bool $commit = true)` - passing `$commit = false` leaves the transaction open instead of always committing right after that one query; `Session::executeQuery()` now picks up the resulting transaction id from the response, so a following `Session::query()`/`commitTransaction()`/`rollbackTransaction()` call continues and closes it, the same way `Session::beginTransaction()` already does. Default behavior (`beginTx($mode)`, no second argument) is unchanged. Also fixed a trailing comma in a function call argument list (PHP 7.3+ only) in the test file, a syntax error on this SDK's own stated PHP 7.2 minimum - found via this fork's own GitHub Actions run against the real CI matrix.
 
 ## 1.16.3
 * improve log

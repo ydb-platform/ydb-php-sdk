@@ -333,6 +333,13 @@ class Session
 
         $result = $this->request('ExecuteDataQuery', $data);
 
+        // Picks up tx_id from a beginTx($mode, false) call, same as beginTransaction() does.
+        if ($result && method_exists($result, 'getTxMeta') && $result->getTxMeta())
+        {
+            $tx_id = $result->getTxMeta()->getId();
+            $this->tx_id = $tx_id !== '' ? $tx_id : null;
+        }
+
         return $result ? new QueryResult($result) : true;
     }
 
