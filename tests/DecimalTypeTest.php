@@ -39,7 +39,7 @@ class DecimalTypeTest extends TestCase
         self::assertSame(
             '-123.450000000',
             DecimalType::fromParts('18446743950259551616', '18446744073709551615', 9),
-            'fromParts() must match toParts() on the raw unsigned strings the server actually returns.',
+            'fromParts() must match toParts() on the raw unsigned strings the server actually returns.'
         );
         self::assertSame('-123.450000000', DecimalType::fromParts($low, $high, 9), 'fromParts() must be the inverse of toParts().');
     }

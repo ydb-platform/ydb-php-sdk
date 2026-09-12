@@ -154,13 +154,15 @@ class DecimalType extends AbstractType
 
     private static function toUnscaled($decimal, $scale)
     {
-        if (in_array(strtolower($decimal), ['nan', 'inf', '+inf', '-inf'], true))
+        switch (strtolower($decimal))
         {
-            return match (strtolower($decimal)) {
-                'nan' => bcadd(bcpow('10', '35'), '1'),
-                'inf', '+inf' => bcpow('10', '35'),
-                '-inf' => bcmul('-1', bcpow('10', '35')),
-            };
+            case 'nan':
+                return bcadd(bcpow('10', '35'), '1');
+            case 'inf':
+            case '+inf':
+                return bcpow('10', '35');
+            case '-inf':
+                return bcmul('-1', bcpow('10', '35'));
         }
 
         // Explicit high intermediate scale keeps the shift itself exact regardless
