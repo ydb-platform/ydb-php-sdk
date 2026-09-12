@@ -104,7 +104,9 @@ class FileSessionPoolTest extends TestCase
                 1 => ['file', $stderrPaths[$tag], 'w'],
                 2 => ['file', $stderrPaths[$tag], 'w'],
             ];
-            $cmd = [PHP_BINARY, $workerScript, $autoloadPath, $tag, $poolFile, $resultsFile];
+            // Array command support in proc_open() needs PHP 7.4+ - this SDK's
+            // stated minimum is 7.2, so build an escaped string command instead.
+            $cmd = implode(' ', array_map('escapeshellarg', [PHP_BINARY, $workerScript, $autoloadPath, $tag, $poolFile, $resultsFile]));
             $proc = proc_open($cmd, $descriptors, $pipes);
             self::assertIsResource($proc, "failed to start worker $tag");
             $processes[$tag] = $proc;
