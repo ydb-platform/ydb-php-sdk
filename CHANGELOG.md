@@ -1,3 +1,4 @@
+* fixed `DECLARE $x AS T?;` (the short YQL form of `Optional<T>`) throwing "Unknown type" client-side instead of being accepted like `Optional<T>`
 
 ## 1.16.3
 * improve log
