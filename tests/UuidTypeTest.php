@@ -72,6 +72,28 @@ class UuidTypeTest extends TestCase
         $session->schemeQuery('DROP TABLE `/local/uuid_type_test`');
     }
 
+    // Requested in PR review: exercise the byte permutation directly via
+    // CAST, independent of table storage, in both directions.
+    public function testCastStringLiteralToUuidProducesTheServerConfirmedValue(): void
+    {
+        $session = $this->makeSession();
+
+        $result = $session->query('SELECT CAST("6E73B41C-4EDE-4D08-9CFB-B7462D9E498B" AS Uuid) AS u');
+
+        self::assertSame('6e73b41c-4ede-4d08-9cfb-b7462d9e498b', strtolower($result->rows()[0]['u']));
+    }
+
+    public function testCastingAnSdkWrittenUuidBackToUtf8ProducesTheOriginalString(): void
+    {
+        $session = $this->makeSession();
+
+        $uuid = '6E73B41C-4EDE-4D08-9CFB-B7462D9E498B';
+        $result = $session->prepare('DECLARE $u AS Uuid; SELECT CAST($u AS Utf8) AS s;')
+            ->execute(['u' => $uuid]);
+
+        self::assertSame(strtolower($uuid), strtolower($result->rows()[0]['s']));
+    }
+
     public function testNullUuidRoundTrips(): void
     {
         $session = $this->makeSession();
