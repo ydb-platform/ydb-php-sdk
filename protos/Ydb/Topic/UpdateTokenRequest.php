@@ -17,7 +17,7 @@ use Google\Protobuf\Internal\GPBUtil;
 class UpdateTokenRequest extends \Google\Protobuf\Internal\Message
 {
     /**
-     * Generated from protobuf field <code>string token = 1;</code>
+     * Generated from protobuf field <code>string token = 1 [(.Ydb.sensitive) = true];</code>
      */
     protected $token = '';
 
@@ -36,7 +36,7 @@ class UpdateTokenRequest extends \Google\Protobuf\Internal\Message
     }
 
     /**
-     * Generated from protobuf field <code>string token = 1;</code>
+     * Generated from protobuf field <code>string token = 1 [(.Ydb.sensitive) = true];</code>
      * @return string
      */
     public function getToken()
@@ -45,7 +45,7 @@ class UpdateTokenRequest extends \Google\Protobuf\Internal\Message
     }
 
     /**
-     * Generated from protobuf field <code>string token = 1;</code>
+     * Generated from protobuf field <code>string token = 1 [(.Ydb.sensitive) = true];</code>
      * @param string $var
      * @return $this
      */

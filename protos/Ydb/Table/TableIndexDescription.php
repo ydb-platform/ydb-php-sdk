@@ -9,7 +9,7 @@ use Google\Protobuf\Internal\RepeatedField;
 use Google\Protobuf\Internal\GPBUtil;
 
 /**
- * Represent secondary index with index state
+ * Represent table index with index state
  *
  * Generated from protobuf message <code>Ydb.Table.TableIndexDescription</code>
  */
@@ -57,6 +57,7 @@ class TableIndexDescription extends \Google\Protobuf\Internal\Message
      *           list of columns
      *     @type \Ydb\Table\GlobalIndex $global_index
      *     @type \Ydb\Table\GlobalAsyncIndex $global_async_index
+     *     @type \Ydb\Table\GlobalUniqueIndex $global_unique_index
      *     @type int $status
      *     @type array<string>|\Google\Protobuf\Internal\RepeatedField $data_columns
      *           list of columns content to be copied in to index table
@@ -171,6 +172,33 @@ class TableIndexDescription extends \Google\Protobuf\Internal\Message
     {
         GPBUtil::checkMessage($var, \Ydb\Table\GlobalAsyncIndex::class);
         $this->writeOneof(5, $var);
+
+        return $this;
+    }
+
+    /**
+     * Generated from protobuf field <code>.Ydb.Table.GlobalUniqueIndex global_unique_index = 8;</code>
+     * @return \Ydb\Table\GlobalUniqueIndex|null
+     */
+    public function getGlobalUniqueIndex()
+    {
+        return $this->readOneof(8);
+    }
+
+    public function hasGlobalUniqueIndex()
+    {
+        return $this->hasOneof(8);
+    }
+
+    /**
+     * Generated from protobuf field <code>.Ydb.Table.GlobalUniqueIndex global_unique_index = 8;</code>
+     * @param \Ydb\Table\GlobalUniqueIndex $var
+     * @return $this
+     */
+    public function setGlobalUniqueIndex($var)
+    {
+        GPBUtil::checkMessage($var, \Ydb\Table\GlobalUniqueIndex::class);
+        $this->writeOneof(8, $var);
 
         return $this;
     }

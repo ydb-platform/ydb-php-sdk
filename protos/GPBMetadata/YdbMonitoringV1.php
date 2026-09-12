@@ -17,12 +17,12 @@ class YdbMonitoringV1
         \GPBMetadata\Protos\YdbMonitoring::initOnce();
         $pool->internalAddGeneratedFile(
             '
-Ã
+É
 ydb_monitoring_v1.protoYdb.Monitoring.V12·
 MonitoringServiceP
 	SelfCheck .Ydb.Monitoring.SelfCheckRequest!.Ydb.Monitoring.SelfCheckResponseP
-	NodeCheck .Ydb.Monitoring.NodeCheckRequest!.Ydb.Monitoring.NodeCheckResponseBS
-tech.ydb.monitoring.v1Z9github.com/ydb-platform/ydb-go-genproto/Ydb_Monitoring_V1bproto3'
+	NodeCheck .Ydb.Monitoring.NodeCheckRequest!.Ydb.Monitoring.NodeCheckResponseBY
+tech.ydb.proto.monitoring.v1Z9github.com/ydb-platform/ydb-go-genproto/Ydb_Monitoring_V1bproto3'
         , true);
 
         static::$is_initialized = true;

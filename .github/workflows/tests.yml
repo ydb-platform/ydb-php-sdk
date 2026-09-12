@@ -33,14 +33,11 @@ jobs:
         php-versions: [ '7.2', '7.4', '8.0', '8.2' ]
         ydb-versions: ['stable-22-5', 'trunk', '23.3', '23.2', '23.1']
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         name: Checkout
 
-      - uses: eWaterCycle/setup-grpc@v5
-        name: Setup gRPC
-        with:
-          grpc-version: 1.51.1
-
+      # The grpc PHP extension installed by setup-php is self-contained (it bundles
+      # grpc core), so no separate gRPC build from source is needed.
       - uses: shivammathur/setup-php@v2
         name: Setup PHP
         id: php
@@ -52,7 +49,7 @@ jobs:
       - run: composer validate --strict
         name: Validate composer.json and composer.lock
 
-      - uses: actions/cache@v3
+      - uses: actions/cache@v4
         name: Cache Composer packages
         id: composer-cache
 

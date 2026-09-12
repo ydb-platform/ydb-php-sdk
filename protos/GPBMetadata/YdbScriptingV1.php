@@ -17,15 +17,15 @@ class YdbScriptingV1
         \GPBMetadata\Protos\YdbScripting::initOnce();
         $pool->internalAddGeneratedFile(
             '
-¢
+¨
 ydb_scripting_v1.protoYdb.Scripting.V12š
 ScriptingServiceQ
 
 ExecuteYql .Ydb.Scripting.ExecuteYqlRequest!.Ydb.Scripting.ExecuteYqlResponse`
 StreamExecuteYql .Ydb.Scripting.ExecuteYqlRequest(.Ydb.Scripting.ExecuteYqlPartialResponse0Q
 
-ExplainYql .Ydb.Scripting.ExplainYqlRequest!.Ydb.Scripting.ExplainYqlResponseBQ
-tech.ydb.scripting.v1Z8github.com/ydb-platform/ydb-go-genproto/Ydb_Scripting_V1bproto3'
+ExplainYql .Ydb.Scripting.ExplainYqlRequest!.Ydb.Scripting.ExplainYqlResponseBW
+tech.ydb.proto.scripting.v1Z8github.com/ydb-platform/ydb-go-genproto/Ydb_Scripting_V1bproto3'
         , true);
 
         static::$is_initialized = true;

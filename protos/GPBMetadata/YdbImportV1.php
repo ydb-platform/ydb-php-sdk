@@ -17,13 +17,16 @@ class YdbImportV1
         \GPBMetadata\Protos\YdbImport::initOnce();
         $pool->internalAddGeneratedFile(
             '
-¬
-ydb_import_v1.protoYdb.Import.V12¯
+á
+ydb_import_v1.protoYdb.Import.V12Þ
 ImportServiceQ
-ImportFromS3.Ydb.Import.ImportFromS3Request .Ydb.Import.ImportFromS3ResponseK
+ImportFromS3.Ydb.Import.ImportFromS3Request .Ydb.Import.ImportFromS3ResponseQ
+ImportFromFs.Ydb.Import.ImportFromFsRequest .Ydb.Import.ImportFromFsResponsel
+ListObjectsInS3Export(.Ydb.Import.ListObjectsInS3ExportRequest).Ydb.Import.ListObjectsInS3ExportResponsel
+ListObjectsInFsExport(.Ydb.Import.ListObjectsInFsExportRequest).Ydb.Import.ListObjectsInFsExportResponseK
 
-ImportData.Ydb.Import.ImportDataRequest.Ydb.Import.ImportDataResponseBL
-tech.ydb.import_.v1Z5github.com/ydb-platform/ydb-go-genproto/Ydb_Import_V1bproto3'
+ImportData.Ydb.Import.ImportDataRequest.Ydb.Import.ImportDataResponseBR
+tech.ydb.proto.import_.v1Z5github.com/ydb-platform/ydb-go-genproto/Ydb_Import_V1bproto3'
         , true);
 
         static::$is_initialized = true;

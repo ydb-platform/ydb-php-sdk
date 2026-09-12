@@ -20,7 +20,7 @@ class TableServiceClient extends \Grpc\BaseStub {
      * Create new session. Implicit session creation is forbidden,
      * so user must create new session before execute any query,
      * otherwise BAD_SESSION status will be returned.
-     * Simultaneous execution of requests are forbiden.
+     * Simultaneous execution of requests are forbidden.
      * Sessions are volatile, can be invalidated by server, for example in case
      * of fatal errors. All requests with this session will fail with BAD_SESSION status.
      * So, client must be able to handle BAD_SESSION status.
@@ -312,6 +312,21 @@ class TableServiceClient extends \Grpc\BaseStub {
     }
 
     /**
+     * Reads specified keys non-transactionally from a single table
+     * @param \Ydb\Table\ReadRowsRequest $argument input argument
+     * @param array $metadata metadata
+     * @param array $options call options
+     * @return \Grpc\UnaryCall
+     */
+    public function ReadRows(\Ydb\Table\ReadRowsRequest $argument,
+      $metadata = [], $options = []) {
+        return $this->_simpleRequest('/Ydb.Table.V1.TableService/ReadRows',
+        $argument,
+        ['\Ydb\Table\ReadRowsResponse', 'decode'],
+        $metadata, $options);
+    }
+
+    /**
      * Upserts a batch of rows non-transactionally.
      * Returns success only when all rows were successfully upserted. In case of an error some rows might
      * be upserted and some might not.
@@ -340,6 +355,51 @@ class TableServiceClient extends \Grpc\BaseStub {
         return $this->_serverStreamRequest('/Ydb.Table.V1.TableService/StreamExecuteScanQuery',
         $argument,
         ['\Ydb\Table\ExecuteScanQueryPartialResponse', 'decode'],
+        $metadata, $options);
+    }
+
+    /**
+     * Returns information about a given external data source.
+     * @param \Ydb\Table\DescribeExternalDataSourceRequest $argument input argument
+     * @param array $metadata metadata
+     * @param array $options call options
+     * @return \Grpc\UnaryCall
+     */
+    public function DescribeExternalDataSource(\Ydb\Table\DescribeExternalDataSourceRequest $argument,
+      $metadata = [], $options = []) {
+        return $this->_simpleRequest('/Ydb.Table.V1.TableService/DescribeExternalDataSource',
+        $argument,
+        ['\Ydb\Table\DescribeExternalDataSourceResponse', 'decode'],
+        $metadata, $options);
+    }
+
+    /**
+     * Returns information about a given external table.
+     * @param \Ydb\Table\DescribeExternalTableRequest $argument input argument
+     * @param array $metadata metadata
+     * @param array $options call options
+     * @return \Grpc\UnaryCall
+     */
+    public function DescribeExternalTable(\Ydb\Table\DescribeExternalTableRequest $argument,
+      $metadata = [], $options = []) {
+        return $this->_simpleRequest('/Ydb.Table.V1.TableService/DescribeExternalTable',
+        $argument,
+        ['\Ydb\Table\DescribeExternalTableResponse', 'decode'],
+        $metadata, $options);
+    }
+
+    /**
+     * Returns information about a given system view table.
+     * @param \Ydb\Table\DescribeSystemViewRequest $argument input argument
+     * @param array $metadata metadata
+     * @param array $options call options
+     * @return \Grpc\UnaryCall
+     */
+    public function DescribeSystemView(\Ydb\Table\DescribeSystemViewRequest $argument,
+      $metadata = [], $options = []) {
+        return $this->_simpleRequest('/Ydb.Table.V1.TableService/DescribeSystemView',
+        $argument,
+        ['\Ydb\Table\DescribeSystemViewResponse', 'decode'],
         $metadata, $options);
     }
 

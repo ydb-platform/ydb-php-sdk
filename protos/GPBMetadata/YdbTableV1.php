@@ -17,8 +17,8 @@ class YdbTableV1
         \GPBMetadata\Protos\YdbTable::initOnce();
         $pool->internalAddGeneratedFile(
             '
-œ
-ydb_table_v1.protoYdb.Table.V12¤
+±
+ydb_table_v1.protoYdb.Table.V12³
 TableServiceR
 CreateSession.Ydb.Table.CreateSessionRequest .Ydb.Table.CreateSessionResponseR
 DeleteSession.Ydb.Table.DeleteSessionRequest .Ydb.Table.DeleteSessionResponseF
@@ -40,11 +40,15 @@ CopyTables.Ydb.Table.CopyTablesRequest.Ydb.Table.CopyTablesResponseO
 CommitTransaction#.Ydb.Table.CommitTransactionRequest$.Ydb.Table.CommitTransactionResponsed
 RollbackTransaction%.Ydb.Table.RollbackTransactionRequest&.Ydb.Table.RollbackTransactionResponseg
 DescribeTableOptions&.Ydb.Table.DescribeTableOptionsRequest\'.Ydb.Table.DescribeTableOptionsResponseN
-StreamReadTable.Ydb.Table.ReadTableRequest.Ydb.Table.ReadTableResponse0I
+StreamReadTable.Ydb.Table.ReadTableRequest.Ydb.Table.ReadTableResponse0C
+ReadRows.Ydb.Table.ReadRowsRequest.Ydb.Table.ReadRowsResponseI
 
 BulkUpsert.Ydb.Table.BulkUpsertRequest.Ydb.Table.BulkUpsertResponsej
-StreamExecuteScanQuery".Ydb.Table.ExecuteScanQueryRequest*.Ydb.Table.ExecuteScanQueryPartialResponse0BI
-tech.ydb.table.v1Z4github.com/ydb-platform/ydb-go-genproto/Ydb_Table_V1bproto3'
+StreamExecuteScanQuery".Ydb.Table.ExecuteScanQueryRequest*.Ydb.Table.ExecuteScanQueryPartialResponse0y
+DescribeExternalDataSource,.Ydb.Table.DescribeExternalDataSourceRequest-.Ydb.Table.DescribeExternalDataSourceResponsej
+DescribeExternalTable\'.Ydb.Table.DescribeExternalTableRequest(.Ydb.Table.DescribeExternalTableResponsea
+DescribeSystemView$.Ydb.Table.DescribeSystemViewRequest%.Ydb.Table.DescribeSystemViewResponseBO
+tech.ydb.proto.table.v1Z4github.com/ydb-platform/ydb-go-genproto/Ydb_Table_V1bproto3'
         , true);
 
         static::$is_initialized = true;
