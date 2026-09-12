@@ -34,7 +34,7 @@
         "psr-4": {
             "YdbPlatform\\Ydb\\Test\\": "tests",
             "App\\": "examples/",
-            "YdbPlatform\\Ydb\\Slo\\": "slo-workload"
+            "YdbPlatform\\Ydb\\Slo\\": "slo-workload/src"
         }
     },
     "config": {

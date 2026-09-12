@@ -1,6 +1,6 @@
 {
     "name": "ydb-platform/ydb-php-slo",
-    "description": "YDB PHP SDK",
+    "description": "YDB PHP SDK SLO workload",
     "license": "Apache-2.0",
     "authors": [
         {
@@ -15,13 +15,24 @@
         }
     ],
     "require": {
+        "php": ">=7.2",
         "ydb-platform/ydb-php-sdk": "@dev",
-        "promphp/prometheus_push_gateway_php": "^v1.0.1",
+        "ext-curl": "*",
+        "ext-json": "*",
+        "ext-pcntl": "*",
+        "ext-posix": "*",
         "ext-sysvmsg": "*"
     },
     "autoload": {
         "psr-4": {
             "YdbPlatform\\Ydb\\Slo\\": "src/"
+        }
+    },
+    "config": {
+        "policy": {
+            "advisories": {
+                "ignore-id": ["PKSA-tcfz-w4fm-hhk9"]
+            }
         }
     }
 }

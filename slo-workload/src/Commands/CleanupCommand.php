@@ -2,72 +2,29 @@
 
 namespace YdbPlatform\Ydb\Slo\Commands;
 
+use YdbPlatform\Ydb\Retry\RetryParams;
 use YdbPlatform\Ydb\Session;
-use YdbPlatform\Ydb\Slo\Defaults;
+use YdbPlatform\Ydb\Slo\Command;
+use YdbPlatform\Ydb\Slo\Config;
 use YdbPlatform\Ydb\Slo\Utils;
 
-class CleanupCommand extends \YdbPlatform\Ydb\Slo\Command
+class CleanupCommand extends Command
 {
-
     public $name = "cleanup";
-    public $description = "drops table in database";
-    public $options = [
-        [
-            "alias"         => ["t", "table-name"],
-            "type"          => "string",
-            "description"   =>  "table name to create"
-        ],
-        [
-            "alias"         => ["c", "initial-data-count"],
-            "type"          => "int",
-            "description"   =>  "table name to create"
-        ]
-    ];
-    public $help = "cleanup <endpoint> <db> [options]
-Arguments:
-  endpoint                        YDB endpoint to connect to
-  db                              YDB database to connect to
+    public $description = "drops the table";
 
-Options:
-  -t -table-name         <string> table name to create
-
-  -write-timeout         <int>    write timeout milliseconds";
-
-    public function execute(string $endpoint, string $path, array $options)
+    public function execute(Config $config)
     {
-        $tableName = $options["table-name"] ?? Defaults::TABLE_NAME;
-
-        $ydb = Utils::initDriver($endpoint, $path, "cleanup");
-
+        $ydb = Utils::initDriver($config, "cleanup");
         $table = $ydb->table();
+        $logger = $table->getLogger();
 
-        $ydb->table()->getLogger()->info("Drop table", [
-            "tableName"    => $tableName
-        ]);
+        $logger->info("Drop table", ["tableName" => $config->tableName]);
 
-        $table->retrySession(function (Session $session) use ($tableName) {
-            $session->dropTable($tableName);
-        }, true);
+        $table->retrySession(function (Session $session) use ($config) {
+            $session->dropTable($config->tableName);
+        }, true, new RetryParams($config->writeTimeout));
 
-        $ydb->table()->getLogger()->info("Dropped table", [
-            "tableName"    => $tableName
-        ]);
+        $logger->info("Dropped table", ["tableName" => $config->tableName]);
     }
-
-    /**
-     * @return string
-     */
-    public function getName(): string
-    {
-        return $this->name;
-    }
-
-    /**
-     * @return array[]
-     */
-    public function getOptions(): array
-    {
-        return $this->options;
-    }
-
 }

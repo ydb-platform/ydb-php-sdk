@@ -9,24 +9,24 @@ use YdbPlatform\Ydb\Types\Utf8Type;
 
 class DataGenerator
 {
-    public $currentObjectId = 0;
+    /** @var int id of the last generated row */
+    public $currentObjectId;
+
     /**
-     * @param int $initialDataCount
+     * @param int $startId ids are generated starting from $startId + 1, every writer
+     *                     needs its own range to avoid overwriting rows of the others
      */
-    public function __construct(int $initialDataCount)
+    public function __construct(int $startId)
     {
+        $this->currentObjectId = $startId;
     }
 
-    public function getMaxId()
+    public function getMaxId(): int
     {
         return $this->currentObjectId;
     }
 
-    public function getRandomId()
-    {
-        return round(lcg_value() * $this->currentObjectId);
-    }
-    public function getUpsertData()
+    public function getUpsertData(): array
     {
         $this->currentObjectId++;
         return [
@@ -37,9 +37,8 @@ class DataGenerator
         ];
     }
 
-    protected function generateRandomString()
+    protected function generateRandomString(): string
     {
-        return base64_encode(bin2hex(random_bytes(round(lcg_value() * 20 + 20))));
+        return base64_encode(bin2hex(random_bytes((int)round(lcg_value() * 20 + 20))));
     }
-
 }

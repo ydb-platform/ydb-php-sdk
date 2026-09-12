@@ -1,3 +1,4 @@
+* migrated SLO tests to `ydb-platform/ydb-slo-action`: the workload now reports `sdk_*` metrics over OTLP, is built as a self-contained docker image and is compared against a baseline revision
 
 ## 1.16.3
 * improve log
