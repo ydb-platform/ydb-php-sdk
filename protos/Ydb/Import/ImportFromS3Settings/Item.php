@@ -14,21 +14,14 @@ use Google\Protobuf\Internal\GPBUtil;
 class Item extends \Google\Protobuf\Internal\Message
 {
     /**
-     * YDB tables in S3 are stored in one or more objects (see ydb_export.proto).
-     *The object name begins with 'source_prefix'.
-     *This prefix is followed by:
-     * '/data_PartNumber', where 'PartNumber' represents the index of the part, starting at zero;
-     * '/scheme.pb' - object with information about scheme, indexes, etc.
+     * Database path to a database object to import the item to
+     * Resolved relative to the default destination_path
+     * May be omitted if the item's source_path is specified, in this case will be taken equal to it
      *
-     * Generated from protobuf field <code>string source_prefix = 1 [(.Ydb.required) = true];</code>
-     */
-    protected $source_prefix = '';
-    /**
-     * Database path to a table to import to.
-     *
-     * Generated from protobuf field <code>string destination_path = 2 [(.Ydb.required) = true];</code>
+     * Generated from protobuf field <code>string destination_path = 2;</code>
      */
     protected $destination_path = '';
+    protected $Source;
 
     /**
      * Constructor.
@@ -37,13 +30,13 @@ class Item extends \Google\Protobuf\Internal\Message
      *     Optional. Data for populating the Message object.
      *
      *     @type string $source_prefix
-     *           YDB tables in S3 are stored in one or more objects (see ydb_export.proto).
-     *          The object name begins with 'source_prefix'.
-     *          This prefix is followed by:
-     *           '/data_PartNumber', where 'PartNumber' represents the index of the part, starting at zero;
-     *           '/scheme.pb' - object with information about scheme, indexes, etc.
+     *           The S3 object prefix can be either provided explicitly
+     *     @type string $source_path
+     *           Or, if the export contains the database objects list, you may specify the database object name, and the S3 prefix will be looked up in the database objects list by the import procedure
      *     @type string $destination_path
-     *           Database path to a table to import to.
+     *           Database path to a database object to import the item to
+     *           Resolved relative to the default destination_path
+     *           May be omitted if the item's source_path is specified, in this case will be taken equal to it
      * }
      */
     public function __construct($data = NULL) {
@@ -52,43 +45,73 @@ class Item extends \Google\Protobuf\Internal\Message
     }
 
     /**
-     * YDB tables in S3 are stored in one or more objects (see ydb_export.proto).
-     *The object name begins with 'source_prefix'.
-     *This prefix is followed by:
-     * '/data_PartNumber', where 'PartNumber' represents the index of the part, starting at zero;
-     * '/scheme.pb' - object with information about scheme, indexes, etc.
+     * The S3 object prefix can be either provided explicitly
      *
-     * Generated from protobuf field <code>string source_prefix = 1 [(.Ydb.required) = true];</code>
+     * Generated from protobuf field <code>string source_prefix = 1;</code>
      * @return string
      */
     public function getSourcePrefix()
     {
-        return $this->source_prefix;
+        return $this->readOneof(1);
+    }
+
+    public function hasSourcePrefix()
+    {
+        return $this->hasOneof(1);
     }
 
     /**
-     * YDB tables in S3 are stored in one or more objects (see ydb_export.proto).
-     *The object name begins with 'source_prefix'.
-     *This prefix is followed by:
-     * '/data_PartNumber', where 'PartNumber' represents the index of the part, starting at zero;
-     * '/scheme.pb' - object with information about scheme, indexes, etc.
+     * The S3 object prefix can be either provided explicitly
      *
-     * Generated from protobuf field <code>string source_prefix = 1 [(.Ydb.required) = true];</code>
+     * Generated from protobuf field <code>string source_prefix = 1;</code>
      * @param string $var
      * @return $this
      */
     public function setSourcePrefix($var)
     {
         GPBUtil::checkString($var, True);
-        $this->source_prefix = $var;
+        $this->writeOneof(1, $var);
 
         return $this;
     }
 
     /**
-     * Database path to a table to import to.
+     * Or, if the export contains the database objects list, you may specify the database object name, and the S3 prefix will be looked up in the database objects list by the import procedure
      *
-     * Generated from protobuf field <code>string destination_path = 2 [(.Ydb.required) = true];</code>
+     * Generated from protobuf field <code>string source_path = 3;</code>
+     * @return string
+     */
+    public function getSourcePath()
+    {
+        return $this->readOneof(3);
+    }
+
+    public function hasSourcePath()
+    {
+        return $this->hasOneof(3);
+    }
+
+    /**
+     * Or, if the export contains the database objects list, you may specify the database object name, and the S3 prefix will be looked up in the database objects list by the import procedure
+     *
+     * Generated from protobuf field <code>string source_path = 3;</code>
+     * @param string $var
+     * @return $this
+     */
+    public function setSourcePath($var)
+    {
+        GPBUtil::checkString($var, True);
+        $this->writeOneof(3, $var);
+
+        return $this;
+    }
+
+    /**
+     * Database path to a database object to import the item to
+     * Resolved relative to the default destination_path
+     * May be omitted if the item's source_path is specified, in this case will be taken equal to it
+     *
+     * Generated from protobuf field <code>string destination_path = 2;</code>
      * @return string
      */
     public function getDestinationPath()
@@ -97,9 +120,11 @@ class Item extends \Google\Protobuf\Internal\Message
     }
 
     /**
-     * Database path to a table to import to.
+     * Database path to a database object to import the item to
+     * Resolved relative to the default destination_path
+     * May be omitted if the item's source_path is specified, in this case will be taken equal to it
      *
-     * Generated from protobuf field <code>string destination_path = 2 [(.Ydb.required) = true];</code>
+     * Generated from protobuf field <code>string destination_path = 2;</code>
      * @param string $var
      * @return $this
      */
@@ -109,6 +134,14 @@ class Item extends \Google\Protobuf\Internal\Message
         $this->destination_path = $var;
 
         return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getSource()
+    {
+        return $this->whichOneof("Source");
     }
 
 }

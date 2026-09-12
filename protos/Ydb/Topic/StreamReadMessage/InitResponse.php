@@ -16,7 +16,7 @@ use Google\Protobuf\Internal\GPBUtil;
 class InitResponse extends \Google\Protobuf\Internal\Message
 {
     /**
-     * Read session identifier for debug purposes.
+     * Read session identifier.
      *
      * Generated from protobuf field <code>string session_id = 1;</code>
      */
@@ -29,7 +29,7 @@ class InitResponse extends \Google\Protobuf\Internal\Message
      *     Optional. Data for populating the Message object.
      *
      *     @type string $session_id
-     *           Read session identifier for debug purposes.
+     *           Read session identifier.
      * }
      */
     public function __construct($data = NULL) {
@@ -38,7 +38,7 @@ class InitResponse extends \Google\Protobuf\Internal\Message
     }
 
     /**
-     * Read session identifier for debug purposes.
+     * Read session identifier.
      *
      * Generated from protobuf field <code>string session_id = 1;</code>
      * @return string
@@ -49,7 +49,7 @@ class InitResponse extends \Google\Protobuf\Internal\Message
     }
 
     /**
-     * Read session identifier for debug purposes.
+     * Read session identifier.
      *
      * Generated from protobuf field <code>string session_id = 1;</code>
      * @param string $var

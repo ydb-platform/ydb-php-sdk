@@ -21,6 +21,13 @@ class ListEndpointsResult extends \Google\Protobuf\Internal\Message
      * Generated from protobuf field <code>string self_location = 2;</code>
      */
     protected $self_location = '';
+    /**
+     * List of bridge pile states.
+     * This field is empty if cluster is not in bridge mode.
+     *
+     * Generated from protobuf field <code>repeated .Ydb.Bridge.PileState pile_states = 3;</code>
+     */
+    private $pile_states;
 
     /**
      * Constructor.
@@ -30,6 +37,9 @@ class ListEndpointsResult extends \Google\Protobuf\Internal\Message
      *
      *     @type array<\Ydb\Discovery\EndpointInfo>|\Google\Protobuf\Internal\RepeatedField $endpoints
      *     @type string $self_location
+     *     @type array<\Ydb\Bridge\PileState>|\Google\Protobuf\Internal\RepeatedField $pile_states
+     *           List of bridge pile states.
+     *           This field is empty if cluster is not in bridge mode.
      * }
      */
     public function __construct($data = NULL) {
@@ -77,6 +87,34 @@ class ListEndpointsResult extends \Google\Protobuf\Internal\Message
     {
         GPBUtil::checkString($var, True);
         $this->self_location = $var;
+
+        return $this;
+    }
+
+    /**
+     * List of bridge pile states.
+     * This field is empty if cluster is not in bridge mode.
+     *
+     * Generated from protobuf field <code>repeated .Ydb.Bridge.PileState pile_states = 3;</code>
+     * @return \Google\Protobuf\Internal\RepeatedField
+     */
+    public function getPileStates()
+    {
+        return $this->pile_states;
+    }
+
+    /**
+     * List of bridge pile states.
+     * This field is empty if cluster is not in bridge mode.
+     *
+     * Generated from protobuf field <code>repeated .Ydb.Bridge.PileState pile_states = 3;</code>
+     * @param array<\Ydb\Bridge\PileState>|\Google\Protobuf\Internal\RepeatedField $var
+     * @return $this
+     */
+    public function setPileStates($var)
+    {
+        $arr = GPBUtil::checkRepeatedField($var, \Google\Protobuf\Internal\GPBType::MESSAGE, \Ydb\Bridge\PileState::class);
+        $this->pile_states = $arr;
 
         return $this;
     }

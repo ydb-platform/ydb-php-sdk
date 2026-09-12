@@ -50,6 +50,7 @@ class CreateTopicRequest extends \Google\Protobuf\Internal\Message
     /**
      * List of allowed codecs for writers.
      * Writes with codec not from this list are forbidden.
+     * If empty, codec compatibility check for the topic is disabled.
      *
      * Generated from protobuf field <code>.Ydb.Topic.SupportedCodecs supported_codecs = 7;</code>
      */
@@ -86,6 +87,18 @@ class CreateTopicRequest extends \Google\Protobuf\Internal\Message
      * Generated from protobuf field <code>.Ydb.Topic.MeteringMode metering_mode = 12;</code>
      */
     protected $metering_mode = 0;
+    /**
+     * Metrics level. If the level is unset, use database setting.
+     *
+     * Generated from protobuf field <code>optional uint32 metrics_level = 13;</code>
+     */
+    protected $metrics_level = null;
+    /**
+     * Enable content-based deduplication for the topic.
+     *
+     * Generated from protobuf field <code>bool content_based_deduplication = 14;</code>
+     */
+    protected $content_based_deduplication = false;
 
     /**
      * Constructor.
@@ -109,6 +122,7 @@ class CreateTopicRequest extends \Google\Protobuf\Internal\Message
      *     @type \Ydb\Topic\SupportedCodecs $supported_codecs
      *           List of allowed codecs for writers.
      *           Writes with codec not from this list are forbidden.
+     *           If empty, codec compatibility check for the topic is disabled.
      *     @type int|string $partition_write_speed_bytes_per_second
      *           Partition write speed in bytes per second. Must be less than database limit.
      *           Zero value means default limit: 1 MB per second.
@@ -121,6 +135,10 @@ class CreateTopicRequest extends \Google\Protobuf\Internal\Message
      *           List of consumers for this topic.
      *     @type int $metering_mode
      *           Metering mode for the topic in a serverless database.
+     *     @type int $metrics_level
+     *           Metrics level. If the level is unset, use database setting.
+     *     @type bool $content_based_deduplication
+     *           Enable content-based deduplication for the topic.
      * }
      */
     public function __construct($data = NULL) {
@@ -295,6 +313,7 @@ class CreateTopicRequest extends \Google\Protobuf\Internal\Message
     /**
      * List of allowed codecs for writers.
      * Writes with codec not from this list are forbidden.
+     * If empty, codec compatibility check for the topic is disabled.
      *
      * Generated from protobuf field <code>.Ydb.Topic.SupportedCodecs supported_codecs = 7;</code>
      * @return \Ydb\Topic\SupportedCodecs|null
@@ -317,6 +336,7 @@ class CreateTopicRequest extends \Google\Protobuf\Internal\Message
     /**
      * List of allowed codecs for writers.
      * Writes with codec not from this list are forbidden.
+     * If empty, codec compatibility check for the topic is disabled.
      *
      * Generated from protobuf field <code>.Ydb.Topic.SupportedCodecs supported_codecs = 7;</code>
      * @param \Ydb\Topic\SupportedCodecs $var
@@ -460,6 +480,68 @@ class CreateTopicRequest extends \Google\Protobuf\Internal\Message
     {
         GPBUtil::checkEnum($var, \Ydb\Topic\MeteringMode::class);
         $this->metering_mode = $var;
+
+        return $this;
+    }
+
+    /**
+     * Metrics level. If the level is unset, use database setting.
+     *
+     * Generated from protobuf field <code>optional uint32 metrics_level = 13;</code>
+     * @return int
+     */
+    public function getMetricsLevel()
+    {
+        return isset($this->metrics_level) ? $this->metrics_level : 0;
+    }
+
+    public function hasMetricsLevel()
+    {
+        return isset($this->metrics_level);
+    }
+
+    public function clearMetricsLevel()
+    {
+        unset($this->metrics_level);
+    }
+
+    /**
+     * Metrics level. If the level is unset, use database setting.
+     *
+     * Generated from protobuf field <code>optional uint32 metrics_level = 13;</code>
+     * @param int $var
+     * @return $this
+     */
+    public function setMetricsLevel($var)
+    {
+        GPBUtil::checkUint32($var);
+        $this->metrics_level = $var;
+
+        return $this;
+    }
+
+    /**
+     * Enable content-based deduplication for the topic.
+     *
+     * Generated from protobuf field <code>bool content_based_deduplication = 14;</code>
+     * @return bool
+     */
+    public function getContentBasedDeduplication()
+    {
+        return $this->content_based_deduplication;
+    }
+
+    /**
+     * Enable content-based deduplication for the topic.
+     *
+     * Generated from protobuf field <code>bool content_based_deduplication = 14;</code>
+     * @param bool $var
+     * @return $this
+     */
+    public function setContentBasedDeduplication($var)
+    {
+        GPBUtil::checkBool($var);
+        $this->content_based_deduplication = $var;
 
         return $this;
     }

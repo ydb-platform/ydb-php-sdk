@@ -24,7 +24,7 @@ class Batch extends \Google\Protobuf\Internal\Message
     /**
      * Producer identifier provided by client for this batch of client messages.
      *
-     * Generated from protobuf field <code>string producer_id = 2;</code>
+     * Generated from protobuf field <code>string producer_id = 2 [(.Ydb.length) = {</code>
      */
     protected $producer_id = '';
     /**
@@ -100,7 +100,7 @@ class Batch extends \Google\Protobuf\Internal\Message
     /**
      * Producer identifier provided by client for this batch of client messages.
      *
-     * Generated from protobuf field <code>string producer_id = 2;</code>
+     * Generated from protobuf field <code>string producer_id = 2 [(.Ydb.length) = {</code>
      * @return string
      */
     public function getProducerId()
@@ -111,7 +111,7 @@ class Batch extends \Google\Protobuf\Internal\Message
     /**
      * Producer identifier provided by client for this batch of client messages.
      *
-     * Generated from protobuf field <code>string producer_id = 2;</code>
+     * Generated from protobuf field <code>string producer_id = 2 [(.Ydb.length) = {</code>
      * @param string $var
      * @return $this
      */

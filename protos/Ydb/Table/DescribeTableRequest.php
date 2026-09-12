@@ -49,6 +49,18 @@ class DescribeTableRequest extends \Google\Protobuf\Internal\Message
      * Generated from protobuf field <code>bool include_partition_stats = 7;</code>
      */
     protected $include_partition_stats = false;
+    /**
+     * Includes set_val settings for sequences
+     *
+     * Generated from protobuf field <code>bool include_set_val = 8;</code>
+     */
+    protected $include_set_val = false;
+    /**
+     * Includes shard -> node id maping (required include_partition_stats)
+     *
+     * Generated from protobuf field <code>bool include_shard_nodes_info = 9;</code>
+     */
+    protected $include_shard_nodes_info = false;
 
     /**
      * Constructor.
@@ -67,6 +79,10 @@ class DescribeTableRequest extends \Google\Protobuf\Internal\Message
      *           Includes table statistics
      *     @type bool $include_partition_stats
      *           Includes partition statistics (required include_table_statistics)
+     *     @type bool $include_set_val
+     *           Includes set_val settings for sequences
+     *     @type bool $include_shard_nodes_info
+     *           Includes shard -> node id maping (required include_partition_stats)
      * }
      */
     public function __construct($data = NULL) {
@@ -232,6 +248,58 @@ class DescribeTableRequest extends \Google\Protobuf\Internal\Message
     {
         GPBUtil::checkBool($var);
         $this->include_partition_stats = $var;
+
+        return $this;
+    }
+
+    /**
+     * Includes set_val settings for sequences
+     *
+     * Generated from protobuf field <code>bool include_set_val = 8;</code>
+     * @return bool
+     */
+    public function getIncludeSetVal()
+    {
+        return $this->include_set_val;
+    }
+
+    /**
+     * Includes set_val settings for sequences
+     *
+     * Generated from protobuf field <code>bool include_set_val = 8;</code>
+     * @param bool $var
+     * @return $this
+     */
+    public function setIncludeSetVal($var)
+    {
+        GPBUtil::checkBool($var);
+        $this->include_set_val = $var;
+
+        return $this;
+    }
+
+    /**
+     * Includes shard -> node id maping (required include_partition_stats)
+     *
+     * Generated from protobuf field <code>bool include_shard_nodes_info = 9;</code>
+     * @return bool
+     */
+    public function getIncludeShardNodesInfo()
+    {
+        return $this->include_shard_nodes_info;
+    }
+
+    /**
+     * Includes shard -> node id maping (required include_partition_stats)
+     *
+     * Generated from protobuf field <code>bool include_shard_nodes_info = 9;</code>
+     * @param bool $var
+     * @return $this
+     */
+    public function setIncludeShardNodesInfo($var)
+    {
+        GPBUtil::checkBool($var);
+        $this->include_shard_nodes_info = $var;
 
         return $this;
     }

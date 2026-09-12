@@ -31,6 +31,13 @@ class ColumnMeta extends \Google\Protobuf\Internal\Message
      * Generated from protobuf field <code>string family = 3;</code>
      */
     protected $family = '';
+    /**
+     * Column nullability
+     *
+     * Generated from protobuf field <code>optional bool not_null = 4;</code>
+     */
+    protected $not_null = null;
+    protected $default_value;
 
     /**
      * Constructor.
@@ -44,6 +51,10 @@ class ColumnMeta extends \Google\Protobuf\Internal\Message
      *           Type of column
      *     @type string $family
      *           Column family name of the column
+     *     @type bool $not_null
+     *           Column nullability
+     *     @type \Ydb\TypedValue $from_literal
+     *     @type \Ydb\Table\SequenceDescription $from_sequence
      * }
      */
     public function __construct($data = NULL) {
@@ -137,6 +148,104 @@ class ColumnMeta extends \Google\Protobuf\Internal\Message
         $this->family = $var;
 
         return $this;
+    }
+
+    /**
+     * Column nullability
+     *
+     * Generated from protobuf field <code>optional bool not_null = 4;</code>
+     * @return bool
+     */
+    public function getNotNull()
+    {
+        return isset($this->not_null) ? $this->not_null : false;
+    }
+
+    public function hasNotNull()
+    {
+        return isset($this->not_null);
+    }
+
+    public function clearNotNull()
+    {
+        unset($this->not_null);
+    }
+
+    /**
+     * Column nullability
+     *
+     * Generated from protobuf field <code>optional bool not_null = 4;</code>
+     * @param bool $var
+     * @return $this
+     */
+    public function setNotNull($var)
+    {
+        GPBUtil::checkBool($var);
+        $this->not_null = $var;
+
+        return $this;
+    }
+
+    /**
+     * Generated from protobuf field <code>.Ydb.TypedValue from_literal = 5;</code>
+     * @return \Ydb\TypedValue|null
+     */
+    public function getFromLiteral()
+    {
+        return $this->readOneof(5);
+    }
+
+    public function hasFromLiteral()
+    {
+        return $this->hasOneof(5);
+    }
+
+    /**
+     * Generated from protobuf field <code>.Ydb.TypedValue from_literal = 5;</code>
+     * @param \Ydb\TypedValue $var
+     * @return $this
+     */
+    public function setFromLiteral($var)
+    {
+        GPBUtil::checkMessage($var, \Ydb\TypedValue::class);
+        $this->writeOneof(5, $var);
+
+        return $this;
+    }
+
+    /**
+     * Generated from protobuf field <code>.Ydb.Table.SequenceDescription from_sequence = 6;</code>
+     * @return \Ydb\Table\SequenceDescription|null
+     */
+    public function getFromSequence()
+    {
+        return $this->readOneof(6);
+    }
+
+    public function hasFromSequence()
+    {
+        return $this->hasOneof(6);
+    }
+
+    /**
+     * Generated from protobuf field <code>.Ydb.Table.SequenceDescription from_sequence = 6;</code>
+     * @param \Ydb\Table\SequenceDescription $var
+     * @return $this
+     */
+    public function setFromSequence($var)
+    {
+        GPBUtil::checkMessage($var, \Ydb\Table\SequenceDescription::class);
+        $this->writeOneof(6, $var);
+
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getDefaultValue()
+    {
+        return $this->whichOneof("default_value");
     }
 
 }

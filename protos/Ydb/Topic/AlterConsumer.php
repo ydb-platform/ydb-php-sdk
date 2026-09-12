@@ -38,6 +38,7 @@ class AlterConsumer extends \Google\Protobuf\Internal\Message
     /**
      * List of supported codecs by this consumer.
      * supported_codecs on topic must be contained inside this list.
+     * If empty, codec compatibility check for the consumer is disabled.
      *
      * Generated from protobuf field <code>.Ydb.Topic.SupportedCodecs set_supported_codecs = 5;</code>
      */
@@ -49,6 +50,7 @@ class AlterConsumer extends \Google\Protobuf\Internal\Message
      * Generated from protobuf field <code>map<string, string> alter_attributes = 6;</code>
      */
     private $alter_attributes;
+    protected $availability_period_action;
 
     /**
      * Constructor.
@@ -67,9 +69,12 @@ class AlterConsumer extends \Google\Protobuf\Internal\Message
      *     @type \Ydb\Topic\SupportedCodecs $set_supported_codecs
      *           List of supported codecs by this consumer.
      *           supported_codecs on topic must be contained inside this list.
+     *           If empty, codec compatibility check for the consumer is disabled.
      *     @type array|\Google\Protobuf\Internal\MapField $alter_attributes
      *           User and server attributes of consumer. Server attributes starts from "_" and will be validated by server.
      *           Leave the value blank to drop an attribute.
+     *     @type \Google\Protobuf\Duration $set_availability_period
+     *     @type \Google\Protobuf\GPBEmpty $reset_availability_period
      * }
      */
     public function __construct($data = NULL) {
@@ -182,6 +187,7 @@ class AlterConsumer extends \Google\Protobuf\Internal\Message
     /**
      * List of supported codecs by this consumer.
      * supported_codecs on topic must be contained inside this list.
+     * If empty, codec compatibility check for the consumer is disabled.
      *
      * Generated from protobuf field <code>.Ydb.Topic.SupportedCodecs set_supported_codecs = 5;</code>
      * @return \Ydb\Topic\SupportedCodecs|null
@@ -204,6 +210,7 @@ class AlterConsumer extends \Google\Protobuf\Internal\Message
     /**
      * List of supported codecs by this consumer.
      * supported_codecs on topic must be contained inside this list.
+     * If empty, codec compatibility check for the consumer is disabled.
      *
      * Generated from protobuf field <code>.Ydb.Topic.SupportedCodecs set_supported_codecs = 5;</code>
      * @param \Ydb\Topic\SupportedCodecs $var
@@ -243,6 +250,68 @@ class AlterConsumer extends \Google\Protobuf\Internal\Message
         $this->alter_attributes = $arr;
 
         return $this;
+    }
+
+    /**
+     * Generated from protobuf field <code>.google.protobuf.Duration set_availability_period = 7;</code>
+     * @return \Google\Protobuf\Duration|null
+     */
+    public function getSetAvailabilityPeriod()
+    {
+        return $this->readOneof(7);
+    }
+
+    public function hasSetAvailabilityPeriod()
+    {
+        return $this->hasOneof(7);
+    }
+
+    /**
+     * Generated from protobuf field <code>.google.protobuf.Duration set_availability_period = 7;</code>
+     * @param \Google\Protobuf\Duration $var
+     * @return $this
+     */
+    public function setSetAvailabilityPeriod($var)
+    {
+        GPBUtil::checkMessage($var, \Google\Protobuf\Duration::class);
+        $this->writeOneof(7, $var);
+
+        return $this;
+    }
+
+    /**
+     * Generated from protobuf field <code>.google.protobuf.Empty reset_availability_period = 8;</code>
+     * @return \Google\Protobuf\GPBEmpty|null
+     */
+    public function getResetAvailabilityPeriod()
+    {
+        return $this->readOneof(8);
+    }
+
+    public function hasResetAvailabilityPeriod()
+    {
+        return $this->hasOneof(8);
+    }
+
+    /**
+     * Generated from protobuf field <code>.google.protobuf.Empty reset_availability_period = 8;</code>
+     * @param \Google\Protobuf\GPBEmpty $var
+     * @return $this
+     */
+    public function setResetAvailabilityPeriod($var)
+    {
+        GPBUtil::checkMessage($var, \Google\Protobuf\GPBEmpty::class);
+        $this->writeOneof(8, $var);
+
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getAvailabilityPeriodAction()
+    {
+        return $this->whichOneof("availability_period_action");
     }
 
 }
