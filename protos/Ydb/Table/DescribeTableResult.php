@@ -97,6 +97,24 @@ class DescribeTableResult extends \Google\Protobuf\Internal\Message
      * Generated from protobuf field <code>repeated .Ydb.Table.ChangefeedDescription changefeeds = 15;</code>
      */
     private $changefeeds;
+    /**
+     * Tiering rules name
+     *
+     * Generated from protobuf field <code>string tiering = 16;</code>
+     */
+    protected $tiering = '';
+    /**
+     * Is temporary table
+     *
+     * Generated from protobuf field <code>bool temporary = 17;</code>
+     */
+    protected $temporary = false;
+    /**
+     * Is table column or row oriented
+     *
+     * Generated from protobuf field <code>.Ydb.Table.StoreType store_type = 18;</code>
+     */
+    protected $store_type = 0;
 
     /**
      * Constructor.
@@ -132,6 +150,12 @@ class DescribeTableResult extends \Google\Protobuf\Internal\Message
      *           Read replicas settings for table
      *     @type array<\Ydb\Table\ChangefeedDescription>|\Google\Protobuf\Internal\RepeatedField $changefeeds
      *           List of changefeeds
+     *     @type string $tiering
+     *           Tiering rules name
+     *     @type bool $temporary
+     *           Is temporary table
+     *     @type int $store_type
+     *           Is table column or row oriented
      * }
      */
     public function __construct($data = NULL) {
@@ -559,6 +583,84 @@ class DescribeTableResult extends \Google\Protobuf\Internal\Message
     {
         $arr = GPBUtil::checkRepeatedField($var, \Google\Protobuf\Internal\GPBType::MESSAGE, \Ydb\Table\ChangefeedDescription::class);
         $this->changefeeds = $arr;
+
+        return $this;
+    }
+
+    /**
+     * Tiering rules name
+     *
+     * Generated from protobuf field <code>string tiering = 16;</code>
+     * @return string
+     */
+    public function getTiering()
+    {
+        return $this->tiering;
+    }
+
+    /**
+     * Tiering rules name
+     *
+     * Generated from protobuf field <code>string tiering = 16;</code>
+     * @param string $var
+     * @return $this
+     */
+    public function setTiering($var)
+    {
+        GPBUtil::checkString($var, True);
+        $this->tiering = $var;
+
+        return $this;
+    }
+
+    /**
+     * Is temporary table
+     *
+     * Generated from protobuf field <code>bool temporary = 17;</code>
+     * @return bool
+     */
+    public function getTemporary()
+    {
+        return $this->temporary;
+    }
+
+    /**
+     * Is temporary table
+     *
+     * Generated from protobuf field <code>bool temporary = 17;</code>
+     * @param bool $var
+     * @return $this
+     */
+    public function setTemporary($var)
+    {
+        GPBUtil::checkBool($var);
+        $this->temporary = $var;
+
+        return $this;
+    }
+
+    /**
+     * Is table column or row oriented
+     *
+     * Generated from protobuf field <code>.Ydb.Table.StoreType store_type = 18;</code>
+     * @return int
+     */
+    public function getStoreType()
+    {
+        return $this->store_type;
+    }
+
+    /**
+     * Is table column or row oriented
+     *
+     * Generated from protobuf field <code>.Ydb.Table.StoreType store_type = 18;</code>
+     * @param int $var
+     * @return $this
+     */
+    public function setStoreType($var)
+    {
+        GPBUtil::checkEnum($var, \Ydb\Table\StoreType::class);
+        $this->store_type = $var;
 
         return $this;
     }

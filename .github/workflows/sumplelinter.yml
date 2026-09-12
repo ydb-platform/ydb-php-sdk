@@ -20,13 +20,8 @@ jobs:
         php-versions: [ '7.2' ]
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         name: Checkout
-
-      - uses: eWaterCycle/setup-grpc@v5
-        name: Setup gRPC
-        with:
-          grpc-version: 1.51.1
 
       - uses: shivammathur/setup-php@v2
         name: Setup PHP
@@ -38,7 +33,7 @@ jobs:
       - run: composer validate --strict
         name: Validate composer.json and composer.lock
 
-      - uses: actions/cache@v3
+      - uses: actions/cache@v4
         name: Cache Composer packages
         id: composer-cache
 
@@ -50,6 +45,6 @@ jobs:
       - name: Install dependencies
         run: composer install --prefer-dist --no-progress
 
-      - name: Run tests
+      - name: Run linter
         run: ./vendor/bin/phplint \
           ./ --exclude=vendor

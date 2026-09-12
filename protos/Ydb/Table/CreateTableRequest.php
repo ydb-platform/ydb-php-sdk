@@ -48,7 +48,7 @@ class CreateTableRequest extends \Google\Protobuf\Internal\Message
      */
     protected $operation_params = null;
     /**
-     * List of secondary indexes
+     * List of table indexes
      *
      * Generated from protobuf field <code>repeated .Ydb.Table.TableIndex indexes = 7;</code>
      */
@@ -101,6 +101,24 @@ class CreateTableRequest extends \Google\Protobuf\Internal\Message
      * Generated from protobuf field <code>.Ydb.Table.ReadReplicasSettings read_replicas_settings = 17;</code>
      */
     protected $read_replicas_settings = null;
+    /**
+     * Tiering rules name. It specifies how data migrates from one tier (logical storage) to another.
+     *
+     * Generated from protobuf field <code>string tiering = 18;</code>
+     */
+    protected $tiering = '';
+    /**
+     * Is temporary table
+     *
+     * Generated from protobuf field <code>bool temporary = 19;</code>
+     */
+    protected $temporary = false;
+    /**
+     * Is table column or row oriented
+     *
+     * Generated from protobuf field <code>.Ydb.Table.StoreType store_type = 20;</code>
+     */
+    protected $store_type = 0;
     protected $partitions;
 
     /**
@@ -121,7 +139,7 @@ class CreateTableRequest extends \Google\Protobuf\Internal\Message
      *           Table profile
      *     @type \Ydb\Operations\OperationParams $operation_params
      *     @type array<\Ydb\Table\TableIndex>|\Google\Protobuf\Internal\RepeatedField $indexes
-     *           List of secondary indexes
+     *           List of table indexes
      *     @type \Ydb\Table\TtlSettings $ttl_settings
      *           Table rows time to live settings
      *     @type \Ydb\Table\StorageSettings $storage_settings
@@ -143,6 +161,12 @@ class CreateTableRequest extends \Google\Protobuf\Internal\Message
      *           Bloom filter by key
      *     @type \Ydb\Table\ReadReplicasSettings $read_replicas_settings
      *           Read replicas settings for table
+     *     @type string $tiering
+     *           Tiering rules name. It specifies how data migrates from one tier (logical storage) to another.
+     *     @type bool $temporary
+     *           Is temporary table
+     *     @type int $store_type
+     *           Is table column or row oriented
      * }
      */
     public function __construct($data = NULL) {
@@ -323,7 +347,7 @@ class CreateTableRequest extends \Google\Protobuf\Internal\Message
     }
 
     /**
-     * List of secondary indexes
+     * List of table indexes
      *
      * Generated from protobuf field <code>repeated .Ydb.Table.TableIndex indexes = 7;</code>
      * @return \Google\Protobuf\Internal\RepeatedField
@@ -334,7 +358,7 @@ class CreateTableRequest extends \Google\Protobuf\Internal\Message
     }
 
     /**
-     * List of secondary indexes
+     * List of table indexes
      *
      * Generated from protobuf field <code>repeated .Ydb.Table.TableIndex indexes = 7;</code>
      * @param array<\Ydb\Table\TableIndex>|\Google\Protobuf\Internal\RepeatedField $var
@@ -656,6 +680,84 @@ class CreateTableRequest extends \Google\Protobuf\Internal\Message
     {
         GPBUtil::checkMessage($var, \Ydb\Table\ReadReplicasSettings::class);
         $this->read_replicas_settings = $var;
+
+        return $this;
+    }
+
+    /**
+     * Tiering rules name. It specifies how data migrates from one tier (logical storage) to another.
+     *
+     * Generated from protobuf field <code>string tiering = 18;</code>
+     * @return string
+     */
+    public function getTiering()
+    {
+        return $this->tiering;
+    }
+
+    /**
+     * Tiering rules name. It specifies how data migrates from one tier (logical storage) to another.
+     *
+     * Generated from protobuf field <code>string tiering = 18;</code>
+     * @param string $var
+     * @return $this
+     */
+    public function setTiering($var)
+    {
+        GPBUtil::checkString($var, True);
+        $this->tiering = $var;
+
+        return $this;
+    }
+
+    /**
+     * Is temporary table
+     *
+     * Generated from protobuf field <code>bool temporary = 19;</code>
+     * @return bool
+     */
+    public function getTemporary()
+    {
+        return $this->temporary;
+    }
+
+    /**
+     * Is temporary table
+     *
+     * Generated from protobuf field <code>bool temporary = 19;</code>
+     * @param bool $var
+     * @return $this
+     */
+    public function setTemporary($var)
+    {
+        GPBUtil::checkBool($var);
+        $this->temporary = $var;
+
+        return $this;
+    }
+
+    /**
+     * Is table column or row oriented
+     *
+     * Generated from protobuf field <code>.Ydb.Table.StoreType store_type = 20;</code>
+     * @return int
+     */
+    public function getStoreType()
+    {
+        return $this->store_type;
+    }
+
+    /**
+     * Is table column or row oriented
+     *
+     * Generated from protobuf field <code>.Ydb.Table.StoreType store_type = 20;</code>
+     * @param int $var
+     * @return $this
+     */
+    public function setStoreType($var)
+    {
+        GPBUtil::checkEnum($var, \Ydb\Table\StoreType::class);
+        $this->store_type = $var;
 
         return $this;
     }

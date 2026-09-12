@@ -16,13 +16,14 @@ use Google\Protobuf\Internal\GPBUtil;
 class ResultSet extends \Google\Protobuf\Internal\Message
 {
     /**
-     * Metadata of columns
+     * Metadata of columns.
+     * May be empty for custom Ydb.Query.SchemaInclusionMode.
      *
      * Generated from protobuf field <code>repeated .Ydb.Column columns = 1;</code>
      */
     private $columns;
     /**
-     * Rows of table
+     * Rows of table, are only filled for FORMAT_VALUE
      *
      * Generated from protobuf field <code>repeated .Ydb.Value rows = 2;</code>
      */
@@ -33,6 +34,24 @@ class ResultSet extends \Google\Protobuf\Internal\Message
      * Generated from protobuf field <code>bool truncated = 3;</code>
      */
     protected $truncated = false;
+    /**
+     * Format of the result set rows
+     *
+     * Generated from protobuf field <code>.Ydb.ResultSet.Format format = 4;</code>
+     */
+    protected $format = 0;
+    /**
+     * Metadata of the result set rows, only used for FORMAT_ARROW
+     *
+     * Generated from protobuf field <code>.Ydb.Formats.ArrowFormatMeta arrow_format_meta = 5;</code>
+     */
+    protected $arrow_format_meta = null;
+    /**
+     * Binary data for compressible formats of rows
+     *
+     * Generated from protobuf field <code>bytes data = 15;</code>
+     */
+    protected $data = '';
 
     /**
      * Constructor.
@@ -41,11 +60,18 @@ class ResultSet extends \Google\Protobuf\Internal\Message
      *     Optional. Data for populating the Message object.
      *
      *     @type array<\Ydb\Column>|\Google\Protobuf\Internal\RepeatedField $columns
-     *           Metadata of columns
+     *           Metadata of columns.
+     *           May be empty for custom Ydb.Query.SchemaInclusionMode.
      *     @type array<\Ydb\Value>|\Google\Protobuf\Internal\RepeatedField $rows
-     *           Rows of table
+     *           Rows of table, are only filled for FORMAT_VALUE
      *     @type bool $truncated
      *           Flag indicates the result was truncated
+     *     @type int $format
+     *           Format of the result set rows
+     *     @type \Ydb\Formats\ArrowFormatMeta $arrow_format_meta
+     *           Metadata of the result set rows, only used for FORMAT_ARROW
+     *     @type string $data
+     *           Binary data for compressible formats of rows
      * }
      */
     public function __construct($data = NULL) {
@@ -54,7 +80,8 @@ class ResultSet extends \Google\Protobuf\Internal\Message
     }
 
     /**
-     * Metadata of columns
+     * Metadata of columns.
+     * May be empty for custom Ydb.Query.SchemaInclusionMode.
      *
      * Generated from protobuf field <code>repeated .Ydb.Column columns = 1;</code>
      * @return \Google\Protobuf\Internal\RepeatedField
@@ -65,7 +92,8 @@ class ResultSet extends \Google\Protobuf\Internal\Message
     }
 
     /**
-     * Metadata of columns
+     * Metadata of columns.
+     * May be empty for custom Ydb.Query.SchemaInclusionMode.
      *
      * Generated from protobuf field <code>repeated .Ydb.Column columns = 1;</code>
      * @param array<\Ydb\Column>|\Google\Protobuf\Internal\RepeatedField $var
@@ -80,7 +108,7 @@ class ResultSet extends \Google\Protobuf\Internal\Message
     }
 
     /**
-     * Rows of table
+     * Rows of table, are only filled for FORMAT_VALUE
      *
      * Generated from protobuf field <code>repeated .Ydb.Value rows = 2;</code>
      * @return \Google\Protobuf\Internal\RepeatedField
@@ -91,7 +119,7 @@ class ResultSet extends \Google\Protobuf\Internal\Message
     }
 
     /**
-     * Rows of table
+     * Rows of table, are only filled for FORMAT_VALUE
      *
      * Generated from protobuf field <code>repeated .Ydb.Value rows = 2;</code>
      * @param array<\Ydb\Value>|\Google\Protobuf\Internal\RepeatedField $var
@@ -127,6 +155,94 @@ class ResultSet extends \Google\Protobuf\Internal\Message
     {
         GPBUtil::checkBool($var);
         $this->truncated = $var;
+
+        return $this;
+    }
+
+    /**
+     * Format of the result set rows
+     *
+     * Generated from protobuf field <code>.Ydb.ResultSet.Format format = 4;</code>
+     * @return int
+     */
+    public function getFormat()
+    {
+        return $this->format;
+    }
+
+    /**
+     * Format of the result set rows
+     *
+     * Generated from protobuf field <code>.Ydb.ResultSet.Format format = 4;</code>
+     * @param int $var
+     * @return $this
+     */
+    public function setFormat($var)
+    {
+        GPBUtil::checkEnum($var, \Ydb\ResultSet\Format::class);
+        $this->format = $var;
+
+        return $this;
+    }
+
+    /**
+     * Metadata of the result set rows, only used for FORMAT_ARROW
+     *
+     * Generated from protobuf field <code>.Ydb.Formats.ArrowFormatMeta arrow_format_meta = 5;</code>
+     * @return \Ydb\Formats\ArrowFormatMeta|null
+     */
+    public function getArrowFormatMeta()
+    {
+        return $this->arrow_format_meta;
+    }
+
+    public function hasArrowFormatMeta()
+    {
+        return isset($this->arrow_format_meta);
+    }
+
+    public function clearArrowFormatMeta()
+    {
+        unset($this->arrow_format_meta);
+    }
+
+    /**
+     * Metadata of the result set rows, only used for FORMAT_ARROW
+     *
+     * Generated from protobuf field <code>.Ydb.Formats.ArrowFormatMeta arrow_format_meta = 5;</code>
+     * @param \Ydb\Formats\ArrowFormatMeta $var
+     * @return $this
+     */
+    public function setArrowFormatMeta($var)
+    {
+        GPBUtil::checkMessage($var, \Ydb\Formats\ArrowFormatMeta::class);
+        $this->arrow_format_meta = $var;
+
+        return $this;
+    }
+
+    /**
+     * Binary data for compressible formats of rows
+     *
+     * Generated from protobuf field <code>bytes data = 15;</code>
+     * @return string
+     */
+    public function getData()
+    {
+        return $this->data;
+    }
+
+    /**
+     * Binary data for compressible formats of rows
+     *
+     * Generated from protobuf field <code>bytes data = 15;</code>
+     * @param string $var
+     * @return $this
+     */
+    public function setData($var)
+    {
+        GPBUtil::checkString($var, False);
+        $this->data = $var;
 
         return $this;
     }

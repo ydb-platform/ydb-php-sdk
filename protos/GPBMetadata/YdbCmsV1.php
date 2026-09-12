@@ -17,7 +17,7 @@ class YdbCmsV1
         \GPBMetadata\Protos\YdbCms::initOnce();
         $pool->internalAddGeneratedFile(
             '
-Œ
+’
 ydb_cms_v1.proto
 Ydb.Cms.V12œ
 
@@ -27,8 +27,8 @@ CmsServiceQ
 AlterDatabase.Ydb.Cms.AlterDatabaseRequest.Ydb.Cms.AlterDatabaseResponseN
 ListDatabases.Ydb.Cms.ListDatabasesRequest.Ydb.Cms.ListDatabasesResponseQ
 RemoveDatabase.Ydb.Cms.RemoveDatabaseRequest.Ydb.Cms.RemoveDatabaseResponsel
-DescribeDatabaseOptions\'.Ydb.Cms.DescribeDatabaseOptionsRequest(.Ydb.Cms.DescribeDatabaseOptionsResponseBE
-tech.ydb.cms.v1Z2github.com/ydb-platform/ydb-go-genproto/Ydb_Cms_V1bproto3'
+DescribeDatabaseOptions\'.Ydb.Cms.DescribeDatabaseOptionsRequest(.Ydb.Cms.DescribeDatabaseOptionsResponseBK
+tech.ydb.proto.cms.v1Z2github.com/ydb-platform/ydb-go-genproto/Ydb_Cms_V1bproto3'
         , true);
 
         static::$is_initialized = true;

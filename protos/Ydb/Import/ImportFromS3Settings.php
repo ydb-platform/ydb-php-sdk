@@ -38,7 +38,9 @@ class ImportFromS3Settings extends \Google\Protobuf\Internal\Message
      */
     protected $secret_key = '';
     /**
-     * Generated from protobuf field <code>repeated .Ydb.Import.ImportFromS3Settings.Item items = 6 [(.Ydb.size) = {</code>
+     * Empty collection means import of all export objects
+     *
+     * Generated from protobuf field <code>repeated .Ydb.Import.ImportFromS3Settings.Item items = 6;</code>
      */
     private $items;
     /**
@@ -49,6 +51,72 @@ class ImportFromS3Settings extends \Google\Protobuf\Internal\Message
      * Generated from protobuf field <code>uint32 number_of_retries = 8;</code>
      */
     protected $number_of_retries = 0;
+    /**
+     * Region to use in requests
+     *
+     * Generated from protobuf field <code>string region = 9;</code>
+     */
+    protected $region = '';
+    /**
+     * disables virtual hosting style buckets aws s3 feature
+     * it changes the way bucket appended to url. e.g. https//bucket_name.example.com/ vs https://example.com/bucket_name
+     * details: https://docs.aws.amazon.com/AmazonS3/latest/userguide/VirtualHosting.html
+     * it is especially useful for custom s3 implementations
+     *
+     * Generated from protobuf field <code>bool disable_virtual_addressing = 10;</code>
+     */
+    protected $disable_virtual_addressing = false;
+    /**
+     * Prevent importing of ACL and owner. If true, objects are created with empty ACL
+     * and their owner will be the user who started the import.
+     *
+     * Generated from protobuf field <code>bool no_acl = 11;</code>
+     */
+    protected $no_acl = false;
+    /**
+     * Skip checksum validation during import
+     *
+     * Generated from protobuf field <code>bool skip_checksum_validation = 12;</code>
+     */
+    protected $skip_checksum_validation = false;
+    /**
+     * A default path prefix for all items,
+     * determines that the import works with the list of objects in the SchemaMapping file.
+     * Must be provided to import an encrypted export.
+     *
+     * Generated from protobuf field <code>string source_prefix = 13;</code>
+     */
+    protected $source_prefix = '';
+    /**
+     * Destination path to restore paths inside database
+     * Default value is database root
+     *
+     * Generated from protobuf field <code>string destination_path = 14;</code>
+     */
+    protected $destination_path = '';
+    /**
+     * Settings how data is encrypted.
+     * If encryption_settings field is not specified,
+     * the resulting data is considered not encrypted.
+     *
+     * Generated from protobuf field <code>.Ydb.Export.EncryptionSettings encryption_settings = 15;</code>
+     */
+    protected $encryption_settings = null;
+    /**
+     * Index filling mode.
+     * If not specified, indexes will be built.
+     *
+     * Generated from protobuf field <code>.Ydb.Import.ImportFromS3Settings.IndexFillingMode index_filling_mode = 16;</code>
+     */
+    protected $index_filling_mode = 0;
+    /**
+     * Patterns (PCRE) for paths excluded from import operation.
+     * - Patterns are matched against the database object names stored in the backup listing.
+     * - Object is excluded from import operation if it matches any of the specified exclude regexps.
+     *
+     * Generated from protobuf field <code>repeated string exclude_regexps = 17;</code>
+     */
+    private $exclude_regexps;
 
     /**
      * Constructor.
@@ -63,8 +131,39 @@ class ImportFromS3Settings extends \Google\Protobuf\Internal\Message
      *     @type string $access_key
      *     @type string $secret_key
      *     @type array<\Ydb\Import\ImportFromS3Settings\Item>|\Google\Protobuf\Internal\RepeatedField $items
+     *           Empty collection means import of all export objects
      *     @type string $description
      *     @type int $number_of_retries
+     *     @type string $region
+     *           Region to use in requests
+     *     @type bool $disable_virtual_addressing
+     *           disables virtual hosting style buckets aws s3 feature
+     *           it changes the way bucket appended to url. e.g. https//bucket_name.example.com/ vs https://example.com/bucket_name
+     *           details: https://docs.aws.amazon.com/AmazonS3/latest/userguide/VirtualHosting.html
+     *           it is especially useful for custom s3 implementations
+     *     @type bool $no_acl
+     *           Prevent importing of ACL and owner. If true, objects are created with empty ACL
+     *           and their owner will be the user who started the import.
+     *     @type bool $skip_checksum_validation
+     *           Skip checksum validation during import
+     *     @type string $source_prefix
+     *           A default path prefix for all items,
+     *           determines that the import works with the list of objects in the SchemaMapping file.
+     *           Must be provided to import an encrypted export.
+     *     @type string $destination_path
+     *           Destination path to restore paths inside database
+     *           Default value is database root
+     *     @type \Ydb\Export\EncryptionSettings $encryption_settings
+     *           Settings how data is encrypted.
+     *           If encryption_settings field is not specified,
+     *           the resulting data is considered not encrypted.
+     *     @type int $index_filling_mode
+     *           Index filling mode.
+     *           If not specified, indexes will be built.
+     *     @type array<string>|\Google\Protobuf\Internal\RepeatedField $exclude_regexps
+     *           Patterns (PCRE) for paths excluded from import operation.
+     *           - Patterns are matched against the database object names stored in the backup listing.
+     *           - Object is excluded from import operation if it matches any of the specified exclude regexps.
      * }
      */
     public function __construct($data = NULL) {
@@ -187,7 +286,9 @@ class ImportFromS3Settings extends \Google\Protobuf\Internal\Message
     }
 
     /**
-     * Generated from protobuf field <code>repeated .Ydb.Import.ImportFromS3Settings.Item items = 6 [(.Ydb.size) = {</code>
+     * Empty collection means import of all export objects
+     *
+     * Generated from protobuf field <code>repeated .Ydb.Import.ImportFromS3Settings.Item items = 6;</code>
      * @return \Google\Protobuf\Internal\RepeatedField
      */
     public function getItems()
@@ -196,7 +297,9 @@ class ImportFromS3Settings extends \Google\Protobuf\Internal\Message
     }
 
     /**
-     * Generated from protobuf field <code>repeated .Ydb.Import.ImportFromS3Settings.Item items = 6 [(.Ydb.size) = {</code>
+     * Empty collection means import of all export objects
+     *
+     * Generated from protobuf field <code>repeated .Ydb.Import.ImportFromS3Settings.Item items = 6;</code>
      * @param array<\Ydb\Import\ImportFromS3Settings\Item>|\Google\Protobuf\Internal\RepeatedField $var
      * @return $this
      */
@@ -248,6 +351,274 @@ class ImportFromS3Settings extends \Google\Protobuf\Internal\Message
     {
         GPBUtil::checkUint32($var);
         $this->number_of_retries = $var;
+
+        return $this;
+    }
+
+    /**
+     * Region to use in requests
+     *
+     * Generated from protobuf field <code>string region = 9;</code>
+     * @return string
+     */
+    public function getRegion()
+    {
+        return $this->region;
+    }
+
+    /**
+     * Region to use in requests
+     *
+     * Generated from protobuf field <code>string region = 9;</code>
+     * @param string $var
+     * @return $this
+     */
+    public function setRegion($var)
+    {
+        GPBUtil::checkString($var, True);
+        $this->region = $var;
+
+        return $this;
+    }
+
+    /**
+     * disables virtual hosting style buckets aws s3 feature
+     * it changes the way bucket appended to url. e.g. https//bucket_name.example.com/ vs https://example.com/bucket_name
+     * details: https://docs.aws.amazon.com/AmazonS3/latest/userguide/VirtualHosting.html
+     * it is especially useful for custom s3 implementations
+     *
+     * Generated from protobuf field <code>bool disable_virtual_addressing = 10;</code>
+     * @return bool
+     */
+    public function getDisableVirtualAddressing()
+    {
+        return $this->disable_virtual_addressing;
+    }
+
+    /**
+     * disables virtual hosting style buckets aws s3 feature
+     * it changes the way bucket appended to url. e.g. https//bucket_name.example.com/ vs https://example.com/bucket_name
+     * details: https://docs.aws.amazon.com/AmazonS3/latest/userguide/VirtualHosting.html
+     * it is especially useful for custom s3 implementations
+     *
+     * Generated from protobuf field <code>bool disable_virtual_addressing = 10;</code>
+     * @param bool $var
+     * @return $this
+     */
+    public function setDisableVirtualAddressing($var)
+    {
+        GPBUtil::checkBool($var);
+        $this->disable_virtual_addressing = $var;
+
+        return $this;
+    }
+
+    /**
+     * Prevent importing of ACL and owner. If true, objects are created with empty ACL
+     * and their owner will be the user who started the import.
+     *
+     * Generated from protobuf field <code>bool no_acl = 11;</code>
+     * @return bool
+     */
+    public function getNoAcl()
+    {
+        return $this->no_acl;
+    }
+
+    /**
+     * Prevent importing of ACL and owner. If true, objects are created with empty ACL
+     * and their owner will be the user who started the import.
+     *
+     * Generated from protobuf field <code>bool no_acl = 11;</code>
+     * @param bool $var
+     * @return $this
+     */
+    public function setNoAcl($var)
+    {
+        GPBUtil::checkBool($var);
+        $this->no_acl = $var;
+
+        return $this;
+    }
+
+    /**
+     * Skip checksum validation during import
+     *
+     * Generated from protobuf field <code>bool skip_checksum_validation = 12;</code>
+     * @return bool
+     */
+    public function getSkipChecksumValidation()
+    {
+        return $this->skip_checksum_validation;
+    }
+
+    /**
+     * Skip checksum validation during import
+     *
+     * Generated from protobuf field <code>bool skip_checksum_validation = 12;</code>
+     * @param bool $var
+     * @return $this
+     */
+    public function setSkipChecksumValidation($var)
+    {
+        GPBUtil::checkBool($var);
+        $this->skip_checksum_validation = $var;
+
+        return $this;
+    }
+
+    /**
+     * A default path prefix for all items,
+     * determines that the import works with the list of objects in the SchemaMapping file.
+     * Must be provided to import an encrypted export.
+     *
+     * Generated from protobuf field <code>string source_prefix = 13;</code>
+     * @return string
+     */
+    public function getSourcePrefix()
+    {
+        return $this->source_prefix;
+    }
+
+    /**
+     * A default path prefix for all items,
+     * determines that the import works with the list of objects in the SchemaMapping file.
+     * Must be provided to import an encrypted export.
+     *
+     * Generated from protobuf field <code>string source_prefix = 13;</code>
+     * @param string $var
+     * @return $this
+     */
+    public function setSourcePrefix($var)
+    {
+        GPBUtil::checkString($var, True);
+        $this->source_prefix = $var;
+
+        return $this;
+    }
+
+    /**
+     * Destination path to restore paths inside database
+     * Default value is database root
+     *
+     * Generated from protobuf field <code>string destination_path = 14;</code>
+     * @return string
+     */
+    public function getDestinationPath()
+    {
+        return $this->destination_path;
+    }
+
+    /**
+     * Destination path to restore paths inside database
+     * Default value is database root
+     *
+     * Generated from protobuf field <code>string destination_path = 14;</code>
+     * @param string $var
+     * @return $this
+     */
+    public function setDestinationPath($var)
+    {
+        GPBUtil::checkString($var, True);
+        $this->destination_path = $var;
+
+        return $this;
+    }
+
+    /**
+     * Settings how data is encrypted.
+     * If encryption_settings field is not specified,
+     * the resulting data is considered not encrypted.
+     *
+     * Generated from protobuf field <code>.Ydb.Export.EncryptionSettings encryption_settings = 15;</code>
+     * @return \Ydb\Export\EncryptionSettings|null
+     */
+    public function getEncryptionSettings()
+    {
+        return $this->encryption_settings;
+    }
+
+    public function hasEncryptionSettings()
+    {
+        return isset($this->encryption_settings);
+    }
+
+    public function clearEncryptionSettings()
+    {
+        unset($this->encryption_settings);
+    }
+
+    /**
+     * Settings how data is encrypted.
+     * If encryption_settings field is not specified,
+     * the resulting data is considered not encrypted.
+     *
+     * Generated from protobuf field <code>.Ydb.Export.EncryptionSettings encryption_settings = 15;</code>
+     * @param \Ydb\Export\EncryptionSettings $var
+     * @return $this
+     */
+    public function setEncryptionSettings($var)
+    {
+        GPBUtil::checkMessage($var, \Ydb\Export\EncryptionSettings::class);
+        $this->encryption_settings = $var;
+
+        return $this;
+    }
+
+    /**
+     * Index filling mode.
+     * If not specified, indexes will be built.
+     *
+     * Generated from protobuf field <code>.Ydb.Import.ImportFromS3Settings.IndexFillingMode index_filling_mode = 16;</code>
+     * @return int
+     */
+    public function getIndexFillingMode()
+    {
+        return $this->index_filling_mode;
+    }
+
+    /**
+     * Index filling mode.
+     * If not specified, indexes will be built.
+     *
+     * Generated from protobuf field <code>.Ydb.Import.ImportFromS3Settings.IndexFillingMode index_filling_mode = 16;</code>
+     * @param int $var
+     * @return $this
+     */
+    public function setIndexFillingMode($var)
+    {
+        GPBUtil::checkEnum($var, \Ydb\Import\ImportFromS3Settings\IndexFillingMode::class);
+        $this->index_filling_mode = $var;
+
+        return $this;
+    }
+
+    /**
+     * Patterns (PCRE) for paths excluded from import operation.
+     * - Patterns are matched against the database object names stored in the backup listing.
+     * - Object is excluded from import operation if it matches any of the specified exclude regexps.
+     *
+     * Generated from protobuf field <code>repeated string exclude_regexps = 17;</code>
+     * @return \Google\Protobuf\Internal\RepeatedField
+     */
+    public function getExcludeRegexps()
+    {
+        return $this->exclude_regexps;
+    }
+
+    /**
+     * Patterns (PCRE) for paths excluded from import operation.
+     * - Patterns are matched against the database object names stored in the backup listing.
+     * - Object is excluded from import operation if it matches any of the specified exclude regexps.
+     *
+     * Generated from protobuf field <code>repeated string exclude_regexps = 17;</code>
+     * @param array<string>|\Google\Protobuf\Internal\RepeatedField $var
+     * @return $this
+     */
+    public function setExcludeRegexps($var)
+    {
+        $arr = GPBUtil::checkRepeatedField($var, \Google\Protobuf\Internal\GPBType::STRING);
+        $this->exclude_regexps = $arr;
 
         return $this;
     }

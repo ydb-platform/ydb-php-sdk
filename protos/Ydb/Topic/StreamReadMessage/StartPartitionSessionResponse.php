@@ -9,7 +9,7 @@ use Google\Protobuf\Internal\RepeatedField;
 use Google\Protobuf\Internal\GPBUtil;
 
 /**
- * Signal for server that cient is ready to recive data for partition.
+ * Signal for server that client is ready to recive data for partition.
  *
  * Generated from protobuf message <code>Ydb.Topic.StreamReadMessage.StartPartitionSessionResponse</code>
  */

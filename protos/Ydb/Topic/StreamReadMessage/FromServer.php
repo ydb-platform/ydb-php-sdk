@@ -17,6 +17,7 @@ use Google\Protobuf\Internal\GPBUtil;
  *     UpdateTokenResponse - acknowledgment of token update.
  *     StartPartitionSessionRequest - command from server to create a partition session.
  *     StopPartitionSessionRequest - command from server to destroy a partition session.
+ *     UpdatePartitionSession - command from server to update a partition session.
  *
  * Generated from protobuf message <code>Ydb.Topic.StreamReadMessage.FromServer</code>
  */
@@ -55,6 +56,8 @@ class FromServer extends \Google\Protobuf\Internal\Message
      *     @type \Ydb\Topic\StreamReadMessage\StartPartitionSessionRequest $start_partition_session_request
      *           Server commands.
      *     @type \Ydb\Topic\StreamReadMessage\StopPartitionSessionRequest $stop_partition_session_request
+     *     @type \Ydb\Topic\StreamReadMessage\UpdatePartitionSession $update_partition_session
+     *     @type \Ydb\Topic\StreamReadMessage\EndPartitionSession $end_partition_session
      * }
      */
     public function __construct($data = NULL) {
@@ -307,6 +310,60 @@ class FromServer extends \Google\Protobuf\Internal\Message
     {
         GPBUtil::checkMessage($var, \Ydb\Topic\StreamReadMessage\StopPartitionSessionRequest::class);
         $this->writeOneof(9, $var);
+
+        return $this;
+    }
+
+    /**
+     * Generated from protobuf field <code>.Ydb.Topic.StreamReadMessage.UpdatePartitionSession update_partition_session = 10;</code>
+     * @return \Ydb\Topic\StreamReadMessage\UpdatePartitionSession|null
+     */
+    public function getUpdatePartitionSession()
+    {
+        return $this->readOneof(10);
+    }
+
+    public function hasUpdatePartitionSession()
+    {
+        return $this->hasOneof(10);
+    }
+
+    /**
+     * Generated from protobuf field <code>.Ydb.Topic.StreamReadMessage.UpdatePartitionSession update_partition_session = 10;</code>
+     * @param \Ydb\Topic\StreamReadMessage\UpdatePartitionSession $var
+     * @return $this
+     */
+    public function setUpdatePartitionSession($var)
+    {
+        GPBUtil::checkMessage($var, \Ydb\Topic\StreamReadMessage\UpdatePartitionSession::class);
+        $this->writeOneof(10, $var);
+
+        return $this;
+    }
+
+    /**
+     * Generated from protobuf field <code>.Ydb.Topic.StreamReadMessage.EndPartitionSession end_partition_session = 11;</code>
+     * @return \Ydb\Topic\StreamReadMessage\EndPartitionSession|null
+     */
+    public function getEndPartitionSession()
+    {
+        return $this->readOneof(11);
+    }
+
+    public function hasEndPartitionSession()
+    {
+        return $this->hasOneof(11);
+    }
+
+    /**
+     * Generated from protobuf field <code>.Ydb.Topic.StreamReadMessage.EndPartitionSession end_partition_session = 11;</code>
+     * @param \Ydb\Topic\StreamReadMessage\EndPartitionSession $var
+     * @return $this
+     */
+    public function setEndPartitionSession($var)
+    {
+        GPBUtil::checkMessage($var, \Ydb\Topic\StreamReadMessage\EndPartitionSession::class);
+        $this->writeOneof(11, $var);
 
         return $this;
     }

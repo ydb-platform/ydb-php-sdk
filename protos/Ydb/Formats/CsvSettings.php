@@ -37,6 +37,10 @@ class CsvSettings extends \Google\Protobuf\Internal\Message
      * Generated from protobuf field <code>bool header = 4;</code>
      */
     protected $header = false;
+    /**
+     * Generated from protobuf field <code>.Ydb.Formats.CsvSettings.Quoting quoting = 5;</code>
+     */
+    protected $quoting = null;
 
     /**
      * Constructor.
@@ -52,6 +56,7 @@ class CsvSettings extends \Google\Protobuf\Internal\Message
      *           String value that would be interpreted as NULL.
      *     @type bool $header
      *           First not skipped line is a CSV header (list of column names).
+     *     @type \Ydb\Formats\CsvSettings\Quoting $quoting
      * }
      */
     public function __construct($data = NULL) {
@@ -159,6 +164,38 @@ class CsvSettings extends \Google\Protobuf\Internal\Message
     {
         GPBUtil::checkBool($var);
         $this->header = $var;
+
+        return $this;
+    }
+
+    /**
+     * Generated from protobuf field <code>.Ydb.Formats.CsvSettings.Quoting quoting = 5;</code>
+     * @return \Ydb\Formats\CsvSettings\Quoting|null
+     */
+    public function getQuoting()
+    {
+        return $this->quoting;
+    }
+
+    public function hasQuoting()
+    {
+        return isset($this->quoting);
+    }
+
+    public function clearQuoting()
+    {
+        unset($this->quoting);
+    }
+
+    /**
+     * Generated from protobuf field <code>.Ydb.Formats.CsvSettings.Quoting quoting = 5;</code>
+     * @param \Ydb\Formats\CsvSettings\Quoting $var
+     * @return $this
+     */
+    public function setQuoting($var)
+    {
+        GPBUtil::checkMessage($var, \Ydb\Formats\CsvSettings\Quoting::class);
+        $this->quoting = $var;
 
         return $this;
     }

@@ -33,6 +33,7 @@ class WriteAck extends \Google\Protobuf\Internal\Message
      *           Sequence number as in WriteRequest.
      *     @type \Ydb\Topic\StreamWriteMessage\WriteResponse\WriteAck\Written $written
      *     @type \Ydb\Topic\StreamWriteMessage\WriteResponse\WriteAck\Skipped $skipped
+     *     @type \Ydb\Topic\StreamWriteMessage\WriteResponse\WriteAck\WrittenInTx $written_in_tx
      * }
      */
     public function __construct($data = NULL) {
@@ -116,6 +117,33 @@ class WriteAck extends \Google\Protobuf\Internal\Message
     {
         GPBUtil::checkMessage($var, \Ydb\Topic\StreamWriteMessage\WriteResponse\WriteAck\Skipped::class);
         $this->writeOneof(3, $var);
+
+        return $this;
+    }
+
+    /**
+     * Generated from protobuf field <code>.Ydb.Topic.StreamWriteMessage.WriteResponse.WriteAck.WrittenInTx written_in_tx = 4;</code>
+     * @return \Ydb\Topic\StreamWriteMessage\WriteResponse\WriteAck\WrittenInTx|null
+     */
+    public function getWrittenInTx()
+    {
+        return $this->readOneof(4);
+    }
+
+    public function hasWrittenInTx()
+    {
+        return $this->hasOneof(4);
+    }
+
+    /**
+     * Generated from protobuf field <code>.Ydb.Topic.StreamWriteMessage.WriteResponse.WriteAck.WrittenInTx written_in_tx = 4;</code>
+     * @param \Ydb\Topic\StreamWriteMessage\WriteResponse\WriteAck\WrittenInTx $var
+     * @return $this
+     */
+    public function setWrittenInTx($var)
+    {
+        GPBUtil::checkMessage($var, \Ydb\Topic\StreamWriteMessage\WriteResponse\WriteAck\WrittenInTx::class);
+        $this->writeOneof(4, $var);
 
         return $this;
     }
