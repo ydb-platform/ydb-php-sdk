@@ -41,20 +41,14 @@ waits `WORKLOAD_DURATION + 60s` for the container to exit. Creating the table an
 happens inside that budget, and the last `-shutdown-time` seconds of it are reserved for
 stopping the workers and dropping the table.
 
-PHP has no threads and the gRPC core does not survive a fork, so the main process never opens a
-connection: every phase, and every read, write and metrics worker inside `run`, is a separate
-forked process.
-
 ## Options
 
-Options override the defaults and may be passed through `workload_current_command` / `workload_baseline_command`
-of the action:
+Every setting of [src/config.php](src/config.php) can be overridden with the option of the same name, with underscores
+replaced by dashes: `read_rps` <- `-read-rps`. The options are passed through `workload_current_command` /
+`workload_baseline_command` of the action, the most useful ones are:
 
 ```
-  -t -table-name          <string> table path relative to the database
-  -min-partitions-count   <int>    minimum amount of partitions in the table
-  -max-partitions-count   <int>    maximum amount of partitions in the table
-  -partition-size         <int>    partition size in mb
+  -table-name             <string> table path relative to the database
   -prefill-count          <int>    amount of rows written before the workload starts
 
   -read-rps               <int>    read RPS, an upper bound for all read processes
@@ -64,19 +58,31 @@ of the action:
   -write-timeout          <int>    write timeout in milliseconds
   -write-forks            <int>    amount of write processes
 
-  -time                   <int>    workload duration in seconds
+  -duration               <int>    workload duration in seconds
   -report-period          <int>    metrics push period in milliseconds
   -shutdown-time          <int>    graceful shutdown time in seconds
   -otlp-endpoint          <string> OTLP metrics endpoint
 ```
 
-The endpoint and the database may also be passed positionally: `php application.php run grpc://localhost:2136 /local`.
-
 ## What's inside
 
-PHP has no threads, so `run` forks a set of processes: `readForks` read processes, `writeForks` write processes and
-one metrics process. Workers send every finished operation to the metrics process over a System V message queue,
-the metrics process aggregates the events and pushes the metrics every second.
+The workload is plain PHP functions, one file per topic:
+
+| File                                     | What is in it                                                  |
+|------------------------------------------|----------------------------------------------------------------|
+| [application.php](application.php)       | command line: the options and the phases to run                |
+| [src/config.php](src/config.php)         | settings: defaults, the environment and the options on top     |
+| [src/processes.php](src/processes.php)   | forking and the message queue the processes talk over          |
+| [src/ydb.php](src/ydb.php)               | connecting to the database and the queries                     |
+| [src/workload.php](src/workload.php)     | the phases themselves: create, run, cleanup                    |
+| [src/metrics.php](src/metrics.php)       | counting the operations and pushing the metrics                |
+
+PHP has no threads, so `run` forks a set of processes: `-read-forks` read processes, `-write-forks` write processes
+and one metrics process. Workers send every finished operation to the metrics process over a System V message queue,
+the metrics process counts the events and pushes the metrics every second.
+
+The gRPC core does not survive a fork, so the main process never connects to the database: every phase, and every
+worker inside `run`, is a separate forked process that connects on its own.
 
 The table has these fields:
 

@@ -3,9 +3,6 @@
 namespace YdbPlatform\Ydb\Test;
 
 use PHPUnit\Framework\TestCase;
-use YdbPlatform\Ydb\Slo\Config;
-use YdbPlatform\Ydb\Slo\Metrics\Metrics;
-use YdbPlatform\Ydb\Slo\Metrics\OtlpExporter;
 
 /**
  * The SLO workload reports metrics to `ydb-platform/ydb-slo-action`, which reads them
@@ -17,46 +14,39 @@ class SloWorkloadTest extends TestCase
     {
         $this->assertEquals(
             ['grpc://ydb:2136', '/Root/testdb'],
-            Config::splitConnectionString('grpc://ydb:2136/Root/testdb')
+            slo_split_connection_string('grpc://ydb:2136/Root/testdb')
         );
         $this->assertEquals(
             ['grpcs://ydb.example.com:2135', '/some/database'],
-            Config::splitConnectionString('grpcs://ydb.example.com:2135?database=/some/database')
+            slo_split_connection_string('grpcs://ydb.example.com:2135?database=/some/database')
         );
     }
 
-    public function testParseOptions()
+    public function testOptions()
     {
-        $options = Config::parseOptions([
-            'grpc://ydb:2136', '/Root/testdb',
-            '-t', 'php-table/current',
-            '--read-rps', '500',
-            '--write-rps=50',
-        ]);
+        $options = slo_options(['-table-name', 'php-table/current', '--read-rps', '500', '--write-rps=50']);
 
         $this->assertEquals([
-            'endpoint' => 'grpc://ydb:2136',
-            'database' => '/Root/testdb',
-            'table-name' => 'php-table/current',
-            'read-rps' => '500',
-            'write-rps' => '50',
+            'table_name' => 'php-table/current',
+            'read_rps' => '500',
+            'write_rps' => '50',
         ], $options);
     }
 
-    public function testMetricsPayload()
+    public function testMetrics()
     {
-        $metrics = new Metrics('current');
-        $metrics->operationFinished(Metrics::READ, Metrics::SUCCESS, 1, 0.01);
-        $metrics->operationFinished(Metrics::READ, Metrics::SUCCESS, 2, 0.02);
-        $metrics->operationFinished(Metrics::WRITE, Metrics::FAILURE, 3, 0.5);
-        $metrics->errorOccurred(Metrics::WRITE, 'YDB_UNAVAILABLE');
+        $metrics = slo_metrics_new('current');
+        slo_metrics_add($metrics, ['type' => 'ok', 'operation' => 'read', 'attempts' => 1, 'latency' => 0.01]);
+        slo_metrics_add($metrics, ['type' => 'ok', 'operation' => 'read', 'attempts' => 2, 'latency' => 0.02]);
+        slo_metrics_add($metrics, [
+            'type' => 'err',
+            'operation' => 'write',
+            'attempts' => 3,
+            'latency' => 0.5,
+            'error' => 'YDB_UNAVAILABLE',
+        ]);
 
-        $exporter = new PayloadCapturingExporter('http://localhost:9090/api/v1/otlp/v1/metrics', [
-            'service.name' => 'php-table',
-        ], microtime(true));
-        $this->assertTrue($exporter->export($metrics->snapshot()));
-
-        $series = $exporter->series();
+        $series = $this->series(slo_metrics_payload($metrics, ['service.name' => 'php-table'], microtime(true)));
 
         // Counters are cumulative and include the zero-initialized series.
         $this->assertEquals(2, $series['sdk_operations_total']['read|success']['asInt']);
@@ -64,29 +54,27 @@ class SloWorkloadTest extends TestCase
         $this->assertEquals(0, $series['sdk_operations_total']['write|success']['asInt']);
         $this->assertEquals(3, $series['sdk_retry_attempts_total']['read|success']['asInt']);
         $this->assertEquals(3, $series['sdk_retry_attempts_total']['write|failure']['asInt']);
+        $this->assertEquals(1, $series['sdk_errors_total']['write|failure']['asInt']);
 
         // Latency percentiles are gauges over the samples of the last window.
         $this->assertEquals(0.01, $series['sdk_operation_latency_p50_seconds']['read|success']['asDouble']);
         $this->assertEquals(0.02, $series['sdk_operation_latency_p99_seconds']['read|success']['asDouble']);
         $this->assertEquals(0.5, $series['sdk_operation_latency_p50_seconds']['write|failure']['asDouble']);
 
-        // Samples are consumed by the export, the next window starts empty.
-        $next = new PayloadCapturingExporter('http://localhost:9090/api/v1/otlp/v1/metrics', [], microtime(true));
-        $next->export($metrics->snapshot());
-        $this->assertEquals([], $next->series()['sdk_operation_latency_p50_seconds'] ?? []);
-        $this->assertEquals(2, $next->series()['sdk_operations_total']['read|success']['asInt']);
+        // Samples are consumed by the push, the next window starts empty.
+        $next = $this->series(slo_metrics_payload($metrics, [], microtime(true)));
+        $this->assertArrayNotHasKey('sdk_operation_latency_p50_seconds', $next);
+        $this->assertEquals(2, $next['sdk_operations_total']['read|success']['asInt']);
     }
 
-    public function testEncodedTypes()
+    public function testPayloadFormat()
     {
-        $metrics = new Metrics('baseline');
-        $metrics->operationFinished(Metrics::READ, Metrics::SUCCESS, 1, 0.01);
+        $metrics = slo_metrics_new('baseline');
+        slo_metrics_add($metrics, ['type' => 'ok', 'operation' => 'read', 'attempts' => 1, 'latency' => 0.01]);
 
-        $exporter = new PayloadCapturingExporter('http://localhost:9090/api/v1/otlp/v1/metrics', ['ref' => 'baseline'], 1.5);
-        $exporter->export($metrics->snapshot());
-        $payload = $exporter->payload();
-
+        $payload = slo_metrics_payload($metrics, ['ref' => 'baseline'], 1.5);
         $resource = $payload['resourceMetrics'][0];
+
         $this->assertEquals(
             [['key' => 'ref', 'value' => ['stringValue' => 'baseline']]],
             $resource['resource']['attributes']
@@ -99,46 +87,29 @@ class SloWorkloadTest extends TestCase
 
         $sum = $encoded['sdk_operations_total']['sum'];
         $this->assertTrue($sum['isMonotonic']);
-        $this->assertEquals(OtlpExporter::AGGREGATION_TEMPORALITY_CUMULATIVE, $sum['aggregationTemporality']);
+        $this->assertEquals(SLO_CUMULATIVE, $sum['aggregationTemporality']);
         // Nanoseconds of a 64-bit protobuf field are encoded as strings.
         $this->assertEquals('1500000000', $sum['dataPoints'][0]['startTimeUnixNano']);
 
         $this->assertArrayHasKey('gauge', $encoded['sdk_operation_latency_p50_seconds']);
         $this->assertArrayNotHasKey('sum', $encoded['sdk_operation_latency_p50_seconds']);
     }
-}
-
-class PayloadCapturingExporter extends OtlpExporter
-{
-    /** @var array */
-    protected $payload = [];
-
-    protected function post(array $payload): bool
-    {
-        $this->payload = $payload;
-        return true;
-    }
-
-    public function payload(): array
-    {
-        return $this->payload;
-    }
 
     /**
      * @return array metric name => "operation_type|operation_status" => data point
      */
-    public function series(): array
+    protected function series(array $payload)
     {
         $series = [];
-        foreach ($this->payload['resourceMetrics'][0]['scopeMetrics'][0]['metrics'] as $metric) {
-            $data = $metric['sum'] ?? $metric['gauge'];
-            $series[$metric['name']] = [];
+        foreach ($payload['resourceMetrics'][0]['scopeMetrics'][0]['metrics'] as $metric) {
+            $data = isset($metric['sum']) ? $metric['sum'] : $metric['gauge'];
+
             foreach ($data['dataPoints'] as $dataPoint) {
-                $attributes = [];
+                $labels = [];
                 foreach ($dataPoint['attributes'] as $attribute) {
-                    $attributes[$attribute['key']] = $attribute['value']['stringValue'];
+                    $labels[$attribute['key']] = $attribute['value']['stringValue'];
                 }
-                $key = $attributes['operation_type'] . '|' . $attributes['operation_status'];
+                $key = $labels['operation_type'] . '|' . $labels['operation_status'];
                 $series[$metric['name']][$key] = $dataPoint;
             }
         }

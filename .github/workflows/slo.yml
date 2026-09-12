@@ -115,7 +115,7 @@ jobs:
         run: |
           # Revisions older than the migration to ydb-slo-action cannot report the
           # metrics the report is built from, so they are not used as a baseline.
-          if [[ -f "$GITHUB_WORKSPACE/baseline/slo-workload/src/Metrics/Metrics.php" ]]; then
+          if [[ -f "$GITHUB_WORKSPACE/baseline/slo-workload/src/metrics.php" ]]; then
             echo "available=true" >> "$GITHUB_OUTPUT"
           else
             echo "available=false" >> "$GITHUB_OUTPUT"
