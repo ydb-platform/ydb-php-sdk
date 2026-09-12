@@ -91,6 +91,36 @@ class TopicServiceClient extends \Grpc\BaseStub {
     }
 
     /**
+     * Single commit offset request.
+     * @param \Ydb\Topic\CommitOffsetRequest $argument input argument
+     * @param array $metadata metadata
+     * @param array $options call options
+     * @return \Grpc\UnaryCall
+     */
+    public function CommitOffset(\Ydb\Topic\CommitOffsetRequest $argument,
+      $metadata = [], $options = []) {
+        return $this->_simpleRequest('/Ydb.Topic.V1.TopicService/CommitOffset',
+        $argument,
+        ['\Ydb\Topic\CommitOffsetResponse', 'decode'],
+        $metadata, $options);
+    }
+
+    /**
+     * Add information about offset ranges to the transaction.
+     * @param \Ydb\Topic\UpdateOffsetsInTransactionRequest $argument input argument
+     * @param array $metadata metadata
+     * @param array $options call options
+     * @return \Grpc\UnaryCall
+     */
+    public function UpdateOffsetsInTransaction(\Ydb\Topic\UpdateOffsetsInTransactionRequest $argument,
+      $metadata = [], $options = []) {
+        return $this->_simpleRequest('/Ydb.Topic.V1.TopicService/UpdateOffsetsInTransaction',
+        $argument,
+        ['\Ydb\Topic\UpdateOffsetsInTransactionResponse', 'decode'],
+        $metadata, $options);
+    }
+
+    /**
      * Create topic command.
      * @param \Ydb\Topic\CreateTopicRequest $argument input argument
      * @param array $metadata metadata

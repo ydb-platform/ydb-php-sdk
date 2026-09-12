@@ -38,7 +38,7 @@ class ExportToS3Settings extends \Google\Protobuf\Internal\Message
      */
     protected $secret_key = '';
     /**
-     * Generated from protobuf field <code>repeated .Ydb.Export.ExportToS3Settings.Item items = 6 [(.Ydb.size) = {</code>
+     * Generated from protobuf field <code>repeated .Ydb.Export.ExportToS3Settings.Item items = 6;</code>
      */
     private $items;
     /**
@@ -67,6 +67,55 @@ class ExportToS3Settings extends \Google\Protobuf\Internal\Message
      * Generated from protobuf field <code>string region = 11;</code>
      */
     protected $region = '';
+    /**
+     * disables virtual hosting style buckets aws s3 feature
+     * it changes the way bucket appended to url. e.g. https//bucket_name.example.com/ vs https://example.com/bucket_name
+     * details: https://docs.aws.amazon.com/AmazonS3/latest/userguide/VirtualHosting.html
+     * it is especially useful for custom s3 implementations
+     *
+     * Generated from protobuf field <code>bool disable_virtual_addressing = 12;</code>
+     */
+    protected $disable_virtual_addressing = false;
+    /**
+     * Defaults to database root if not provided.
+     * All object names are calculated and written relative to this path.
+     *
+     * Generated from protobuf field <code>string source_path = 13;</code>
+     */
+    protected $source_path = '';
+    /**
+     * A default S3 path prefix for all export items.
+     * When specified, export writes SchemaMapping file with the list of objects.
+     * Must be provided for an encrypted backup.
+     *
+     * Generated from protobuf field <code>string destination_prefix = 14;</code>
+     */
+    protected $destination_prefix = '';
+    /**
+     * Settings for data encryption.
+     * If encryption_settings field is not specified,
+     * the resulting data will not be encrypted.
+     *
+     * Generated from protobuf field <code>.Ydb.Export.EncryptionSettings encryption_settings = 15;</code>
+     */
+    protected $encryption_settings = null;
+    /**
+     * Materialization of index table data.
+     * By default, only index metadata is uploaded and indexes are built during import — it saves space
+     * and reduces export time, but it can potentially increase the import time.
+     * Indexes can be materialized, then their data will be uploaded during export and downloaded during import.
+     *
+     * Generated from protobuf field <code>bool materialize_indexes = 16;</code>
+     */
+    protected $materialize_indexes = false;
+    /**
+     * Patterns (PCRE) for paths excluded from export operation.
+     * - Patterns are matched against the object path relative to the export's source_path.
+     * - Object is excluded from export operation if it matches any of the specified exclude regexps.
+     *
+     * Generated from protobuf field <code>repeated string exclude_regexps = 17;</code>
+     */
+    private $exclude_regexps;
 
     /**
      * Constructor.
@@ -90,6 +139,31 @@ class ExportToS3Settings extends \Google\Protobuf\Internal\Message
      *           - zstd-N, where N is compression level, e.g. zstd-3.
      *     @type string $region
      *           Region to use in requests
+     *     @type bool $disable_virtual_addressing
+     *           disables virtual hosting style buckets aws s3 feature
+     *           it changes the way bucket appended to url. e.g. https//bucket_name.example.com/ vs https://example.com/bucket_name
+     *           details: https://docs.aws.amazon.com/AmazonS3/latest/userguide/VirtualHosting.html
+     *           it is especially useful for custom s3 implementations
+     *     @type string $source_path
+     *           Defaults to database root if not provided.
+     *           All object names are calculated and written relative to this path.
+     *     @type string $destination_prefix
+     *           A default S3 path prefix for all export items.
+     *           When specified, export writes SchemaMapping file with the list of objects.
+     *           Must be provided for an encrypted backup.
+     *     @type \Ydb\Export\EncryptionSettings $encryption_settings
+     *           Settings for data encryption.
+     *           If encryption_settings field is not specified,
+     *           the resulting data will not be encrypted.
+     *     @type bool $materialize_indexes
+     *           Materialization of index table data.
+     *           By default, only index metadata is uploaded and indexes are built during import — it saves space
+     *           and reduces export time, but it can potentially increase the import time.
+     *           Indexes can be materialized, then their data will be uploaded during export and downloaded during import.
+     *     @type array<string>|\Google\Protobuf\Internal\RepeatedField $exclude_regexps
+     *           Patterns (PCRE) for paths excluded from export operation.
+     *           - Patterns are matched against the object path relative to the export's source_path.
+     *           - Object is excluded from export operation if it matches any of the specified exclude regexps.
      * }
      */
     public function __construct($data = NULL) {
@@ -212,7 +286,7 @@ class ExportToS3Settings extends \Google\Protobuf\Internal\Message
     }
 
     /**
-     * Generated from protobuf field <code>repeated .Ydb.Export.ExportToS3Settings.Item items = 6 [(.Ydb.size) = {</code>
+     * Generated from protobuf field <code>repeated .Ydb.Export.ExportToS3Settings.Item items = 6;</code>
      * @return \Google\Protobuf\Internal\RepeatedField
      */
     public function getItems()
@@ -221,7 +295,7 @@ class ExportToS3Settings extends \Google\Protobuf\Internal\Message
     }
 
     /**
-     * Generated from protobuf field <code>repeated .Ydb.Export.ExportToS3Settings.Item items = 6 [(.Ydb.size) = {</code>
+     * Generated from protobuf field <code>repeated .Ydb.Export.ExportToS3Settings.Item items = 6;</code>
      * @param array<\Ydb\Export\ExportToS3Settings\Item>|\Google\Protobuf\Internal\RepeatedField $var
      * @return $this
      */
@@ -351,6 +425,198 @@ class ExportToS3Settings extends \Google\Protobuf\Internal\Message
     {
         GPBUtil::checkString($var, True);
         $this->region = $var;
+
+        return $this;
+    }
+
+    /**
+     * disables virtual hosting style buckets aws s3 feature
+     * it changes the way bucket appended to url. e.g. https//bucket_name.example.com/ vs https://example.com/bucket_name
+     * details: https://docs.aws.amazon.com/AmazonS3/latest/userguide/VirtualHosting.html
+     * it is especially useful for custom s3 implementations
+     *
+     * Generated from protobuf field <code>bool disable_virtual_addressing = 12;</code>
+     * @return bool
+     */
+    public function getDisableVirtualAddressing()
+    {
+        return $this->disable_virtual_addressing;
+    }
+
+    /**
+     * disables virtual hosting style buckets aws s3 feature
+     * it changes the way bucket appended to url. e.g. https//bucket_name.example.com/ vs https://example.com/bucket_name
+     * details: https://docs.aws.amazon.com/AmazonS3/latest/userguide/VirtualHosting.html
+     * it is especially useful for custom s3 implementations
+     *
+     * Generated from protobuf field <code>bool disable_virtual_addressing = 12;</code>
+     * @param bool $var
+     * @return $this
+     */
+    public function setDisableVirtualAddressing($var)
+    {
+        GPBUtil::checkBool($var);
+        $this->disable_virtual_addressing = $var;
+
+        return $this;
+    }
+
+    /**
+     * Defaults to database root if not provided.
+     * All object names are calculated and written relative to this path.
+     *
+     * Generated from protobuf field <code>string source_path = 13;</code>
+     * @return string
+     */
+    public function getSourcePath()
+    {
+        return $this->source_path;
+    }
+
+    /**
+     * Defaults to database root if not provided.
+     * All object names are calculated and written relative to this path.
+     *
+     * Generated from protobuf field <code>string source_path = 13;</code>
+     * @param string $var
+     * @return $this
+     */
+    public function setSourcePath($var)
+    {
+        GPBUtil::checkString($var, True);
+        $this->source_path = $var;
+
+        return $this;
+    }
+
+    /**
+     * A default S3 path prefix for all export items.
+     * When specified, export writes SchemaMapping file with the list of objects.
+     * Must be provided for an encrypted backup.
+     *
+     * Generated from protobuf field <code>string destination_prefix = 14;</code>
+     * @return string
+     */
+    public function getDestinationPrefix()
+    {
+        return $this->destination_prefix;
+    }
+
+    /**
+     * A default S3 path prefix for all export items.
+     * When specified, export writes SchemaMapping file with the list of objects.
+     * Must be provided for an encrypted backup.
+     *
+     * Generated from protobuf field <code>string destination_prefix = 14;</code>
+     * @param string $var
+     * @return $this
+     */
+    public function setDestinationPrefix($var)
+    {
+        GPBUtil::checkString($var, True);
+        $this->destination_prefix = $var;
+
+        return $this;
+    }
+
+    /**
+     * Settings for data encryption.
+     * If encryption_settings field is not specified,
+     * the resulting data will not be encrypted.
+     *
+     * Generated from protobuf field <code>.Ydb.Export.EncryptionSettings encryption_settings = 15;</code>
+     * @return \Ydb\Export\EncryptionSettings|null
+     */
+    public function getEncryptionSettings()
+    {
+        return $this->encryption_settings;
+    }
+
+    public function hasEncryptionSettings()
+    {
+        return isset($this->encryption_settings);
+    }
+
+    public function clearEncryptionSettings()
+    {
+        unset($this->encryption_settings);
+    }
+
+    /**
+     * Settings for data encryption.
+     * If encryption_settings field is not specified,
+     * the resulting data will not be encrypted.
+     *
+     * Generated from protobuf field <code>.Ydb.Export.EncryptionSettings encryption_settings = 15;</code>
+     * @param \Ydb\Export\EncryptionSettings $var
+     * @return $this
+     */
+    public function setEncryptionSettings($var)
+    {
+        GPBUtil::checkMessage($var, \Ydb\Export\EncryptionSettings::class);
+        $this->encryption_settings = $var;
+
+        return $this;
+    }
+
+    /**
+     * Materialization of index table data.
+     * By default, only index metadata is uploaded and indexes are built during import — it saves space
+     * and reduces export time, but it can potentially increase the import time.
+     * Indexes can be materialized, then their data will be uploaded during export and downloaded during import.
+     *
+     * Generated from protobuf field <code>bool materialize_indexes = 16;</code>
+     * @return bool
+     */
+    public function getMaterializeIndexes()
+    {
+        return $this->materialize_indexes;
+    }
+
+    /**
+     * Materialization of index table data.
+     * By default, only index metadata is uploaded and indexes are built during import — it saves space
+     * and reduces export time, but it can potentially increase the import time.
+     * Indexes can be materialized, then their data will be uploaded during export and downloaded during import.
+     *
+     * Generated from protobuf field <code>bool materialize_indexes = 16;</code>
+     * @param bool $var
+     * @return $this
+     */
+    public function setMaterializeIndexes($var)
+    {
+        GPBUtil::checkBool($var);
+        $this->materialize_indexes = $var;
+
+        return $this;
+    }
+
+    /**
+     * Patterns (PCRE) for paths excluded from export operation.
+     * - Patterns are matched against the object path relative to the export's source_path.
+     * - Object is excluded from export operation if it matches any of the specified exclude regexps.
+     *
+     * Generated from protobuf field <code>repeated string exclude_regexps = 17;</code>
+     * @return \Google\Protobuf\Internal\RepeatedField
+     */
+    public function getExcludeRegexps()
+    {
+        return $this->exclude_regexps;
+    }
+
+    /**
+     * Patterns (PCRE) for paths excluded from export operation.
+     * - Patterns are matched against the object path relative to the export's source_path.
+     * - Object is excluded from export operation if it matches any of the specified exclude regexps.
+     *
+     * Generated from protobuf field <code>repeated string exclude_regexps = 17;</code>
+     * @param array<string>|\Google\Protobuf\Internal\RepeatedField $var
+     * @return $this
+     */
+    public function setExcludeRegexps($var)
+    {
+        $arr = GPBUtil::checkRepeatedField($var, \Google\Protobuf\Internal\GPBType::STRING);
+        $this->exclude_regexps = $arr;
 
         return $this;
     }

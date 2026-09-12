@@ -25,6 +25,10 @@ class LocationNode extends \Google\Protobuf\Internal\Message
      * Generated from protobuf field <code>uint32 port = 3;</code>
      */
     protected $port = 0;
+    /**
+     * Generated from protobuf field <code>.Ydb.Monitoring.LocationBridgePile pile = 4;</code>
+     */
+    protected $pile = null;
 
     /**
      * Constructor.
@@ -35,6 +39,7 @@ class LocationNode extends \Google\Protobuf\Internal\Message
      *     @type int $id
      *     @type string $host
      *     @type int $port
+     *     @type \Ydb\Monitoring\LocationBridgePile $pile
      * }
      */
     public function __construct($data = NULL) {
@@ -104,6 +109,38 @@ class LocationNode extends \Google\Protobuf\Internal\Message
     {
         GPBUtil::checkUint32($var);
         $this->port = $var;
+
+        return $this;
+    }
+
+    /**
+     * Generated from protobuf field <code>.Ydb.Monitoring.LocationBridgePile pile = 4;</code>
+     * @return \Ydb\Monitoring\LocationBridgePile|null
+     */
+    public function getPile()
+    {
+        return $this->pile;
+    }
+
+    public function hasPile()
+    {
+        return isset($this->pile);
+    }
+
+    public function clearPile()
+    {
+        unset($this->pile);
+    }
+
+    /**
+     * Generated from protobuf field <code>.Ydb.Monitoring.LocationBridgePile pile = 4;</code>
+     * @param \Ydb\Monitoring\LocationBridgePile $var
+     * @return $this
+     */
+    public function setPile($var)
+    {
+        GPBUtil::checkMessage($var, \Ydb\Monitoring\LocationBridgePile::class);
+        $this->pile = $var;
 
         return $this;
     }

@@ -63,6 +63,34 @@ class Type
      * Generated from protobuf enum <code>TOPIC = 17;</code>
      */
     const TOPIC = 17;
+    /**
+     * Generated from protobuf enum <code>EXTERNAL_TABLE = 18;</code>
+     */
+    const EXTERNAL_TABLE = 18;
+    /**
+     * Generated from protobuf enum <code>EXTERNAL_DATA_SOURCE = 19;</code>
+     */
+    const EXTERNAL_DATA_SOURCE = 19;
+    /**
+     * Generated from protobuf enum <code>VIEW = 20;</code>
+     */
+    const VIEW = 20;
+    /**
+     * Generated from protobuf enum <code>RESOURCE_POOL = 21;</code>
+     */
+    const RESOURCE_POOL = 21;
+    /**
+     * Generated from protobuf enum <code>TRANSFER = 23;</code>
+     */
+    const TRANSFER = 23;
+    /**
+     * Generated from protobuf enum <code>SYS_VIEW = 24;</code>
+     */
+    const SYS_VIEW = 24;
+    /**
+     * Generated from protobuf enum <code>SECRET = 25;</code>
+     */
+    const SECRET = 25;
 
     private static $valueToName = [
         self::TYPE_UNSPECIFIED => 'TYPE_UNSPECIFIED',
@@ -78,6 +106,13 @@ class Type
         self::SEQUENCE => 'SEQUENCE',
         self::REPLICATION => 'REPLICATION',
         self::TOPIC => 'TOPIC',
+        self::EXTERNAL_TABLE => 'EXTERNAL_TABLE',
+        self::EXTERNAL_DATA_SOURCE => 'EXTERNAL_DATA_SOURCE',
+        self::VIEW => 'VIEW',
+        self::RESOURCE_POOL => 'RESOURCE_POOL',
+        self::TRANSFER => 'TRANSFER',
+        self::SYS_VIEW => 'SYS_VIEW',
+        self::SECRET => 'SECRET',
     ];
 
     public static function name($value)

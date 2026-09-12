@@ -14,7 +14,7 @@ use Google\Protobuf\Internal\GPBUtil;
 class Item extends \Google\Protobuf\Internal\Message
 {
     /**
-     * Database path to a table to be exported
+     * Database path to a table/directory to be exported
      *
      * Generated from protobuf field <code>string source_path = 1 [(.Ydb.required) = true];</code>
      */
@@ -24,8 +24,12 @@ class Item extends \Google\Protobuf\Internal\Message
      *The object name begins with 'destination_prefix'.
      *This prefix will be followed by '/data_PartNumber', where 'PartNumber'
      *represents the index of the part, starting at zero.
+     *Not required if the default `destination_prefix` is set.
+     *If not specified, actual S3 path is the default `destination_prefix` concatenated with:
+     * The object path relative to the global `source_path` for a non-encrypted export
+     * The anonymized path for an encrypted export
      *
-     * Generated from protobuf field <code>string destination_prefix = 2 [(.Ydb.required) = true];</code>
+     * Generated from protobuf field <code>string destination_prefix = 2;</code>
      */
     protected $destination_prefix = '';
 
@@ -36,12 +40,16 @@ class Item extends \Google\Protobuf\Internal\Message
      *     Optional. Data for populating the Message object.
      *
      *     @type string $source_path
-     *           Database path to a table to be exported
+     *           Database path to a table/directory to be exported
      *     @type string $destination_prefix
      *           Tables are exported to one or more S3 objects.
      *          The object name begins with 'destination_prefix'.
      *          This prefix will be followed by '/data_PartNumber', where 'PartNumber'
      *          represents the index of the part, starting at zero.
+     *          Not required if the default `destination_prefix` is set.
+     *          If not specified, actual S3 path is the default `destination_prefix` concatenated with:
+     *           The object path relative to the global `source_path` for a non-encrypted export
+     *           The anonymized path for an encrypted export
      * }
      */
     public function __construct($data = NULL) {
@@ -50,7 +58,7 @@ class Item extends \Google\Protobuf\Internal\Message
     }
 
     /**
-     * Database path to a table to be exported
+     * Database path to a table/directory to be exported
      *
      * Generated from protobuf field <code>string source_path = 1 [(.Ydb.required) = true];</code>
      * @return string
@@ -61,7 +69,7 @@ class Item extends \Google\Protobuf\Internal\Message
     }
 
     /**
-     * Database path to a table to be exported
+     * Database path to a table/directory to be exported
      *
      * Generated from protobuf field <code>string source_path = 1 [(.Ydb.required) = true];</code>
      * @param string $var
@@ -80,8 +88,12 @@ class Item extends \Google\Protobuf\Internal\Message
      *The object name begins with 'destination_prefix'.
      *This prefix will be followed by '/data_PartNumber', where 'PartNumber'
      *represents the index of the part, starting at zero.
+     *Not required if the default `destination_prefix` is set.
+     *If not specified, actual S3 path is the default `destination_prefix` concatenated with:
+     * The object path relative to the global `source_path` for a non-encrypted export
+     * The anonymized path for an encrypted export
      *
-     * Generated from protobuf field <code>string destination_prefix = 2 [(.Ydb.required) = true];</code>
+     * Generated from protobuf field <code>string destination_prefix = 2;</code>
      * @return string
      */
     public function getDestinationPrefix()
@@ -94,8 +106,12 @@ class Item extends \Google\Protobuf\Internal\Message
      *The object name begins with 'destination_prefix'.
      *This prefix will be followed by '/data_PartNumber', where 'PartNumber'
      *represents the index of the part, starting at zero.
+     *Not required if the default `destination_prefix` is set.
+     *If not specified, actual S3 path is the default `destination_prefix` concatenated with:
+     * The object path relative to the global `source_path` for a non-encrypted export
+     * The anonymized path for an encrypted export
      *
-     * Generated from protobuf field <code>string destination_prefix = 2 [(.Ydb.required) = true];</code>
+     * Generated from protobuf field <code>string destination_prefix = 2;</code>
      * @param string $var
      * @return $this
      */

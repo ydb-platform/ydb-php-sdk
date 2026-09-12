@@ -17,12 +17,12 @@ class YdbDiscoveryV1
         \GPBMetadata\Protos\YdbDiscovery::initOnce();
         $pool->internalAddGeneratedFile(
             '
-½
+Ã
 ydb_discovery_v1.protoYdb.Discovery.V12µ
 DiscoveryServiceZ
 ListEndpoints#.Ydb.Discovery.ListEndpointsRequest$.Ydb.Discovery.ListEndpointsResponseE
-WhoAmI.Ydb.Discovery.WhoAmIRequest.Ydb.Discovery.WhoAmIResponseBQ
-tech.ydb.discovery.v1Z8github.com/ydb-platform/ydb-go-genproto/Ydb_Discovery_V1bproto3'
+WhoAmI.Ydb.Discovery.WhoAmIRequest.Ydb.Discovery.WhoAmIResponseBW
+tech.ydb.proto.discovery.v1Z8github.com/ydb-platform/ydb-go-genproto/Ydb_Discovery_V1bproto3'
         , true);
 
         static::$is_initialized = true;
