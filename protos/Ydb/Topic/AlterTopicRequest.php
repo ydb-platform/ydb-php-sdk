@@ -49,6 +49,7 @@ class AlterTopicRequest extends \Google\Protobuf\Internal\Message
     /**
      * List of allowed codecs for writers.
      * Writes with codec not from this list are forbidden.
+     * If empty, codec compatibility check for the topic is disabled.
      *
      * Generated from protobuf field <code>.Ydb.Topic.SupportedCodecs set_supported_codecs = 7;</code>
      */
@@ -96,6 +97,13 @@ class AlterTopicRequest extends \Google\Protobuf\Internal\Message
      * Generated from protobuf field <code>.Ydb.Topic.MeteringMode set_metering_mode = 14;</code>
      */
     protected $set_metering_mode = 0;
+    /**
+     * Enable content-based deduplication for the topic.
+     *
+     * Generated from protobuf field <code>optional bool set_content_based_deduplication = 17;</code>
+     */
+    protected $set_content_based_deduplication = null;
+    protected $metrics_level;
 
     /**
      * Constructor.
@@ -118,6 +126,7 @@ class AlterTopicRequest extends \Google\Protobuf\Internal\Message
      *     @type \Ydb\Topic\SupportedCodecs $set_supported_codecs
      *           List of allowed codecs for writers.
      *           Writes with codec not from this list are forbidden.
+     *           If empty, codec compatibility check for the topic is disabled.
      *     @type int|string $set_partition_write_speed_bytes_per_second
      *           Partition write speed in bytes per second. Must be less than database limit. Default limit - 1 MB/s.
      *     @type int|string $set_partition_write_burst_bytes
@@ -133,6 +142,10 @@ class AlterTopicRequest extends \Google\Protobuf\Internal\Message
      *           Alter consumers
      *     @type int $set_metering_mode
      *           Set metering mode for topic in serverless database.
+     *     @type int $set_metrics_level
+     *     @type \Google\Protobuf\GPBEmpty $reset_metrics_level
+     *     @type bool $set_content_based_deduplication
+     *           Enable content-based deduplication for the topic.
      * }
      */
     public function __construct($data = NULL) {
@@ -315,6 +328,7 @@ class AlterTopicRequest extends \Google\Protobuf\Internal\Message
     /**
      * List of allowed codecs for writers.
      * Writes with codec not from this list are forbidden.
+     * If empty, codec compatibility check for the topic is disabled.
      *
      * Generated from protobuf field <code>.Ydb.Topic.SupportedCodecs set_supported_codecs = 7;</code>
      * @return \Ydb\Topic\SupportedCodecs|null
@@ -337,6 +351,7 @@ class AlterTopicRequest extends \Google\Protobuf\Internal\Message
     /**
      * List of allowed codecs for writers.
      * Writes with codec not from this list are forbidden.
+     * If empty, codec compatibility check for the topic is disabled.
      *
      * Generated from protobuf field <code>.Ydb.Topic.SupportedCodecs set_supported_codecs = 7;</code>
      * @param \Ydb\Topic\SupportedCodecs $var
@@ -552,6 +567,104 @@ class AlterTopicRequest extends \Google\Protobuf\Internal\Message
         $this->set_metering_mode = $var;
 
         return $this;
+    }
+
+    /**
+     * Generated from protobuf field <code>uint32 set_metrics_level = 15;</code>
+     * @return int
+     */
+    public function getSetMetricsLevel()
+    {
+        return $this->readOneof(15);
+    }
+
+    public function hasSetMetricsLevel()
+    {
+        return $this->hasOneof(15);
+    }
+
+    /**
+     * Generated from protobuf field <code>uint32 set_metrics_level = 15;</code>
+     * @param int $var
+     * @return $this
+     */
+    public function setSetMetricsLevel($var)
+    {
+        GPBUtil::checkUint32($var);
+        $this->writeOneof(15, $var);
+
+        return $this;
+    }
+
+    /**
+     * Generated from protobuf field <code>.google.protobuf.Empty reset_metrics_level = 16;</code>
+     * @return \Google\Protobuf\GPBEmpty|null
+     */
+    public function getResetMetricsLevel()
+    {
+        return $this->readOneof(16);
+    }
+
+    public function hasResetMetricsLevel()
+    {
+        return $this->hasOneof(16);
+    }
+
+    /**
+     * Generated from protobuf field <code>.google.protobuf.Empty reset_metrics_level = 16;</code>
+     * @param \Google\Protobuf\GPBEmpty $var
+     * @return $this
+     */
+    public function setResetMetricsLevel($var)
+    {
+        GPBUtil::checkMessage($var, \Google\Protobuf\GPBEmpty::class);
+        $this->writeOneof(16, $var);
+
+        return $this;
+    }
+
+    /**
+     * Enable content-based deduplication for the topic.
+     *
+     * Generated from protobuf field <code>optional bool set_content_based_deduplication = 17;</code>
+     * @return bool
+     */
+    public function getSetContentBasedDeduplication()
+    {
+        return isset($this->set_content_based_deduplication) ? $this->set_content_based_deduplication : false;
+    }
+
+    public function hasSetContentBasedDeduplication()
+    {
+        return isset($this->set_content_based_deduplication);
+    }
+
+    public function clearSetContentBasedDeduplication()
+    {
+        unset($this->set_content_based_deduplication);
+    }
+
+    /**
+     * Enable content-based deduplication for the topic.
+     *
+     * Generated from protobuf field <code>optional bool set_content_based_deduplication = 17;</code>
+     * @param bool $var
+     * @return $this
+     */
+    public function setSetContentBasedDeduplication($var)
+    {
+        GPBUtil::checkBool($var);
+        $this->set_content_based_deduplication = $var;
+
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getMetricsLevel()
+    {
+        return $this->whichOneof("metrics_level");
     }
 
 }

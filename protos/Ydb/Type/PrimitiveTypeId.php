@@ -88,6 +88,22 @@ class PrimitiveTypeId
      */
     const TZ_TIMESTAMP = 54;
     /**
+     * Generated from protobuf enum <code>DATE32 = 64;</code>
+     */
+    const DATE32 = 64;
+    /**
+     * Generated from protobuf enum <code>DATETIME64 = 65;</code>
+     */
+    const DATETIME64 = 65;
+    /**
+     * Generated from protobuf enum <code>TIMESTAMP64 = 66;</code>
+     */
+    const TIMESTAMP64 = 66;
+    /**
+     * Generated from protobuf enum <code>INTERVAL64 = 67;</code>
+     */
+    const INTERVAL64 = 67;
+    /**
      * Generated from protobuf enum <code>STRING = 4097;</code>
      */
     const STRING = 4097;
@@ -136,6 +152,10 @@ class PrimitiveTypeId
         self::TZ_DATE => 'TZ_DATE',
         self::TZ_DATETIME => 'TZ_DATETIME',
         self::TZ_TIMESTAMP => 'TZ_TIMESTAMP',
+        self::DATE32 => 'DATE32',
+        self::DATETIME64 => 'DATETIME64',
+        self::TIMESTAMP64 => 'TIMESTAMP64',
+        self::INTERVAL64 => 'INTERVAL64',
         self::STRING => 'STRING',
         self::UTF8 => 'UTF8',
         self::YSON => 'YSON',

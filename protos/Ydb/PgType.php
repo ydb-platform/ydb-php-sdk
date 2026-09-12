@@ -14,6 +14,14 @@ use Google\Protobuf\Internal\GPBUtil;
 class PgType extends \Google\Protobuf\Internal\Message
 {
     /**
+     * Generated from protobuf field <code>string type_name = 10;</code>
+     */
+    protected $type_name = '';
+    /**
+     * Generated from protobuf field <code>string type_modifier = 11;</code>
+     */
+    protected $type_modifier = '';
+    /**
      * pg object id of the type
      * full registry could be found here: https://github.com/postgres/postgres/blob/master/src/include/catalog/pg_type.dat
      *
@@ -27,8 +35,6 @@ class PgType extends \Google\Protobuf\Internal\Message
      */
     protected $typlen = 0;
     /**
-     * optional, set to 0 by default
-     *
      * Generated from protobuf field <code>int32 typmod = 3;</code>
      */
     protected $typmod = 0;
@@ -39,18 +45,63 @@ class PgType extends \Google\Protobuf\Internal\Message
      * @param array $data {
      *     Optional. Data for populating the Message object.
      *
+     *     @type string $type_name
+     *     @type string $type_modifier
      *     @type int $oid
      *           pg object id of the type
      *           full registry could be found here: https://github.com/postgres/postgres/blob/master/src/include/catalog/pg_type.dat
      *     @type int $typlen
      *           advanced type details useful for pg wire format proxying
      *     @type int $typmod
-     *           optional, set to 0 by default
      * }
      */
     public function __construct($data = NULL) {
         \GPBMetadata\Protos\YdbValue::initOnce();
         parent::__construct($data);
+    }
+
+    /**
+     * Generated from protobuf field <code>string type_name = 10;</code>
+     * @return string
+     */
+    public function getTypeName()
+    {
+        return $this->type_name;
+    }
+
+    /**
+     * Generated from protobuf field <code>string type_name = 10;</code>
+     * @param string $var
+     * @return $this
+     */
+    public function setTypeName($var)
+    {
+        GPBUtil::checkString($var, True);
+        $this->type_name = $var;
+
+        return $this;
+    }
+
+    /**
+     * Generated from protobuf field <code>string type_modifier = 11;</code>
+     * @return string
+     */
+    public function getTypeModifier()
+    {
+        return $this->type_modifier;
+    }
+
+    /**
+     * Generated from protobuf field <code>string type_modifier = 11;</code>
+     * @param string $var
+     * @return $this
+     */
+    public function setTypeModifier($var)
+    {
+        GPBUtil::checkString($var, True);
+        $this->type_modifier = $var;
+
+        return $this;
     }
 
     /**
@@ -108,8 +159,6 @@ class PgType extends \Google\Protobuf\Internal\Message
     }
 
     /**
-     * optional, set to 0 by default
-     *
      * Generated from protobuf field <code>int32 typmod = 3;</code>
      * @return int
      */
@@ -119,8 +168,6 @@ class PgType extends \Google\Protobuf\Internal\Message
     }
 
     /**
-     * optional, set to 0 by default
-     *
      * Generated from protobuf field <code>int32 typmod = 3;</code>
      * @param int $var
      * @return $this

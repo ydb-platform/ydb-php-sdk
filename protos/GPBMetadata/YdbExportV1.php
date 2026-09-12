@@ -17,14 +17,16 @@ class YdbExportV1
         \GPBMetadata\Protos\YdbExport::initOnce();
         $pool->internalAddGeneratedFile(
             '
-¥
-ydb_export_v1.protoYdb.Export.V12©
+ø
+ydb_export_v1.protoYdb.Export.V12ö
 ExportServiceK
 
 ExportToYt.Ydb.Export.ExportToYtRequest.Ydb.Export.ExportToYtResponseK
 
-ExportToS3.Ydb.Export.ExportToS3Request.Ydb.Export.ExportToS3ResponseBK
-tech.ydb.export.v1Z5github.com/ydb-platform/ydb-go-genproto/Ydb_Export_V1bproto3'
+ExportToS3.Ydb.Export.ExportToS3Request.Ydb.Export.ExportToS3ResponseK
+
+ExportToFs.Ydb.Export.ExportToFsRequest.Ydb.Export.ExportToFsResponseBQ
+tech.ydb.proto.export.v1Z5github.com/ydb-platform/ydb-go-genproto/Ydb_Export_V1bproto3'
         , true);
 
         static::$is_initialized = true;

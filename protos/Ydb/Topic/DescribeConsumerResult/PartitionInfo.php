@@ -49,6 +49,12 @@ class PartitionInfo extends \Google\Protobuf\Internal\Message
      * Generated from protobuf field <code>.Ydb.Topic.DescribeConsumerResult.PartitionConsumerStats partition_consumer_stats = 6;</code>
      */
     protected $partition_consumer_stats = null;
+    /**
+     * Partition location, filled only when include_location in request is true.
+     *
+     * Generated from protobuf field <code>.Ydb.Topic.PartitionLocation partition_location = 7;</code>
+     */
+    protected $partition_location = null;
 
     /**
      * Constructor.
@@ -68,6 +74,8 @@ class PartitionInfo extends \Google\Protobuf\Internal\Message
      *           Stats for partition, filled only when include_stats in request is true.
      *     @type \Ydb\Topic\DescribeConsumerResult\PartitionConsumerStats $partition_consumer_stats
      *           Stats for consumer of this partition, filled only when include_stats in request is true.
+     *     @type \Ydb\Topic\PartitionLocation $partition_location
+     *           Partition location, filled only when include_location in request is true.
      * }
      */
     public function __construct($data = NULL) {
@@ -247,6 +255,42 @@ class PartitionInfo extends \Google\Protobuf\Internal\Message
     {
         GPBUtil::checkMessage($var, \Ydb\Topic\DescribeConsumerResult\PartitionConsumerStats::class);
         $this->partition_consumer_stats = $var;
+
+        return $this;
+    }
+
+    /**
+     * Partition location, filled only when include_location in request is true.
+     *
+     * Generated from protobuf field <code>.Ydb.Topic.PartitionLocation partition_location = 7;</code>
+     * @return \Ydb\Topic\PartitionLocation|null
+     */
+    public function getPartitionLocation()
+    {
+        return $this->partition_location;
+    }
+
+    public function hasPartitionLocation()
+    {
+        return isset($this->partition_location);
+    }
+
+    public function clearPartitionLocation()
+    {
+        unset($this->partition_location);
+    }
+
+    /**
+     * Partition location, filled only when include_location in request is true.
+     *
+     * Generated from protobuf field <code>.Ydb.Topic.PartitionLocation partition_location = 7;</code>
+     * @param \Ydb\Topic\PartitionLocation $var
+     * @return $this
+     */
+    public function setPartitionLocation($var)
+    {
+        GPBUtil::checkMessage($var, \Ydb\Topic\PartitionLocation::class);
+        $this->partition_location = $var;
 
         return $this;
     }
