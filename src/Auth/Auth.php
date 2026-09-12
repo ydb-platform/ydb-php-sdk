@@ -42,7 +42,11 @@ abstract class Auth
 
             $property->setAccessible(true);
 
-            if (!$property->isInitialized($this) || is_object($property->getValue($this)))
+            // ReflectionProperty::isInitialized() only exists from PHP 7.4 - guard it so
+            // this still runs on this SDK's stated PHP 7.2 minimum. No property in this
+            // hierarchy is a typed property under <7.4 anyway (that syntax wouldn't parse).
+            if ((method_exists($property, 'isInitialized') && !$property->isInitialized($this))
+                || is_object($property->getValue($this)))
             {
                 continue;
             }
