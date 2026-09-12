@@ -1,3 +1,6 @@
+* fixed flaky `RefreshTokenTest`: token refresh is now forced explicitly instead of relying on wall-clock timing
+* CI: dropped the unnecessary gRPC-from-source build step (tests job takes ~1 minute instead of ~10), updated GitHub Actions versions, SLO workflow is now opt-in (`SLO` label or manual run)
+
 ## 1.16.3
 * improve log
 
