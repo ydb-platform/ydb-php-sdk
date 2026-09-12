@@ -34,6 +34,12 @@ class StartPartitionSessionRequest extends \Google\Protobuf\Internal\Message
      * Generated from protobuf field <code>.Ydb.Topic.OffsetsRange partition_offsets = 3;</code>
      */
     protected $partition_offsets = null;
+    /**
+     * Partition location, filled only when InitRequest.direct_read is true.
+     *
+     * Generated from protobuf field <code>.Ydb.Topic.PartitionLocation partition_location = 4;</code>
+     */
+    protected $partition_location = null;
 
     /**
      * Constructor.
@@ -47,6 +53,8 @@ class StartPartitionSessionRequest extends \Google\Protobuf\Internal\Message
      *           Each offset up to and including (committed_offset - 1) was fully processed.
      *     @type \Ydb\Topic\OffsetsRange $partition_offsets
      *           Partition contains messages with offsets in range [start, end).
+     *     @type \Ydb\Topic\PartitionLocation $partition_location
+     *           Partition location, filled only when InitRequest.direct_read is true.
      * }
      */
     public function __construct($data = NULL) {
@@ -148,6 +156,42 @@ class StartPartitionSessionRequest extends \Google\Protobuf\Internal\Message
     {
         GPBUtil::checkMessage($var, \Ydb\Topic\OffsetsRange::class);
         $this->partition_offsets = $var;
+
+        return $this;
+    }
+
+    /**
+     * Partition location, filled only when InitRequest.direct_read is true.
+     *
+     * Generated from protobuf field <code>.Ydb.Topic.PartitionLocation partition_location = 4;</code>
+     * @return \Ydb\Topic\PartitionLocation|null
+     */
+    public function getPartitionLocation()
+    {
+        return $this->partition_location;
+    }
+
+    public function hasPartitionLocation()
+    {
+        return isset($this->partition_location);
+    }
+
+    public function clearPartitionLocation()
+    {
+        unset($this->partition_location);
+    }
+
+    /**
+     * Partition location, filled only when InitRequest.direct_read is true.
+     *
+     * Generated from protobuf field <code>.Ydb.Topic.PartitionLocation partition_location = 4;</code>
+     * @param \Ydb\Topic\PartitionLocation $var
+     * @return $this
+     */
+    public function setPartitionLocation($var)
+    {
+        GPBUtil::checkMessage($var, \Ydb\Topic\PartitionLocation::class);
+        $this->partition_location = $var;
 
         return $this;
     }

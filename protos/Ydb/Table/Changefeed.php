@@ -68,6 +68,12 @@ class Changefeed extends \Google\Protobuf\Internal\Message
      */
     protected $resolved_timestamps_interval = null;
     /**
+     * Partitioning settings of underlying topic.
+     *
+     * Generated from protobuf field <code>.Ydb.Topic.PartitioningSettings topic_partitioning_settings = 10;</code>
+     */
+    protected $topic_partitioning_settings = null;
+    /**
      * Emit schema change events or not
      *
      * Generated from protobuf field <code>bool schema_changes = 11;</code>
@@ -98,6 +104,8 @@ class Changefeed extends \Google\Protobuf\Internal\Message
      *           Value that will be emitted in the `awsRegion` field of the record in DYNAMODB_STREAMS_JSON format
      *     @type \Google\Protobuf\Duration $resolved_timestamps_interval
      *           Periodically emit resolved timestamps. If unspecified, resolved timestamps are not emitted.
+     *     @type \Ydb\Topic\PartitioningSettings $topic_partitioning_settings
+     *           Partitioning settings of underlying topic.
      *     @type bool $schema_changes
      *           Emit schema change events or not
      * }
@@ -357,6 +365,42 @@ class Changefeed extends \Google\Protobuf\Internal\Message
     {
         GPBUtil::checkMessage($var, \Google\Protobuf\Duration::class);
         $this->resolved_timestamps_interval = $var;
+
+        return $this;
+    }
+
+    /**
+     * Partitioning settings of underlying topic.
+     *
+     * Generated from protobuf field <code>.Ydb.Topic.PartitioningSettings topic_partitioning_settings = 10;</code>
+     * @return \Ydb\Topic\PartitioningSettings|null
+     */
+    public function getTopicPartitioningSettings()
+    {
+        return $this->topic_partitioning_settings;
+    }
+
+    public function hasTopicPartitioningSettings()
+    {
+        return isset($this->topic_partitioning_settings);
+    }
+
+    public function clearTopicPartitioningSettings()
+    {
+        unset($this->topic_partitioning_settings);
+    }
+
+    /**
+     * Partitioning settings of underlying topic.
+     *
+     * Generated from protobuf field <code>.Ydb.Topic.PartitioningSettings topic_partitioning_settings = 10;</code>
+     * @param \Ydb\Topic\PartitioningSettings $var
+     * @return $this
+     */
+    public function setTopicPartitioningSettings($var)
+    {
+        GPBUtil::checkMessage($var, \Ydb\Topic\PartitioningSettings::class);
+        $this->topic_partitioning_settings = $var;
 
         return $this;
     }
