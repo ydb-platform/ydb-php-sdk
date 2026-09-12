@@ -1,3 +1,4 @@
+* CI: replaced the stale `cr.yandex/yc/yandex-docker-local-ydb` test image (numbered tags stop at 23.3, no `latest`) with the actively-maintained `ydbplatform/local-ydb` (used by the Go/Python/Java/.NET/Rust/Node.js SDKs); refreshed the version matrix to `['24.4', '25.4', 'latest', 'edge', 'trunk']`
 
 ## 1.16.3
 * improve log
