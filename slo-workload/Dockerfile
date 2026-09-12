@@ -11,7 +11,18 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 
 COPY --from=mlocati/php-extension-installer:2 /usr/bin/install-php-extensions /usr/local/bin/
-RUN install-php-extensions bcmath grpc pcntl protobuf sysvmsg
+
+# PECL occasionally answers "no releases available" from the CI runners, so the
+# installation is retried. ext-protobuf is deliberately not installed: it is only an
+# optional accelerator for google/protobuf and one more flaky remote dependency.
+RUN for attempt in 1 2 3; do \
+        if install-php-extensions bcmath grpc pcntl sysvmsg; then \
+            exit 0; \
+        fi; \
+        echo "install-php-extensions failed (attempt ${attempt}), retrying in 10s"; \
+        sleep 10; \
+    done; \
+    exit 1
 
 COPY --from=composer:2 /usr/bin/composer /usr/local/bin/composer
 
