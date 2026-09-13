@@ -64,6 +64,9 @@ action, the most useful ones are:
   -otlp-endpoint          <string> OTLP metrics endpoint
 ```
 
+`-endpoint` with `-database` replace the connection settings of the environment, which is how the workload is run
+without the action: `php application.php run -endpoint grpc://localhost:2136 -database /local`.
+
 ## What's inside
 
 Data is classes, everything else is plain functions:

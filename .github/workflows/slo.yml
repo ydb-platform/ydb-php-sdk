@@ -174,11 +174,14 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           github_run_id: ${{ github.run_id }}
 
+  # Pull requests from forks get the label removed by slo-report.yml: their token is
+  # read-only and cannot edit the labels.
   remove-slo-label:
     needs: [ydb-slo-action, publish-slo-report]
     if: >-
       always() && needs.ydb-slo-action.result != 'skipped' &&
-      github.event_name == 'pull_request'
+      github.event_name == 'pull_request' &&
+      github.event.pull_request.head.repo.full_name == github.repository
 
     name: Remove SLO Label
     runs-on: ubuntu-latest

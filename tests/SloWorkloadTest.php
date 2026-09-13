@@ -36,6 +36,22 @@ class SloWorkloadTest extends TestCase
         ], $options);
     }
 
+    /**
+     * A missing value must not be taken from the next option: `-read-rps` without a
+     * number would silently become 0, which is "no rate limit at all".
+     */
+    public function testOptionWithoutValue()
+    {
+        $this->expectExceptionMessage('option -read-rps needs a value');
+        Config::parseOptions(['-read-rps', '-write-rps', '50']);
+    }
+
+    public function testOptionWithNotANumber()
+    {
+        $this->expectExceptionMessage('option -read-rps needs a number');
+        Config::fromEnv(['-read-rps', 'fast']);
+    }
+
     public function testMetrics()
     {
         $metrics = new Metrics('current');

@@ -94,6 +94,8 @@ class Config
         $connection = self::connectionFromEnv();
         $config->endpoint = $connection->endpoint;
         $config->database = $connection->database;
+        // The connection is checked after the options are applied: -endpoint with
+        // -database is a valid way to run the workload without the environment.
         $config->ref = self::env('WORKLOAD_REF', $config->ref);
         $config->workloadName = self::env('WORKLOAD_NAME', $config->workloadName);
         $config->duration = (int)self::env('WORKLOAD_DURATION', (string)$config->duration);
@@ -105,9 +107,22 @@ class Config
             }
 
             $property = self::OPTIONS[$name];
-            $config->$property = is_int($config->$property) ? (int)$value : $value;
+            if (is_int($config->$property)) {
+                if (!is_numeric($value)) {
+                    throw new Exception("option -$name needs a number, got: $value");
+                }
+                $value = (int)$value;
+            }
+
+            $config->$property = $value;
         }
 
+        if ($config->endpoint === '' || $config->database === '') {
+            throw new Exception(
+                'YDB_CONNECTION_STRING or YDB_ENDPOINT with YDB_DATABASE is required,'
+                . ' or -endpoint with -database'
+            );
+        }
         if ($config->duration <= 0) {
             throw new Exception('workload duration must be > 0');
         }
@@ -132,6 +147,7 @@ class Config
      *
      * @param string[] $args
      * @return string[] option name without the dashes => value
+     * @throws Exception when an option has no value
      */
     public static function parseOptions(array $args): array
     {
@@ -144,8 +160,19 @@ class Config
                 list($name, $value) = explode('=', $arg, 2);
             } else {
                 $name = $arg;
-                $value = isset($args[$i + 1]) ? $args[$i + 1] : '';
+                // Every option of the workload takes a value: the next argument is
+                // the value, and not the next option or the end of the line.
+                $next = isset($args[$i + 1]) ? $args[$i + 1] : '-';
+                if (substr($next, 0, 1) == '-') {
+                    throw new Exception("option -$name needs a value");
+                }
+
+                $value = $next;
                 $i++;
+            }
+
+            if ($value === '') {
+                throw new Exception("option -$name needs a value");
             }
 
             $options[$name] = $value;
@@ -190,7 +217,8 @@ class Config
     }
 
     /**
-     * @throws Exception when the environment describes no database to connect to
+     * The parts the environment does not describe are left empty: they may still
+     * come from the options, see fromEnv().
      */
     protected static function connectionFromEnv(): Connection
     {
@@ -204,10 +232,6 @@ class Config
             if ($database === '') {
                 $database = $connection->database;
             }
-        }
-
-        if ($endpoint === '' || $database === '') {
-            throw new Exception('YDB_CONNECTION_STRING or YDB_ENDPOINT with YDB_DATABASE is required');
         }
 
         return new Connection($endpoint, $database);

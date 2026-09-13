@@ -21,6 +21,7 @@ jobs:
       pull-requests: write
     if: >-
       github.event.workflow_run.conclusion != 'cancelled' &&
+      github.event.workflow_run.conclusion != 'skipped' &&
       github.event.workflow_run.head_repository.full_name != github.repository
     steps:
       - name: Publish YDB SLO Report
@@ -33,6 +34,7 @@ jobs:
     needs: publish-slo-report
     if: >-
       always() && github.event.workflow_run.event == 'pull_request' &&
+      github.event.workflow_run.conclusion != 'skipped' &&
       github.event.workflow_run.head_repository.full_name != github.repository
     runs-on: ubuntu-latest
     name: Remove SLO Label
