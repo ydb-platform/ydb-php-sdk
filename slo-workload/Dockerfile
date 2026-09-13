@@ -1,7 +1,53 @@
-FROM ilyakharev/php-grpc:7.2
+# SLO workload image. The build context is the repository root, so that the workload
+# is built against the SDK sources of the checked out revision:
+#
+#   docker build -t ydb-app-current -f slo-workload/Dockerfile .
+FROM php:8.2-cli
+
+# git and unzip are used by composer: to extract the packages it downloads and to
+# determine the version of the SDK, which is required as a path repository.
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends git unzip \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY --from=mlocati/php-extension-installer:2 /usr/bin/install-php-extensions /usr/local/bin/
+
+# PECL occasionally answers "no releases available" from the CI runners, so the
+# installation is retried. ext-protobuf is deliberately not installed: it is only an
+# optional accelerator for google/protobuf and one more flaky remote dependency.
+RUN for attempt in 1 2 3; do \
+        if install-php-extensions bcmath grpc pcntl sysvmsg; then \
+            exit 0; \
+        fi; \
+        echo "install-php-extensions failed (attempt ${attempt}), retrying in 10s"; \
+        sleep 10; \
+    done; \
+    exit 1
+
+COPY --from=composer:2 /usr/bin/composer /usr/local/bin/composer
+
+# grpc needs fork support: the workload runs its read, write and metrics jobs
+# in forked processes.
+RUN { \
+        echo "grpc.enable_fork_support=1"; \
+        echo "grpc.poll_strategy=poll"; \
+    } > /usr/local/etc/php/conf.d/grpc-fork.ini
 
 COPY . /src
 WORKDIR /src/slo-workload
-RUN composer update
-#RUN apt update; apt install htop
-ENTRYPOINT  ["php", "application.php"]
+
+# The repository is copied as root, git refuses to read it otherwise.
+RUN git config --global --add safe.directory /src
+
+# The lock file is not committed, and the SDK is required as a path repository.
+# Packagist occasionally times out from the CI runners, so the install is retried.
+RUN for attempt in 1 2 3; do \
+        if composer update --no-dev --no-interaction --no-progress --prefer-dist; then \
+            exit 0; \
+        fi; \
+        echo "composer update failed (attempt ${attempt}), retrying in 10s"; \
+        sleep 10; \
+    done; \
+    exit 1
+
+ENTRYPOINT ["php", "application.php"]

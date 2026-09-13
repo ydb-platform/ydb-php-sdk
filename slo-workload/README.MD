@@ -1,110 +1,98 @@
 # SLO workload
 
-SLO is the type of test where app based on ydb-sdk is tested against falling YDB cluster nodes, tablets, network
-(that is possible situations for distributed DBs with hundreds of nodes)
+SLO is the type of test where an app based on ydb-sdk is tested against falling YDB cluster nodes, tablets, network
+(that is possible situations for distributed DBs with hundreds of nodes).
 
-### Usage:
+The workload is run by [ydb-platform/ydb-slo-action](https://github.com/ydb-platform/ydb-slo-action): the action
+deploys a YDB cluster with Prometheus and a chaos monkey, starts the workload image of the current and of the baseline
+revision side by side, and builds a comparison report out of the metrics both of them push. See
+[.github/workflows/slo.yml](../.github/workflows/slo.yml) and [.github/workflows/slo-report.yml](../.github/workflows/slo-report.yml).
 
-It has 3 commands:
-
-- `create`  - creates table in database
-- `cleanup` - drops table in database
-- `run`     - runs workload (read and write to table with sets RPS)
-
-### Run examples with all arguments:
-
-create:
-
-`$APP create grpcs://ydb.cool.example.com:2135 /some/folder -t tableName
--min-partitions-count 6 -max-partitions-count 1000 -partition-size 1 -с 1000
--write-timeout 10000`
-
-cleanup:
-
-`$APP cleanup grpcs://ydb.cool.example.com:2135 /some/folder -t tableName`
-
-run:
-
-`$APP create run grpcs://ydb.cool.example.com:2135 /some/folder -t tableName
--prom-pgw http://prometheus-pushgateway:9091 -report-period 250
--read-rps 1000 -read-timeout 10000
--write-rps 100 -write-timeout 10000
--time 600 -shutdown-time 30`
-
-## Arguments for commands:
-
-### create
-`$APP create <endpoint> <db> [options]`
+## Usage
 
 ```
-Arguments:
-  endpoint                        YDB endpoint to connect to
-  db                              YDB database to connect to
-
-Options:
-  -t -table-name         <string> table name to create
-
-  -min-partitions-count  <int>    minimum amount of partitions in table
-  -max-partitions-count  <int>    maximum amount of partitions in table
-  -partition-size        <int>    partition size in mb
-
-  -c -initial-data-count <int>    amount of initially created rows
-
-  -write-timeout         <int>    write timeout milliseconds
+php application.php [create|run|cleanup] [options]
 ```
 
-### cleanup
-`$APP cleanup <endpoint> <db> [options]`
+Without a command the whole lifecycle is executed: `create`, `run`, `cleanup` — this is how the action runs the image.
+
+- `create`  - creates the table and fills it with the initial data
+- `run`     - runs the workload (reads and writes rows with the given RPS)
+- `cleanup` - drops the table
+
+## Workload contract
+
+Everything essential comes from the environment, as set by the action:
+
+| Variable                              | Description                                                     |
+|---------------------------------------|-----------------------------------------------------------------|
+| `YDB_CONNECTION_STRING`               | e.g. `grpc://ydb:2136/Root/testdb`                              |
+| `YDB_ENDPOINT`, `YDB_DATABASE`        | used when `YDB_CONNECTION_STRING` is not set                    |
+| `WORKLOAD_REF`                        | value of the `ref` label in metrics: `current` or `baseline`     |
+| `WORKLOAD_NAME`                       | workload name, the table lives in `<database>/<name>/<ref>`      |
+| `WORKLOAD_DURATION`                   | budget of the whole run in seconds, see below                   |
+| `OTEL_EXPORTER_OTLP_METRICS_ENDPOINT` | OTLP metrics endpoint; metrics are not pushed when it is not set |
+| `OTEL_EXPORTER_OTLP_ENDPOINT`         | base OTLP endpoint, `/v1/metrics` is appended to it              |
+
+Authentication uses anonymous credentials.
+
+`WORKLOAD_DURATION` bounds the whole container run, not only the workload itself: the action
+waits `WORKLOAD_DURATION + 60s` for the container to exit. Creating the table and filling it
+happens inside that budget, and the last `-shutdown-time` seconds of it are reserved for
+stopping the workers and dropping the table.
+
+## Options
+
+Every setting of [src/Config.php](src/Config.php) can be overridden with the option listed next to it in
+`Config::OPTIONS`. The options are passed through `workload_current_command` / `workload_baseline_command` of the
+action, the most useful ones are:
 
 ```
-Arguments:
-  endpoint                        YDB endpoint to connect to
-  db                              YDB database to connect to
+  -table-name             <string> table path relative to the database
+  -prefill-count          <int>    amount of rows written before the workload starts
 
-Options:
-  -t -table-name         <string> table name to create
+  -read-rps               <int>    read RPS, an upper bound for all read processes
+  -read-timeout           <int>    read timeout in milliseconds
+  -read-forks             <int>    amount of read processes
+  -write-rps              <int>    write RPS, an upper bound for all write processes
+  -write-timeout          <int>    write timeout in milliseconds
+  -write-forks            <int>    amount of write processes
 
-  -write-timeout         <int>    write timeout milliseconds
+  -duration               <int>    workload duration in seconds
+  -report-period          <int>    metrics push period in milliseconds
+  -shutdown-time          <int>    graceful shutdown time in seconds
+  -otlp-endpoint          <string> OTLP metrics endpoint
 ```
 
-### run
-`$APP run <endpoint> <db> [options]`
-
-```
-Arguments:
-  endpoint                        YDB endpoint to connect to
-  db                              YDB database to connect to
-
-Options:
-  -t -table-name         <string> table name to create
-
-  -initial-data-count    <int>    amount of initially created rows
-
-  -prom-pgw              <string> prometheus push gateway
-  -report-period         <int>    prometheus push period in milliseconds
-
-  -read-rps              <int>    read RPS
-  -read-timeout          <int>    read timeout milliseconds
-
-  -write-rps             <int>    write RPS
-  -write-timeout         <int>    write timeout milliseconds
-
-  -time                  <int>    run time in seconds
-  -shutdown-time         <int>    graceful shutdown time in seconds
-```
-
-## Authentication
-
-Workload using anonymous credentials.
+`-endpoint` with `-database` replace the connection settings of the environment, which is how the workload is run
+without the action: `php application.php run -endpoint grpc://localhost:2136 -database /local`.
 
 ## What's inside
-When running `run` command, the program creates three jobs: `readJob`, `writeJob`, `metricsJob`.
 
-- `readJob`    reads rows from the table one by one with random identifiers generated by writeJob
-- `writeJob`   generates and inserts rows
-- `metricsJob` periodically sends metrics to Prometheus
+Data is classes, everything else is plain functions:
 
-Table have these fields:
+| File                                       | What is in it                                                |
+|--------------------------------------------|--------------------------------------------------------------|
+| [application.php](application.php)         | command line: the options and the phases to run              |
+| [src/Config.php](src/Config.php)           | settings: defaults, the environment and the options on top   |
+| [src/Connection.php](src/Connection.php)   | endpoint and database path                                   |
+| [src/Event.php](src/Event.php)             | what a worker reports about an operation                     |
+| [src/EventQueue.php](src/EventQueue.php)   | the message queue the processes talk over                    |
+| [src/Metrics.php](src/Metrics.php)         | counting the events into the metrics                         |
+| [src/Otlp.php](src/Otlp.php)               | encoding the metrics as OTLP/JSON and pushing them           |
+| [src/processes.php](src/processes.php)     | forking and stopping the processes                           |
+| [src/ydb.php](src/ydb.php)                 | connecting to the database and the queries                   |
+| [src/workload.php](src/workload.php)       | the phases themselves: create, run, cleanup                  |
+
+PHP has no threads, so `run` forks a set of processes: `-read-forks` read processes, `-write-forks` write processes
+and one metrics process. Workers send every finished operation to the metrics process over a System V message queue,
+the metrics process counts the events and pushes the metrics every second.
+
+The gRPC core does not survive a fork, so the main process never connects to the database: every phase, and every
+worker inside `run`, is a separate forked process that connects on its own.
+
+The table has these fields:
+
 - `hash Uint64 Digest::NumericHash(id)`
 - `id Uint64`
 - `payload_double Double`
@@ -115,23 +103,33 @@ Table have these fields:
 Primary key: `("hash", "id")`
 
 ## Collected metrics
-- `oks`           - amount of OK requests
-- `not_oks`       - amount of not OK requests
-- `inflight`      - amount of requests in flight
-- `latency`       - summary of latencies in ms
-- `attempts`      - summary of amount for request
-- `error`         - amount of errors
-- `query_latency` - summary of latencies in ms in query
 
-> You must reset metrics to keep them `0` in prometheus and grafana before beginning and after ending of jobs
+Metrics are pushed as OTLP/JSON to the Prometheus OTLP receiver (it accepts both protobuf and JSON, and JSON keeps the
+workload free of a protobuf dependency conflicting with the one pinned by the SDK). Every data point carries the `ref`
+label, which is how the report tells the current revision from the baseline one:
 
-In `php` it looks like that:
-```php
-$pushGateway->delete('workload-php', [
-    'sdk' => 'php',
-    'sdkVersion' => Ydb::VERSION
-]);
+- `sdk_operations_total{ref, operation_type, operation_status}` - finished operations
+- `sdk_retry_attempts_total{ref, operation_type, operation_status}` - attempts, including the first one
+- `sdk_operation_latency_p50_seconds{ref, operation_type, operation_status}` - latency percentile of the last window
+- `sdk_operation_latency_p95_seconds{...}`
+- `sdk_operation_latency_p99_seconds{...}`
+- `sdk_errors_total{ref, operation_type, operation_status, error_name}` - errors, both retried and final
+
+## Running locally
+
+The workload image is built from the repository root, so that it is built against the SDK sources of the checked out
+revision:
+
+```bash
+docker build -t ydb-app-current -f slo-workload/Dockerfile .
 ```
 
-## Look at metrics in grafana
-You can get dashboard used in that test [here](https://github.com/ydb-platform/slo-tests/blob/main/k8s/helms/grafana.yaml#L69) - you will need to import json into grafana.
+```bash
+docker run --rm --network host \
+  -e YDB_CONNECTION_STRING=grpc://localhost:2136/local \
+  -e WORKLOAD_DURATION=60 \
+  ydb-app-current
+```
+
+Without `OTEL_EXPORTER_OTLP_*` the workload runs without pushing any metrics, which is enough to check that the
+workload itself works.
