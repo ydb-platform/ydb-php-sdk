@@ -3,6 +3,7 @@
 namespace YdbPlatform\Ydb;
 
 use DateTime;
+use Ydb\CostInfo;
 use YdbPlatform\Ydb\QueryStats\QueryStats;
 
 class QueryResult
@@ -16,8 +17,18 @@ class QueryResult
      */
     protected $queryStats = null;
 
-    public function __construct($result)
+    /**
+     * @var float|null Request Units consumed, set only when opted in via $options['reportCostInfo'].
+     */
+    protected $consumedRu = null;
+
+    public function __construct($result, ?CostInfo $costInfo = null)
     {
+        if ($costInfo !== null)
+        {
+            $this->consumedRu = $costInfo->getConsumedUnits();
+        }
+
         if (method_exists($result, 'getResultSets'))
         {
             $sets = $result->getResultSets();
@@ -252,6 +263,14 @@ class QueryResult
     public function getQueryStats(): ?QueryStats
     {
         return $this->queryStats;
+    }
+
+    /**
+     * @return float|null
+     */
+    public function getConsumedRu(): ?float
+    {
+        return $this->consumedRu;
     }
 
 }

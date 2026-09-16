@@ -32,6 +32,11 @@ trait RequestTrait
     protected $last_request_try_count = 0;
 
     /**
+     * @var \Ydb\CostInfo|null Set by processResponse(), reset on every request.
+     */
+    protected $lastCostInfo;
+
+    /**
      * @var Ydb
      */
     protected $ydb;
@@ -225,8 +230,14 @@ trait RequestTrait
      */
     protected function processResponse($service, $method, $response, $resultClass)
     {
+        $this->lastCostInfo = null;
+
         if (method_exists($response, 'getOperation')) {
             $response = $response->getOperation();
+        }
+
+        if (method_exists($response, 'hasCostInfo') && $response->hasCostInfo()) {
+            $this->lastCostInfo = $response->getCostInfo();
         }
 
         if (!method_exists($response, 'getStatus') || !method_exists($response, 'getResult')) {

@@ -1,3 +1,4 @@
+* added Request Units reporting (ydb-platform/ydb-php-sdk#23) - the server already returns consumed RU (`Ydb.Operations.Operation.cost_info`, used for Serverless YDB billing) on every response, but the SDK discarded it while unwrapping the response envelope. `Session::query()`/`Statement::execute()` now accept `$options['reportCostInfo'] = true`, which requests it (`OperationParams.report_cost_info`) and surfaces it via the new `QueryResult::getConsumedRu()`; verified live it's a real, positive RU count, not just present
 
 ## 1.16.3
 * improve log
