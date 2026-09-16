@@ -6,10 +6,7 @@ use PHPUnit\Framework\TestCase;
 use YdbPlatform\Ydb\Auth\Implement\AnonymousAuthentication;
 use YdbPlatform\Ydb\Ydb;
 
-// The server reports Request Units consumed per operation (Ydb.CostInfo,
-// used for Serverless YDB billing), but nothing surfaced it - the SDK read
-// Operation.cost_info off the response envelope and then discarded it while
-// unwrapping to the typed result. See ydb-platform/ydb-php-sdk#23.
+// The server reports Request Units per operation, but nothing surfaced it. See ydb-platform/ydb-php-sdk#23.
 class RequestUnitsTest extends TestCase
 {
     private function makeSession()

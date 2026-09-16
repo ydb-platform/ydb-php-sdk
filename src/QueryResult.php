@@ -18,10 +18,7 @@ class QueryResult
     protected $queryStats = null;
 
     /**
-     * @var float|null Request Units consumed by this operation, in server-billed
-     *      units. Only populated when the request opted in (see
-     *      Session::query()'s $options['reportCostInfo']) - relevant mainly for
-     *      Serverless YDB, which bills per RU. See ydb-platform/ydb-php-sdk#23.
+     * @var float|null Request Units consumed, set only when opted in via $options['reportCostInfo'].
      */
     protected $consumedRu = null;
 
@@ -269,9 +266,6 @@ class QueryResult
     }
 
     /**
-     * Request Units consumed by this operation, or null if the request didn't
-     * ask for it via $options['reportCostInfo'].
-     *
      * @return float|null
      */
     public function getConsumedRu(): ?float

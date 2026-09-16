@@ -32,9 +32,7 @@ trait RequestTrait
     protected $last_request_try_count = 0;
 
     /**
-     * @var \Ydb\CostInfo|null Set by processResponse() from the last response's
-     *      Operation.cost_info, when the request set operation_params.report_cost_info.
-     *      Reset to null on every request, including ones that didn't ask for it.
+     * @var \Ydb\CostInfo|null Set by processResponse(), reset on every request.
      */
     protected $lastCostInfo;
 
