@@ -5,6 +5,8 @@ namespace YdbPlatform\Ydb;
 use Closure;
 use Psr\Log\LoggerInterface;
 use YdbPlatform\Ydb\Auth\UseConfigInterface;
+use YdbPlatform\Ydb\Contracts\SessionPoolCapacityContract;
+use YdbPlatform\Ydb\Contracts\SessionPoolContract;
 use YdbPlatform\Ydb\Exceptions\NonRetryableException;
 use YdbPlatform\Ydb\Exceptions\RetryableException;
 use YdbPlatform\Ydb\Exceptions\Ydb\BadSessionException;
@@ -53,6 +55,16 @@ class Ydb
      * @var int|null
      */
     protected $grpcTimeout;
+
+    /**
+     * @var int|null
+     */
+    protected $sessionPoolMaxSize;
+
+    /**
+     * @var SessionPoolContract
+     */
+    protected $sessionPool;
 
     /**
      * @var Iam
@@ -128,6 +140,7 @@ class Ydb
         $this->iam_config = $config['iam_config'] ?? [];
         $this->grpc_config = (array) ($config['grpc'] ?? []);
         $this->grpcTimeout = $config['grpc']['timeout'] ?? null;
+        $this->sessionPoolMaxSize = $this->parseSessionPoolMaxSize($config['sessionPoolMaxSize'] ?? null);
 
         if (!is_null($logger) && isset($config['logger'])){
             throw new \Exception('Logger set in 2 places');
@@ -221,6 +234,65 @@ class Ydb
     public function getGrpcTimeout()
     {
         return $this->grpcTimeout;
+    }
+
+    /**
+     * @return SessionPoolContract
+     */
+    public function sessionPool()
+    {
+        if (!isset($this->sessionPool)) {
+            $this->sessionPool = new Sessions\MemorySessionPool(
+                $this->retry,
+                $this->sessionPoolMaxSize
+            );
+        }
+
+        return $this->sessionPool;
+    }
+
+    /**
+     * @param SessionPoolContract $sessionPool
+     * @return void
+     */
+    public function setSessionPool(SessionPoolContract $sessionPool)
+    {
+        if (!is_null($this->sessionPoolMaxSize)) {
+            if (!($sessionPool instanceof SessionPoolCapacityContract)) {
+                throw new \InvalidArgumentException(
+                    'Custom session pool must support capacity limits when sessionPoolMaxSize is configured'
+                );
+            }
+
+            $sessionPool->setMaxSize($this->sessionPoolMaxSize);
+        }
+
+        $this->sessionPool = $sessionPool;
+    }
+
+    /**
+     * @param mixed $value
+     * @return int|null
+     */
+    private function parseSessionPoolMaxSize($value)
+    {
+        if (is_null($value)) {
+            return null;
+        }
+
+        if (is_bool($value) || is_float($value)) {
+            throw new \InvalidArgumentException('sessionPoolMaxSize must be a positive integer');
+        }
+
+        $maxSize = filter_var($value, FILTER_VALIDATE_INT, [
+            'options' => ['min_range' => 1],
+        ]);
+
+        if ($maxSize === false) {
+            throw new \InvalidArgumentException('sessionPoolMaxSize must be a positive integer');
+        }
+
+        return $maxSize;
     }
 
     /**
