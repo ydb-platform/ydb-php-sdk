@@ -32,15 +32,27 @@ class SessionPoolLimitTable extends Table
 {
     private static $nextSessionId = 1;
     private $failNextCreate = false;
+    private $beforeNextCreateSessionResponse;
 
     public function failNextCreate()
     {
         $this->failNextCreate = true;
     }
 
+    public function beforeNextCreateSessionResponse(callable $callback)
+    {
+        $this->beforeNextCreateSessionResponse = $callback;
+    }
+
     protected function request($method, array $data = [])
     {
         if ($method === 'CreateSession') {
+            if ($this->beforeNextCreateSessionResponse) {
+                $callback = $this->beforeNextCreateSessionResponse;
+                $this->beforeNextCreateSessionResponse = null;
+                $callback();
+            }
+
             if ($this->failNextCreate) {
                 $this->failNextCreate = false;
                 throw new \RuntimeException('CreateSession failed');
@@ -148,6 +160,37 @@ class SessionPoolSizeLimitTest extends TestCase
         $session = $table->createSession();
         self::assertNotNull($session);
         $this->removeSession($table, $session);
+    }
+
+    public function testInProgressCreationConsumesCapacity()
+    {
+        $ydb = $this->createYdb(1);
+        $firstTable = $this->createTableForYdb($ydb);
+        $secondTable = $this->createTableForYdb($ydb);
+        $secondCreationRejected = false;
+
+        $firstTable->beforeNextCreateSessionResponse(
+            function () use ($secondTable, &$secondCreationRejected) {
+                try {
+                    $unexpectedSession = $secondTable->createSession();
+                    $this->removeSession($secondTable, $unexpectedSession);
+                } catch (ClientResourceExhaustedException $exception) {
+                    $secondCreationRejected = true;
+                    self::assertSame(
+                        'YDB session pool size limit of 1 has been reached',
+                        $exception->getMessage()
+                    );
+                }
+            }
+        );
+
+        $session = $firstTable->createSession();
+
+        self::assertTrue(
+            $secondCreationRejected,
+            'An in-progress CreateSession request must consume pool capacity'
+        );
+        $this->removeSession($firstTable, $session);
     }
 
     public function testPoolsAreIsolatedBetweenClients()
