@@ -55,6 +55,11 @@ class Ydb
     protected $grpcTimeout;
 
     /**
+     * @var int|null
+     */
+    protected $sessionPoolMaxSize;
+
+    /**
      * @var Iam
      */
     protected $iam;
@@ -128,6 +133,7 @@ class Ydb
         $this->iam_config = $config['iam_config'] ?? [];
         $this->grpc_config = (array) ($config['grpc'] ?? []);
         $this->grpcTimeout = $config['grpc']['timeout'] ?? null;
+        $this->sessionPoolMaxSize = $this->parseSessionPoolMaxSize($config['sessionPoolMaxSize'] ?? null);
 
         if (!is_null($logger) && isset($config['logger'])){
             throw new \Exception('Logger set in 2 places');
@@ -221,6 +227,42 @@ class Ydb
     public function getGrpcTimeout()
     {
         return $this->grpcTimeout;
+    }
+
+    /**
+     * Get the maximum number of sessions in the client pool.
+     * A null value means that the pool is unlimited.
+     *
+     * @return int|null
+     */
+    public function sessionPoolMaxSize()
+    {
+        return $this->sessionPoolMaxSize;
+    }
+
+    /**
+     * @param mixed $value
+     * @return int|null
+     */
+    private function parseSessionPoolMaxSize($value)
+    {
+        if (is_null($value)) {
+            return null;
+        }
+
+        if (is_bool($value)) {
+            throw new \InvalidArgumentException('sessionPoolMaxSize must be a positive integer');
+        }
+
+        $maxSize = filter_var($value, FILTER_VALIDATE_INT, [
+            'options' => ['min_range' => 1],
+        ]);
+
+        if ($maxSize === false) {
+            throw new \InvalidArgumentException('sessionPoolMaxSize must be a positive integer');
+        }
+
+        return $maxSize;
     }
 
     /**

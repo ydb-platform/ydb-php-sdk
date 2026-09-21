@@ -8,6 +8,7 @@ use Psr\Log\LoggerInterface;
 use Ydb\Table\Query;
 use Ydb\Table\V1\TableServiceClient as ServiceClient;
 use YdbPlatform\Ydb\Contracts\SessionPoolContract;
+use YdbPlatform\Ydb\Contracts\SessionPoolCapacityContract;
 use YdbPlatform\Ydb\Enums\ScanQueryMode;
 use YdbPlatform\Ydb\Exceptions\Grpc\InvalidArgumentException;
 use YdbPlatform\Ydb\Exceptions\Grpc\UnknownException;
@@ -46,7 +47,7 @@ class  Table
     /**
      * @var SessionPoolContract
      */
-    protected static $session_pool;
+    protected $session_pool;
 
     /**
      * @var LoggerInterface
@@ -87,10 +88,7 @@ class  Table
 
         $this->retry = $retry;
 
-        if (empty(static::$session_pool))
-        {
-            static::$session_pool = new Sessions\MemorySessionPool($retry);
-        }
+        $this->session_pool = new Sessions\MemorySessionPool($retry, $ydb->sessionPoolMaxSize());
     }
 
     /**
@@ -98,7 +96,7 @@ class  Table
      */
     public function sessionPool(SessionPoolContract $manager)
     {
-        static::$session_pool = $manager;
+        $this->session_pool = $manager;
     }
 
     /**
@@ -161,7 +159,7 @@ class  Table
      */
     public function takeSession()
     {
-        $session = static::$session_pool->getIdleSession();
+        $session = $this->session_pool->getIdleSession();
 
         if ($session)
         {
@@ -176,13 +174,27 @@ class  Table
      */
     public function createSession()
     {
-        $result = $this->request('CreateSession');
-        $session_id = $result->getSessionId();
-        $this->logger()->info('YDB: New session created [...' . substr($session_id, -6) . '].');
+        $capacityPool = $this->session_pool instanceof SessionPoolCapacityContract
+            ? $this->session_pool
+            : null;
 
-        $session = new Session($this, $session_id);
-        static::$session_pool->addSession($session);
-        return $session->take();
+        if ($capacityPool) {
+            $capacityPool->reserveSessionSlot();
+        }
+
+        try {
+            $result = $this->request('CreateSession');
+            $session_id = $result->getSessionId();
+            $this->logger()->info('YDB: New session created [...' . substr($session_id, -6) . '].');
+
+            $session = new Session($this, $session_id);
+            $this->session_pool->addSession($session);
+            return $session->take();
+        } finally {
+            if ($capacityPool) {
+                $capacityPool->releaseSessionSlot();
+            }
+        }
     }
 
     /**
@@ -191,7 +203,7 @@ class  Table
      */
     public function dropSession($session_id)
     {
-        static::$session_pool->dropSession($session_id);
+        $this->session_pool->dropSession($session_id);
     }
 
     /**
@@ -200,7 +212,7 @@ class  Table
      */
     public function syncSession($session_id)
     {
-        static::$session_pool->syncSession($session_id);
+        $this->session_pool->syncSession($session_id);
     }
 
     /**
@@ -209,7 +221,7 @@ class  Table
      */
     public function sessionTaken($session)
     {
-        static::$session_pool->sessionTaken($session);
+        $this->session_pool->sessionTaken($session);
     }
 
     /**
@@ -218,7 +230,7 @@ class  Table
      */
     public function sessionReleased($session)
     {
-        static::$session_pool->sessionReleased($session);
+        $this->session_pool->sessionReleased($session);
     }
 
     /**

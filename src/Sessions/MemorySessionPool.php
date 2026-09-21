@@ -4,19 +4,35 @@ namespace YdbPlatform\Ydb\Sessions;
 
 use YdbPlatform\Ydb\Retry\Retry;
 use YdbPlatform\Ydb\Session;
-use YdbPlatform\Ydb\Contracts\SessionPoolContract;
+use YdbPlatform\Ydb\Contracts\SessionPoolCapacityContract;
+use YdbPlatform\Ydb\Exceptions\Ydb\ClientResourceExhaustedException;
 
-class MemorySessionPool implements SessionPoolContract
+class MemorySessionPool implements SessionPoolCapacityContract
 {
     /**
      * @var array
      */
-    protected static $sessions = [];
-    protected static $retry = null;
+    protected $sessions = [];
+    protected $retry;
 
-    public function __construct(Retry &$retry)
+    /**
+     * @var int|null
+     */
+    protected $maxSize;
+
+    /**
+     * @var int
+     */
+    protected $reservedSlots = 0;
+
+    public function __construct(Retry &$retry, $maxSize = null)
     {
-        self::$retry = $retry;
+        if (!is_null($maxSize) && (!is_int($maxSize) || $maxSize < 1)) {
+            throw new \InvalidArgumentException('Session pool max size must be a positive integer');
+        }
+
+        $this->retry = $retry;
+        $this->maxSize = $maxSize;
     }
 
     /**
@@ -25,9 +41,9 @@ class MemorySessionPool implements SessionPoolContract
      */
     public function __destruct()
     {
-        foreach (static::$sessions as $session_id => $session) {
+        foreach ($this->sessions as $session_id => $session) {
             try {
-                static::$retry->retry(function () use ($session) {
+                $this->retry->retry(function () use ($session) {
                     $session->delete();
                 }, true);
             } catch (\Exception $e) {
@@ -40,7 +56,7 @@ class MemorySessionPool implements SessionPoolContract
      */
     public function getIdleSession()
     {
-        foreach (static::$sessions as $session_id => $session)
+        foreach ($this->sessions as $session_id => $session)
         {
             if ($session->isIdle())
             {
@@ -56,7 +72,16 @@ class MemorySessionPool implements SessionPoolContract
      */
     public function addSession(Session $session)
     {
-        static::$sessions[$session->id()] = $session;
+        if (!isset($this->sessions[$session->id()])
+            && !is_null($this->maxSize)
+            && count($this->sessions) >= $this->maxSize
+        ) {
+            throw new ClientResourceExhaustedException(
+                'YDB session pool size limit of ' . $this->maxSize . ' has been reached'
+            );
+        }
+
+        $this->sessions[$session->id()] = $session;
     }
 
     /**
@@ -65,7 +90,7 @@ class MemorySessionPool implements SessionPoolContract
      */
     public function dropSession($session_id)
     {
-        $session = static::$sessions[$session_id] ?? null;
+        $session = $this->sessions[$session_id] ?? null;
 
         if ($session)
         {
@@ -75,7 +100,7 @@ class MemorySessionPool implements SessionPoolContract
             }
             else
             {
-                unset(static::$sessions[$session_id]);
+                unset($this->sessions[$session_id]);
             }
         }
     }
@@ -86,12 +111,39 @@ class MemorySessionPool implements SessionPoolContract
      */
     public function syncSession($session_id)
     {
-        $session = static::$sessions[$session_id] ?? null;
+        $session = $this->sessions[$session_id] ?? null;
 
         if ($session && $session->id() !== $session_id)
         {
-            unset(static::$sessions[$session_id]);
-            static::$sessions[$session->id()] = $session;
+            unset($this->sessions[$session_id]);
+            $this->sessions[$session->id()] = $session;
+        }
+    }
+
+    /**
+     * @return void
+     * @throws ClientResourceExhaustedException
+     */
+    public function reserveSessionSlot()
+    {
+        if (!is_null($this->maxSize)
+            && count($this->sessions) + $this->reservedSlots >= $this->maxSize
+        ) {
+            throw new ClientResourceExhaustedException(
+                'YDB session pool size limit of ' . $this->maxSize . ' has been reached'
+            );
+        }
+
+        $this->reservedSlots++;
+    }
+
+    /**
+     * @return void
+     */
+    public function releaseSessionSlot()
+    {
+        if ($this->reservedSlots > 0) {
+            $this->reservedSlots--;
         }
     }
 

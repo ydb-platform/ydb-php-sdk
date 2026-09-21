@@ -551,6 +551,26 @@ Methods of the query builder:
 
 You can chain these methods for convenience.
 
+## Session pool size limit
+
+By default, the in-memory session pool is unlimited for backward compatibility.
+Set `sessionPoolMaxSize` to a positive integer to limit the number of sessions
+created by a client:
+
+```php
+$config = [
+    // ...
+    'sessionPoolMaxSize' => 50,
+];
+
+$ydb = new \YdbPlatform\Ydb\Ydb($config);
+```
+
+When all sessions are busy and the limit has been reached, acquiring another
+session throws
+`YdbPlatform\Ydb\Exceptions\Ydb\ClientResourceExhaustedException`. Released
+sessions remain available for reuse and do not consume additional capacity.
+
 ## Logging
 
 For logging purposes, you need use class, which implements `\Psr\Log\LoggerInterface`.
