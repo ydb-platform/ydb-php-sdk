@@ -307,6 +307,7 @@ class SessionPoolSizeLimitTest extends TestCase
             'zero' => [0],
             'negative' => [-1],
             'boolean' => [true],
+            'integral float' => [1.0],
             'fraction' => [1.5],
             'non-numeric string' => ['ten'],
         ];

@@ -269,7 +269,7 @@ class Ydb
             return null;
         }
 
-        if (is_bool($value)) {
+        if (is_bool($value) || is_float($value)) {
             throw new \InvalidArgumentException('sessionPoolMaxSize must be a positive integer');
         }
 
