@@ -4,10 +4,12 @@ namespace YdbPlatform\Ydb\Test;
 
 use PHPUnit\Framework\TestCase;
 use YdbPlatform\Ydb\Auth\Implement\AnonymousAuthentication;
+use YdbPlatform\Ydb\Contracts\SessionPoolContract;
 use YdbPlatform\Ydb\Exceptions\Ydb\ClientResourceExhaustedException;
 use YdbPlatform\Ydb\Logger\NullLogger;
 use YdbPlatform\Ydb\Retry\Retry;
 use YdbPlatform\Ydb\Session;
+use YdbPlatform\Ydb\Sessions\MemorySessionPool;
 use YdbPlatform\Ydb\Table;
 use YdbPlatform\Ydb\Ydb;
 
@@ -60,6 +62,40 @@ class SessionPoolSessionManager extends Session
     public static function markDead(Session $session)
     {
         $session->is_alive = false;
+    }
+}
+
+class SessionPoolWithoutCapacity implements SessionPoolContract
+{
+    public $sessions = [];
+    public $taken = 0;
+
+    public function getIdleSession()
+    {
+        return null;
+    }
+
+    public function addSession(Session $session)
+    {
+        $this->sessions[$session->id()] = $session;
+    }
+
+    public function dropSession($sessionId)
+    {
+        unset($this->sessions[$sessionId]);
+    }
+
+    public function syncSession($sessionId)
+    {
+    }
+
+    public function sessionTaken(Session $session)
+    {
+        $this->taken++;
+    }
+
+    public function sessionReleased(Session $session)
+    {
     }
 }
 
@@ -135,6 +171,55 @@ class SessionPoolSizeLimitTest extends TestCase
         self::assertNotSame($firstSession, $secondSession);
         $this->removeSession($table, $firstSession);
         $this->removeSession($table, $secondSession);
+    }
+
+    public function testMemoryPoolRejectsInvalidLimit()
+    {
+        $logger = new NullLogger();
+        $retry = new Retry($logger);
+
+        $this->expectException(\InvalidArgumentException::class);
+        new MemorySessionPool($retry, 0);
+    }
+
+    public function testMemoryPoolRejectsAddingPastLimitWithoutReservation()
+    {
+        $table = $this->createTable(null);
+        $logger = new NullLogger();
+        $retry = new Retry($logger);
+        $pool = new MemorySessionPool($retry, 1);
+        $firstSession = new Session($table, 'direct-session-1');
+        $secondSession = new Session($table, 'direct-session-2');
+
+        $pool->addSession($firstSession);
+
+        try {
+            $pool->addSession($secondSession);
+            self::fail('Expected the session pool limit to be enforced');
+        } catch (ClientResourceExhaustedException $exception) {
+            self::assertSame(
+                'YDB session pool size limit of 1 has been reached',
+                $exception->getMessage()
+            );
+        } finally {
+            SessionPoolSessionManager::markDead($firstSession);
+            SessionPoolSessionManager::markDead($secondSession);
+        }
+    }
+
+    public function testCreateSessionSupportsPoolWithoutCapacityContract()
+    {
+        $table = $this->createTable(1);
+        $pool = new SessionPoolWithoutCapacity();
+        $table->sessionPool($pool);
+
+        $session = $table->createSession();
+
+        self::assertSame($session, $pool->sessions[$session->id()]);
+        self::assertSame(1, $pool->taken);
+
+        $this->removeSession($table, $session);
+        self::assertArrayNotHasKey($session->id(), $pool->sessions);
     }
 
     /**
