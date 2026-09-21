@@ -68,6 +68,7 @@ class SessionPoolSessionManager extends Session
 class SessionPoolWithoutCapacity implements SessionPoolContract
 {
     public $sessions = [];
+    public $synced = [];
     public $taken = 0;
 
     public function getIdleSession()
@@ -87,6 +88,7 @@ class SessionPoolWithoutCapacity implements SessionPoolContract
 
     public function syncSession($sessionId)
     {
+        $this->synced[] = $sessionId;
     }
 
     public function sessionTaken(Session $session)
@@ -217,6 +219,9 @@ class SessionPoolSizeLimitTest extends TestCase
 
         self::assertSame($session, $pool->sessions[$session->id()]);
         self::assertSame(1, $pool->taken);
+
+        $table->syncSession($session->id());
+        self::assertSame([$session->id()], $pool->synced);
 
         $this->removeSession($table, $session);
         self::assertArrayNotHasKey($session->id(), $pool->sessions);
