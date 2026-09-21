@@ -236,17 +236,6 @@ class Ydb
     }
 
     /**
-     * Get the maximum number of sessions in the client pool.
-     * A null value means that the pool is unlimited.
-     *
-     * @return int|null
-     */
-    public function sessionPoolMaxSize()
-    {
-        return $this->sessionPoolMaxSize;
-    }
-
-    /**
      * @return SessionPoolContract
      */
     public function sessionPool()
