@@ -45,11 +45,6 @@ class  Table
     protected $path;
 
     /**
-     * @var SessionPoolContract
-     */
-    protected $session_pool;
-
-    /**
      * @var LoggerInterface
      */
     protected $logger;
@@ -87,8 +82,6 @@ class  Table
         $this->logger = $logger;
 
         $this->retry = $retry;
-
-        $this->session_pool = new Sessions\MemorySessionPool($retry, $ydb->sessionPoolMaxSize());
     }
 
     /**
@@ -96,7 +89,7 @@ class  Table
      */
     public function sessionPool(SessionPoolContract $manager)
     {
-        $this->session_pool = $manager;
+        $this->ydb->setSessionPool($manager);
     }
 
     /**
@@ -159,7 +152,7 @@ class  Table
      */
     public function takeSession()
     {
-        $session = $this->session_pool->getIdleSession();
+        $session = $this->ydb->sessionPool()->getIdleSession();
 
         if ($session)
         {
@@ -174,8 +167,9 @@ class  Table
      */
     public function createSession()
     {
-        $capacityPool = $this->session_pool instanceof SessionPoolCapacityContract
-            ? $this->session_pool
+        $sessionPool = $this->ydb->sessionPool();
+        $capacityPool = $sessionPool instanceof SessionPoolCapacityContract
+            ? $sessionPool
             : null;
 
         if ($capacityPool) {
@@ -188,7 +182,7 @@ class  Table
             $this->logger()->info('YDB: New session created [...' . substr($session_id, -6) . '].');
 
             $session = new Session($this, $session_id);
-            $this->session_pool->addSession($session);
+            $sessionPool->addSession($session);
             return $session->take();
         } finally {
             if ($capacityPool) {
@@ -203,7 +197,7 @@ class  Table
      */
     public function dropSession($session_id)
     {
-        $this->session_pool->dropSession($session_id);
+        $this->ydb->sessionPool()->dropSession($session_id);
     }
 
     /**
@@ -212,7 +206,7 @@ class  Table
      */
     public function syncSession($session_id)
     {
-        $this->session_pool->syncSession($session_id);
+        $this->ydb->sessionPool()->syncSession($session_id);
     }
 
     /**
@@ -221,7 +215,7 @@ class  Table
      */
     public function sessionTaken($session)
     {
-        $this->session_pool->sessionTaken($session);
+        $this->ydb->sessionPool()->sessionTaken($session);
     }
 
     /**
@@ -230,7 +224,7 @@ class  Table
      */
     public function sessionReleased($session)
     {
-        $this->session_pool->sessionReleased($session);
+        $this->ydb->sessionPool()->sessionReleased($session);
     }
 
     /**

@@ -163,6 +163,26 @@ class SessionPoolSizeLimitTest extends TestCase
         $this->removeSession($secondTable, $secondSession);
     }
 
+    public function testLimitIsSharedBetweenTablesOfSameClient()
+    {
+        $ydb = $this->createYdb(1);
+        $firstTable = $this->createTableForYdb($ydb);
+        $secondTable = $this->createTableForYdb($ydb);
+        $session = $firstTable->createSession();
+
+        try {
+            $secondTable->createSession();
+            self::fail('Expected the client session pool limit to be enforced');
+        } catch (ClientResourceExhaustedException $exception) {
+            self::assertSame(
+                'YDB session pool size limit of 1 has been reached',
+                $exception->getMessage()
+            );
+        } finally {
+            $this->removeSession($firstTable, $session);
+        }
+    }
+
     public function testPoolIsUnlimitedByDefault()
     {
         $table = $this->createTable(null);
@@ -209,21 +229,23 @@ class SessionPoolSizeLimitTest extends TestCase
         }
     }
 
-    public function testCreateSessionSupportsPoolWithoutCapacityContract()
+    public function testCustomPoolWithoutCapacityContractIsSharedByClientTables()
     {
-        $table = $this->createTable(1);
+        $ydb = $this->createYdb(1);
+        $firstTable = $this->createTableForYdb($ydb);
+        $secondTable = $this->createTableForYdb($ydb);
         $pool = new SessionPoolWithoutCapacity();
-        $table->sessionPool($pool);
+        $firstTable->sessionPool($pool);
 
-        $session = $table->createSession();
+        $session = $secondTable->createSession();
 
         self::assertSame($session, $pool->sessions[$session->id()]);
         self::assertSame(1, $pool->taken);
 
-        $table->syncSession($session->id());
+        $secondTable->syncSession($session->id());
         self::assertSame([$session->id()], $pool->synced);
 
-        $this->removeSession($table, $session);
+        $this->removeSession($secondTable, $session);
         self::assertArrayNotHasKey($session->id(), $pool->sessions);
     }
 
@@ -249,7 +271,11 @@ class SessionPoolSizeLimitTest extends TestCase
 
     private function createTable($maxSize)
     {
-        $ydb = $this->createYdb($maxSize);
+        return $this->createTableForYdb($this->createYdb($maxSize));
+    }
+
+    private function createTableForYdb(Ydb $ydb)
+    {
         $logger = new NullLogger();
         $retry = new Retry($logger);
 

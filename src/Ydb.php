@@ -5,6 +5,7 @@ namespace YdbPlatform\Ydb;
 use Closure;
 use Psr\Log\LoggerInterface;
 use YdbPlatform\Ydb\Auth\UseConfigInterface;
+use YdbPlatform\Ydb\Contracts\SessionPoolContract;
 use YdbPlatform\Ydb\Exceptions\NonRetryableException;
 use YdbPlatform\Ydb\Exceptions\RetryableException;
 use YdbPlatform\Ydb\Exceptions\Ydb\BadSessionException;
@@ -58,6 +59,11 @@ class Ydb
      * @var int|null
      */
     protected $sessionPoolMaxSize;
+
+    /**
+     * @var SessionPoolContract
+     */
+    protected $sessionPool;
 
     /**
      * @var Iam
@@ -238,6 +244,30 @@ class Ydb
     public function sessionPoolMaxSize()
     {
         return $this->sessionPoolMaxSize;
+    }
+
+    /**
+     * @return SessionPoolContract
+     */
+    public function sessionPool()
+    {
+        if (!isset($this->sessionPool)) {
+            $this->sessionPool = new Sessions\MemorySessionPool(
+                $this->retry,
+                $this->sessionPoolMaxSize
+            );
+        }
+
+        return $this->sessionPool;
+    }
+
+    /**
+     * @param SessionPoolContract $sessionPool
+     * @return void
+     */
+    public function setSessionPool(SessionPoolContract $sessionPool)
+    {
+        $this->sessionPool = $sessionPool;
     }
 
     /**
