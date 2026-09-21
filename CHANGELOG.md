@@ -1,4 +1,3 @@
-## Unreleased
 * added the optional `sessionPoolMaxSize` client setting to limit the in-memory session pool size
 
 ## 1.16.3
