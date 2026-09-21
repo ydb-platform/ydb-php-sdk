@@ -570,6 +570,9 @@ When all sessions are busy and the limit has been reached, acquiring another
 session throws
 `YdbPlatform\Ydb\Exceptions\Ydb\ClientResourceExhaustedException`. Released
 sessions remain available for reuse and do not consume additional capacity.
+When replacing the default pool through `Table::sessionPool()`, a client with
+this setting requires a pool implementing `SessionPoolCapacityContract`; the
+configured limit is applied to that pool as well.
 
 ## Logging
 

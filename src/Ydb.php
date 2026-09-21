@@ -5,6 +5,7 @@ namespace YdbPlatform\Ydb;
 use Closure;
 use Psr\Log\LoggerInterface;
 use YdbPlatform\Ydb\Auth\UseConfigInterface;
+use YdbPlatform\Ydb\Contracts\SessionPoolCapacityContract;
 use YdbPlatform\Ydb\Contracts\SessionPoolContract;
 use YdbPlatform\Ydb\Exceptions\NonRetryableException;
 use YdbPlatform\Ydb\Exceptions\RetryableException;
@@ -256,6 +257,16 @@ class Ydb
      */
     public function setSessionPool(SessionPoolContract $sessionPool)
     {
+        if (!is_null($this->sessionPoolMaxSize)) {
+            if (!($sessionPool instanceof SessionPoolCapacityContract)) {
+                throw new \InvalidArgumentException(
+                    'Custom session pool must support capacity limits when sessionPoolMaxSize is configured'
+                );
+            }
+
+            $sessionPool->setMaxSize($this->sessionPoolMaxSize);
+        }
+
         $this->sessionPool = $sessionPool;
     }
 

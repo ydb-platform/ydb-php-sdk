@@ -274,7 +274,7 @@ class SessionPoolSizeLimitTest extends TestCase
 
     public function testCustomPoolWithoutCapacityContractIsSharedByClientTables()
     {
-        $ydb = $this->createYdb(1);
+        $ydb = $this->createYdb(null);
         $firstTable = $this->createTableForYdb($ydb);
         $secondTable = $this->createTableForYdb($ydb);
         $pool = new SessionPoolWithoutCapacity();
@@ -290,6 +290,40 @@ class SessionPoolSizeLimitTest extends TestCase
 
         $this->removeSession($secondTable, $session);
         self::assertArrayNotHasKey($session->id(), $pool->sessions);
+    }
+
+    public function testCustomPoolWithoutCapacityContractIsRejectedWhenLimitIsConfigured()
+    {
+        $table = $this->createTable(1);
+
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage(
+            'Custom session pool must support capacity limits when sessionPoolMaxSize is configured'
+        );
+
+        $table->sessionPool(new SessionPoolWithoutCapacity());
+    }
+
+    public function testConfiguredLimitIsAppliedToReplacementCapacityPool()
+    {
+        $table = $this->createTable(1);
+        $logger = new NullLogger();
+        $retry = new Retry($logger);
+        $pool = new MemorySessionPool($retry, 2);
+        $table->sessionPool($pool);
+        $session = $table->createSession();
+
+        try {
+            $table->createSession();
+            self::fail('Expected the client session pool limit to override the pool limit');
+        } catch (ClientResourceExhaustedException $exception) {
+            self::assertSame(
+                'YDB session pool size limit of 1 has been reached',
+                $exception->getMessage()
+            );
+        } finally {
+            $this->removeSession($table, $session);
+        }
     }
 
     /**

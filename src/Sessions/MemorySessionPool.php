@@ -27,11 +27,20 @@ class MemorySessionPool implements SessionPoolCapacityContract
 
     public function __construct(Retry &$retry, $maxSize = null)
     {
+        $this->retry = $retry;
+        $this->setMaxSize($maxSize);
+    }
+
+    /**
+     * @param int|null $maxSize
+     * @return void
+     */
+    public function setMaxSize($maxSize)
+    {
         if (!is_null($maxSize) && (!is_int($maxSize) || $maxSize < 1)) {
             throw new \InvalidArgumentException('Session pool max size must be a positive integer');
         }
 
-        $this->retry = $retry;
         $this->maxSize = $maxSize;
     }
 
