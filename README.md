@@ -551,6 +551,49 @@ Methods of the query builder:
 
 You can chain these methods for convenience.
 
+## Query Service and commit timestamps
+
+Query Service supports `StrictSerializableRW` through `Ydb.Query.TransactionSettings.strict_serializable_read_write`.
+Its transaction and query methods use Query Service session IDs; they do not share Table service sessions.
+
+```php
+<?php
+
+use YdbPlatform\Ydb\QueryService;
+
+$query = $ydb->queryService();
+$sessionId = $query->createSession();
+try {
+    // A separate, explicit transaction:
+    $txId = $query->beginTransaction($sessionId, 'StrictSerializableRW');
+    $query->executeQuery($sessionId, 'UPSERT INTO my_table (id) VALUES (1);',
+        QueryService::inTransaction($txId));
+    $commitTimestamp = $query->commitTransaction($sessionId, $txId);
+
+    // Or an autocommit query. Read the timestamp from the final response part:
+    $result = $query->executeQuery($sessionId, 'UPSERT INTO my_table (id) VALUES (2);',
+        QueryService::autocommit('StrictSerializableRW'));
+    $otherTimestamp = $result->commitTimestamp();
+    $parts = $result->parts(); // Original Ydb.Query.ExecuteQueryResponsePart messages.
+
+    if ($commitTimestamp !== null && $otherTimestamp !== null) {
+        $order = $commitTimestamp->compareTo($otherTimestamp);
+        $planStep = $commitTimestamp->planStep(); // Decimal uint64 string.
+        $txId = $commitTimestamp->txId();         // Decimal uint64 string.
+        $protobuf = $commitTimestamp->proto();    // Ydb.VirtualTimestamp.
+    }
+} finally {
+    $query->deleteSession($sessionId);
+}
+```
+
+`commitTimestamp()` and `commitTransaction()` return `null` when the server omits the field,
+including read-only transactions. A timestamp is returned only after a successful response.
+`CommitTimestamp::compareTo()` compares unsigned `plan_step` and then `tx_id`, and rejects
+timestamps from different `Ydb` connection objects. The protobuf message contains no database
+identity, and a configured path alone cannot prove two connections target the same database.
+Timestamps from separate connections are therefore not comparable, even if their paths match.
+
 ## Logging
 
 For logging purposes, you need use class, which implements `\Psr\Log\LoggerInterface`.

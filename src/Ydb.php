@@ -80,6 +80,11 @@ class Ydb
     protected $table;
 
     /**
+     * @var QueryService
+     */
+    protected $queryService;
+
+    /**
      * @var Operations
      */
     protected $operations;
@@ -328,6 +333,19 @@ class Ydb
         }
 
         return $this->table;
+    }
+
+    /**
+     * @return QueryService
+     */
+    public function queryService()
+    {
+        if (!isset($this->queryService))
+        {
+            $this->queryService = new QueryService($this);
+        }
+
+        return $this->queryService;
     }
 
     /**

@@ -1,4 +1,6 @@
 
+* added Query Service transactions with StrictSerializableRW and optional connection-scoped commit timestamps for explicit commits and autocommit queries
+
 ## 1.16.3
 * improve log
 
