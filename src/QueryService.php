@@ -36,20 +36,17 @@ class QueryService
 
     public static function transactionSettings(string $mode = 'StrictSerializableRW'): TransactionSettings
     {
-        switch ($mode) {
-            case 'StrictSerializableRW':
-            case 'strict_serializable_read_write':
-                return new TransactionSettings([
-                    'strict_serializable_read_write' => new StrictSerializableRWModeSettings(),
-                ]);
-            case 'SerializableRW':
-            case 'serializable_read_write':
-                return new TransactionSettings([
-                    'serializable_read_write' => new SerializableModeSettings(),
-                ]);
-            default:
-                throw new InvalidArgumentException("Unsupported Query transaction mode: {$mode}");
+        if ($mode === 'StrictSerializableRW' || $mode === 'strict_serializable_read_write') {
+            return new TransactionSettings([
+                'strict_serializable_read_write' => new StrictSerializableRWModeSettings(),
+            ]);
         }
+        if ($mode === 'SerializableRW' || $mode === 'serializable_read_write') {
+            return new TransactionSettings([
+                'serializable_read_write' => new SerializableModeSettings(),
+            ]);
+        }
+        throw new InvalidArgumentException("Unsupported Query transaction mode: {$mode}");
     }
 
     public static function autocommit(string $mode = 'StrictSerializableRW'): TransactionControl

@@ -7,8 +7,11 @@ use PHPUnit\Framework\TestCase;
 use Ydb\Query\BeginTransactionResponse;
 use Ydb\Query\CommitTransactionResponse;
 use Ydb\Query\CreateSessionResponse;
+use Ydb\Query\DeleteSessionResponse;
 use Ydb\Query\ExecuteQueryResponsePart;
+use Ydb\Query\RollbackTransactionResponse;
 use Ydb\Query\TransactionMeta;
+use Ydb\Issue\IssueMessage;
 use Ydb\StatusIds\StatusCode;
 use Ydb\VirtualTimestamp;
 use YdbPlatform\Ydb\CommitTimestamp;
@@ -18,7 +21,7 @@ use YdbPlatform\Ydb\Ydb;
 
 class QueryServiceTimestampTest extends TestCase
 {
-    private function ydb(string $database = '/local'): Ydb
+    private function ydb(string $database = '/local', ?int $timeout = null): Ydb
     {
         return new Ydb([
             'endpoint' => 'localhost:2136',
@@ -26,6 +29,7 @@ class QueryServiceTimestampTest extends TestCase
             'discovery' => false,
             'iam_config' => ['insecure' => true],
             'credentials' => new AnonymousAuthentication(),
+            'grpc' => ['timeout' => $timeout],
         ]);
     }
 
@@ -74,6 +78,53 @@ class QueryServiceTimestampTest extends TestCase
         $client = new FakeQueryClient();
         $client->commitResponse = new CommitTransactionResponse(['status' => StatusCode::SUCCESS]);
         self::assertNull($this->service($client)->commitTransaction('session', 'tx'));
+    }
+
+    public function testFactoryKeepsOneQueryServicePerConnection(): void
+    {
+        $ydb = $this->ydb();
+        self::assertSame($ydb->queryService(), $ydb->queryService());
+    }
+
+    public function testTransactionModesAndExistingTransactionControl(): void
+    {
+        self::assertTrue(QueryService::transactionSettings('strict_serializable_read_write')
+            ->hasStrictSerializableReadWrite());
+        self::assertTrue(QueryService::transactionSettings('SerializableRW')
+            ->hasSerializableReadWrite());
+        self::assertTrue(QueryService::transactionSettings('serializable_read_write')
+            ->hasSerializableReadWrite());
+        $control = QueryService::inTransaction('existing-tx');
+        self::assertSame('existing-tx', $control->getTxId());
+        self::assertFalse($control->getCommitTx());
+
+        $this->expectException(InvalidArgumentException::class);
+        QueryService::transactionSettings('unknown-mode');
+    }
+
+    public function testSessionCleanupRollbackAndGrpcTimeout(): void
+    {
+        $client = new FakeQueryClient();
+        $client->deleteResponse = new DeleteSessionResponse(['status' => StatusCode::SUCCESS]);
+        $client->rollbackResponse = new RollbackTransactionResponse(['status' => StatusCode::SUCCESS]);
+        $service = new QueryService($this->ydb('/db', 5000), $client);
+
+        $service->rollbackTransaction('session', 'tx');
+        $service->deleteSession('session');
+
+        self::assertSame('session', $client->rollbackRequest->getSessionId());
+        self::assertSame('tx', $client->rollbackRequest->getTxId());
+        self::assertSame('session', $client->deleteRequest->getSessionId());
+        self::assertSame(['timeout' => 5000], $client->lastOptions);
+    }
+
+    public function testMissingTransactionMetadataFails(): void
+    {
+        $client = new FakeQueryClient();
+        $client->beginResponse = new BeginTransactionResponse(['status' => StatusCode::SUCCESS]);
+        $this->expectException(\YdbPlatform\Ydb\Exception::class);
+        $this->expectExceptionMessage('no transaction metadata');
+        $this->service($client)->beginTransaction('session');
     }
 
     public function testExecuteReadsTimestampOnlyFromFinalTrailingPart(): void
@@ -127,6 +178,50 @@ class QueryServiceTimestampTest extends TestCase
         $this->service($client)->executeQuery('session', 'SELECT 1', QueryService::autocommit());
     }
 
+    public function testEmptyExecuteStreamFails(): void
+    {
+        $this->expectException(\YdbPlatform\Ydb\Exception::class);
+        $this->expectExceptionMessage('no response parts');
+        $this->service(new FakeQueryClient())->executeQuery('session', 'SELECT 1', QueryService::autocommit());
+    }
+
+    public function testMissingUnaryResponseFails(): void
+    {
+        $this->expectException(\YdbPlatform\Ydb\Exception::class);
+        $this->expectExceptionMessage('no response');
+        $this->service(new FakeQueryClient())->commitTransaction('session', 'tx');
+    }
+
+    public function testServerIssuesAreIncludedInFailure(): void
+    {
+        $client = new FakeQueryClient();
+        $client->commitResponse = new CommitTransactionResponse([
+            'status' => StatusCode::BAD_REQUEST,
+            'issues' => [new IssueMessage(['message' => 'write conflict'])],
+        ]);
+        $this->expectException(\YdbPlatform\Ydb\Exception::class);
+        $this->expectExceptionMessage('write conflict');
+        $this->service($client)->commitTransaction('session', 'tx');
+    }
+
+    public function testGrpcFailureIsReportedBeforeResponse(): void
+    {
+        $client = new FakeQueryClient();
+        $client->grpcStatus = (object)['code' => 14, 'details' => 'transport closed'];
+        $this->expectException(\YdbPlatform\Ydb\Exception::class);
+        $this->expectExceptionMessage('gRPC status 14: transport closed');
+        $this->service($client)->commitTransaction('session', 'tx');
+    }
+
+    public function testMissingGrpcStatusIsReported(): void
+    {
+        $client = new FakeQueryClient();
+        $client->grpcStatus = (object)[];
+        $this->expectException(\YdbPlatform\Ydb\Exception::class);
+        $this->expectExceptionMessage('gRPC status unknown');
+        $this->service($client)->commitTransaction('session', 'tx');
+    }
+
     public function testCompareUnsignedComponentsAndRejectDifferentDatabases(): void
     {
         $max = new VirtualTimestamp();
@@ -148,12 +243,24 @@ class QueryServiceTimestampTest extends TestCase
         self::assertSame(0, $a->compareTo(new CommitTimestamp($this->timestamp(9, 100), $origin)));
         self::assertSame('9223372036854775808', $upper->planStep());
         self::assertSame('18446744073709551615', $highest->planStep());
+        self::assertSame('/db', $highest->database());
         self::assertSame('18446744073709551615', (new CommitTimestamp($highTx, $origin))->txId());
         self::assertLessThan(0, $upper->compareTo($highest));
         self::assertGreaterThan(0, $highest->compareTo($c));
 
         $this->expectException(InvalidArgumentException::class);
         $a->compareTo(new CommitTimestamp($this->timestamp(9, 100), $this->ydb('/db')));
+    }
+
+    public function testMalformedTimestampComponentIsRejected(): void
+    {
+        $proto = $this->timestamp(1, 2);
+        $component = new \ReflectionProperty(VirtualTimestamp::class, 'plan_step');
+        $component->setAccessible(true);
+        $component->setValue($proto, '18446744073709551616');
+        $stamp = new CommitTimestamp($proto, $this->ydb());
+        $this->expectException(InvalidArgumentException::class);
+        $stamp->planStep();
     }
 }
 
@@ -162,10 +269,16 @@ class FakeQueryClient
     public $createResponse;
     public $beginResponse;
     public $commitResponse;
+    public $deleteResponse;
+    public $rollbackResponse;
     public $parts = [];
+    public $grpcStatus;
     public $beginRequest;
     public $commitRequest;
     public $executeRequest;
+    public $deleteRequest;
+    public $rollbackRequest;
+    public $lastOptions;
 
     public function CreateSession($request, $meta, $options)
     {
@@ -181,7 +294,21 @@ class FakeQueryClient
     public function CommitTransaction($request, $meta, $options)
     {
         $this->commitRequest = $request;
-        return new FakeUnaryCall($this->commitResponse);
+        return new FakeUnaryCall($this->commitResponse, $this->grpcStatus);
+    }
+
+    public function DeleteSession($request, $meta, $options)
+    {
+        $this->deleteRequest = $request;
+        $this->lastOptions = $options;
+        return new FakeUnaryCall($this->deleteResponse);
+    }
+
+    public function RollbackTransaction($request, $meta, $options)
+    {
+        $this->rollbackRequest = $request;
+        $this->lastOptions = $options;
+        return new FakeUnaryCall($this->rollbackResponse);
     }
 
     public function ExecuteQuery($request, $meta, $options)
@@ -194,15 +321,17 @@ class FakeQueryClient
 class FakeUnaryCall
 {
     private $response;
+    private $status;
 
-    public function __construct($response)
+    public function __construct($response, $status = null)
     {
         $this->response = $response;
+        $this->status = $status === null ? (object)['code' => 0] : $status;
     }
 
     public function wait(): array
     {
-        return [$this->response, (object)['code' => 0]];
+        return [$this->response, $this->status];
     }
 }
 
