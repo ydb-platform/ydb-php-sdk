@@ -96,6 +96,7 @@ class QueryServiceTimestampTest extends TestCase
         self::assertTrue($client->executeRequest->getTxControl()->getCommitTx());
         self::assertTrue($client->executeRequest->getTxControl()->getBeginTx()->hasStrictSerializableReadWrite());
         self::assertSame('UPSERT INTO t ...', $client->executeRequest->getQueryContent()->getText());
+        self::assertSame(\Ydb\Query\Syntax::SYNTAX_YQL_V1, $client->executeRequest->getQueryContent()->getSyntax());
 
         $client->parts[1] = new ExecuteQueryResponsePart(['status' => StatusCode::SUCCESS]);
         self::assertNull($this->service($client)->executeQuery('session', 'SELECT 1', QueryService::autocommit())->commitTimestamp());

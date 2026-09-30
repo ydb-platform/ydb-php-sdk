@@ -13,6 +13,7 @@ use Ydb\Query\QueryContent;
 use Ydb\Query\RollbackTransactionRequest;
 use Ydb\Query\SerializableModeSettings;
 use Ydb\Query\StrictSerializableRWModeSettings;
+use Ydb\Query\Syntax;
 use Ydb\Query\TransactionControl;
 use Ydb\Query\TransactionSettings;
 use Ydb\Query\V1\QueryServiceClient;
@@ -122,7 +123,10 @@ class QueryService
         $request = new ExecuteQueryRequest([
             'session_id' => $sessionId,
             'exec_mode' => ExecMode::EXEC_MODE_EXECUTE,
-            'query_content' => new QueryContent(['text' => $text]),
+            'query_content' => new QueryContent([
+                'syntax' => Syntax::SYNTAX_YQL_V1,
+                'text' => $text,
+            ]),
             'tx_control' => $txControl,
             'parameters' => $parameters,
         ]);
