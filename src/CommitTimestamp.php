@@ -72,7 +72,7 @@ class CommitTimestamp
 
         $value = ltrim((string)$value, '0');
         $value = $value === '' ? '0' : $value;
-        if (!ctype_digit($value) || self::compareUint64($value, '18446744073709551615') > 0) {
+        if (!preg_match('/\A[0-9]+\z/', $value) || self::compareUint64($value, '18446744073709551615') > 0) {
             throw new InvalidArgumentException('Invalid uint64 timestamp component');
         }
         return $value;

@@ -38,6 +38,16 @@ class QueryServiceTimestampTest extends TestCase
         return new QueryService($this->ydb($database), $client);
     }
 
+    private function discoveringYdb(): DiscoveringYdb
+    {
+        return new DiscoveringYdb([
+            'endpoint' => 'localhost:2136',
+            'database' => '/local',
+            'iam_config' => ['insecure' => true],
+            'credentials' => new AnonymousAuthentication(),
+        ]);
+    }
+
     private function timestamp(int $planStep, int $txId): VirtualTimestamp
     {
         return new VirtualTimestamp(['plan_step' => $planStep, 'tx_id' => $txId]);
@@ -223,12 +233,7 @@ class QueryServiceTimestampTest extends TestCase
 
     public function testTransportFailureRefreshesClientForNextRequest(): void
     {
-        $ydb = new DiscoveringYdb([
-            'endpoint' => 'localhost:2136',
-            'database' => '/local',
-            'iam_config' => ['insecure' => true],
-            'credentials' => new AnonymousAuthentication(),
-        ]);
+        $ydb = $this->discoveringYdb();
         $ydb->cluster()->insert(['address' => 'node.example', 'port' => 2136]);
         $client = new FakeQueryClient();
         $client->grpcStatus = (object)['code' => 14, 'details' => 'node unavailable'];
@@ -252,12 +257,7 @@ class QueryServiceTimestampTest extends TestCase
 
     public function testFailedRediscoveryPreservesOriginalTransportError(): void
     {
-        $ydb = new DiscoveringYdb([
-            'endpoint' => 'localhost:2136',
-            'database' => '/local',
-            'iam_config' => ['insecure' => true],
-            'credentials' => new AnonymousAuthentication(),
-        ]);
+        $ydb = $this->discoveringYdb();
         $ydb->failDiscovery = true;
         $client = new FakeQueryClient();
         $client->grpcStatus = (object)['code' => 14, 'details' => 'node unavailable'];
@@ -270,6 +270,23 @@ class QueryServiceTimestampTest extends TestCase
             self::assertSame(1, $ydb->discoverCalls);
             self::assertSame('localhost:2136', $service->createdEndpoint);
             self::assertTrue($service->createdOptions['force_new']);
+        }
+    }
+
+    public function testNonTransportGrpcErrorKeepsSessionAndClient(): void
+    {
+        $ydb = $this->discoveringYdb();
+        $client = new FakeQueryClient();
+        $client->grpcStatus = (object)['code' => 3, 'details' => 'invalid query'];
+        $service = new RecordingQueryService($ydb, $client);
+
+        try {
+            $service->commitTransaction('session', 'tx');
+            self::fail('Expected an invalid argument error');
+        } catch (\YdbPlatform\Ydb\Exceptions\Grpc\InvalidArgumentException $error) {
+            self::assertSame(0, $ydb->discoverCalls);
+            self::assertSame(0, $client->closeCalls);
+            self::assertNull($service->createdEndpoint);
         }
     }
 
@@ -398,7 +415,7 @@ class DiscoveringYdb extends Ydb
     {
         $this->discoverCalls++;
         if ($this->failDiscovery) {
-            throw new \RuntimeException('discovery unavailable');
+            throw new \Error('discovery unavailable');
         }
         $this->endpoint = 'recovered:2136';
     }

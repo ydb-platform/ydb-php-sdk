@@ -175,7 +175,11 @@ class QueryService
         if (!$status || !isset($status->code) || $status->code !== 0) {
             $code = isset($status->code) ? $status->code : 'unknown';
             $details = isset($status->details) ? $status->details : '';
-            $this->refreshClientAfterTransportFailure();
+            // Only UNAVAILABLE means the channel may need a new endpoint. Other
+            // errors can leave this node-bound Query session usable.
+            if ($code === 14) {
+                $this->refreshClientAfterTransportFailure();
+            }
             $exceptionClass = Table::$grpcExceptions[$code] ?? Exception::class;
             throw new $exceptionClass("Query {$method} gRPC status {$code}: {$details}");
         }
@@ -187,7 +191,7 @@ class QueryService
         if ($this->ydb->needDiscovery()) {
             try {
                 $this->ydb->discover();
-            } catch (\Exception $ignored) {
+            } catch (\Throwable $ignored) {
                 // Keep the original transport error and reconnect to the last known endpoint.
             }
         }
