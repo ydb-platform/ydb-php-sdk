@@ -31,7 +31,12 @@ class QueryService
     public function __construct(Ydb $ydb, $client = null)
     {
         $this->ydb = $ydb;
-        $this->client = $client ?: new QueryServiceClient($ydb->endpoint(), $ydb->grpcOpts());
+        $this->client = $client ?: $this->createClient($ydb->endpoint(), $ydb->grpcOpts());
+    }
+
+    protected function createClient(string $endpoint, array $options)
+    {
+        return new QueryServiceClient($endpoint, $options);
     }
 
     public static function transactionSettings(string $mode = 'StrictSerializableRW'): TransactionSettings
@@ -154,12 +159,14 @@ class QueryService
 
     private function checkResponse($response, string $method): void
     {
-        if ($response->getStatus() !== StatusCode::SUCCESS) {
+        $statusCode = $response->getStatus();
+        if ($statusCode !== StatusCode::SUCCESS) {
             $issues = [];
             foreach ($response->getIssues() as $issue) {
                 $issues[] = (new Issue($issue))->toString();
             }
-            throw new Exception("Query {$method} failed with status {$response->getStatus()}: " . implode('; ', $issues));
+            $exceptionClass = Table::$ydbExceptions[$statusCode] ?? Exception::class;
+            throw new $exceptionClass("Query {$method} failed with status {$statusCode}: " . implode('; ', $issues));
         }
     }
 
@@ -168,8 +175,36 @@ class QueryService
         if (!$status || !isset($status->code) || $status->code !== 0) {
             $code = isset($status->code) ? $status->code : 'unknown';
             $details = isset($status->details) ? $status->details : '';
-            throw new Exception("Query {$method} gRPC status {$code}: {$details}");
+            $this->refreshClientAfterTransportFailure();
+            $exceptionClass = Table::$grpcExceptions[$code] ?? Exception::class;
+            throw new $exceptionClass("Query {$method} gRPC status {$code}: {$details}");
         }
+    }
+
+    /** Reconnect for the next request; the failed transaction must be retried by the caller. */
+    protected function refreshClientAfterTransportFailure(): void
+    {
+        if ($this->ydb->needDiscovery()) {
+            try {
+                $this->ydb->discover();
+            } catch (\Exception $ignored) {
+                // Keep the original transport error and reconnect to the last known endpoint.
+            }
+        }
+
+        $endpoint = $this->ydb->endpoint();
+        if ($this->ydb->needDiscovery()) {
+            $nodes = array_values($this->ydb->cluster()->all());
+            if ($nodes) {
+                $endpoint = $nodes[array_rand($nodes)]->endpoint();
+            }
+        }
+        if (method_exists($this->client, 'close')) {
+            $this->client->close();
+        }
+        $options = $this->ydb->grpcOpts();
+        $options['force_new'] = true;
+        $this->client = $this->createClient($endpoint, $options);
     }
 
     private function options(): array
@@ -177,5 +212,4 @@ class QueryService
         $timeout = $this->ydb->getGrpcTimeout();
         return $timeout === null ? [] : ['timeout' => $timeout];
     }
-
 }

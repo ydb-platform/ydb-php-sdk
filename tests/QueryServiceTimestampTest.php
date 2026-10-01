@@ -204,13 +204,73 @@ class QueryServiceTimestampTest extends TestCase
         $this->service($client)->commitTransaction('session', 'tx');
     }
 
+    public function testAbortedTransactionUsesRetryableSdkException(): void
+    {
+        $client = new FakeQueryClient();
+        $client->commitResponse = new CommitTransactionResponse(['status' => StatusCode::ABORTED]);
+        $this->expectException(\YdbPlatform\Ydb\Exceptions\Ydb\AbortedException::class);
+        $this->service($client)->commitTransaction('session', 'tx');
+    }
+
     public function testGrpcFailureIsReportedBeforeResponse(): void
     {
         $client = new FakeQueryClient();
         $client->grpcStatus = (object)['code' => 14, 'details' => 'transport closed'];
-        $this->expectException(\YdbPlatform\Ydb\Exception::class);
+        $this->expectException(\YdbPlatform\Ydb\Exceptions\Grpc\UnavailableException::class);
         $this->expectExceptionMessage('gRPC status 14: transport closed');
         $this->service($client)->commitTransaction('session', 'tx');
+    }
+
+    public function testTransportFailureRefreshesClientForNextRequest(): void
+    {
+        $ydb = new DiscoveringYdb([
+            'endpoint' => 'localhost:2136',
+            'database' => '/local',
+            'iam_config' => ['insecure' => true],
+            'credentials' => new AnonymousAuthentication(),
+        ]);
+        $ydb->cluster()->insert(['address' => 'node.example', 'port' => 2136]);
+        $client = new FakeQueryClient();
+        $client->grpcStatus = (object)['code' => 14, 'details' => 'node unavailable'];
+        $service = new RecordingQueryService($ydb, $client);
+        $replacement = new FakeQueryClient();
+        $replacement->commitResponse = new CommitTransactionResponse(['status' => StatusCode::SUCCESS]);
+        $service->replacementClient = $replacement;
+
+        try {
+            $service->commitTransaction('session', 'tx');
+            self::fail('Expected a retryable transport error');
+        } catch (\YdbPlatform\Ydb\Exceptions\Grpc\UnavailableException $error) {
+            self::assertSame(1, $ydb->discoverCalls);
+            self::assertSame(1, $client->closeCalls);
+            self::assertSame('node.example:2136', $service->createdEndpoint);
+            self::assertTrue($service->createdOptions['force_new']);
+        }
+        self::assertNull($service->commitTransaction('new-session', 'new-tx'));
+        self::assertSame('new-session', $replacement->commitRequest->getSessionId());
+    }
+
+    public function testFailedRediscoveryPreservesOriginalTransportError(): void
+    {
+        $ydb = new DiscoveringYdb([
+            'endpoint' => 'localhost:2136',
+            'database' => '/local',
+            'iam_config' => ['insecure' => true],
+            'credentials' => new AnonymousAuthentication(),
+        ]);
+        $ydb->failDiscovery = true;
+        $client = new FakeQueryClient();
+        $client->grpcStatus = (object)['code' => 14, 'details' => 'node unavailable'];
+        $service = new RecordingQueryService($ydb, $client);
+
+        try {
+            $service->commitTransaction('session', 'tx');
+            self::fail('Expected the original transport error');
+        } catch (\YdbPlatform\Ydb\Exceptions\Grpc\UnavailableException $error) {
+            self::assertSame(1, $ydb->discoverCalls);
+            self::assertSame('localhost:2136', $service->createdEndpoint);
+            self::assertTrue($service->createdOptions['force_new']);
+        }
     }
 
     public function testMissingGrpcStatusIsReported(): void
@@ -279,6 +339,12 @@ class FakeQueryClient
     public $deleteRequest;
     public $rollbackRequest;
     public $lastOptions;
+    public $closeCalls = 0;
+
+    public function close(): void
+    {
+        $this->closeCalls++;
+    }
 
     public function CreateSession($request, $meta, $options)
     {
@@ -315,6 +381,40 @@ class FakeQueryClient
     {
         $this->executeRequest = $request;
         return new FakeStreamCall($this->parts);
+    }
+}
+
+class DiscoveringYdb extends Ydb
+{
+    public $discoverCalls = 0;
+    public $failDiscovery = false;
+
+    public function needDiscovery(): bool
+    {
+        return true;
+    }
+
+    public function discover()
+    {
+        $this->discoverCalls++;
+        if ($this->failDiscovery) {
+            throw new \RuntimeException('discovery unavailable');
+        }
+        $this->endpoint = 'recovered:2136';
+    }
+}
+
+class RecordingQueryService extends QueryService
+{
+    public $createdEndpoint;
+    public $createdOptions;
+    public $replacementClient;
+
+    protected function createClient(string $endpoint, array $options)
+    {
+        $this->createdEndpoint = $endpoint;
+        $this->createdOptions = $options;
+        return $this->replacementClient ?: new FakeQueryClient();
     }
 }
 

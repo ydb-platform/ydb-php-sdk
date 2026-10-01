@@ -593,6 +593,9 @@ including read-only transactions. A timestamp is returned only after a successfu
 timestamps from different `Ydb` connection objects. The protobuf message contains no database
 identity, and a configured path alone cannot prove two connections target the same database.
 Timestamps from separate connections are therefore not comparable, even if their paths match.
+Query Service reports YDB and gRPC failures using the SDK's typed exceptions. After a transport
+failure it creates a fresh channel for the next request; retry the whole failed transaction
+with a new session when its outcome is uncertain.
 
 ## Logging
 
