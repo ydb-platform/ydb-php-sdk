@@ -52,6 +52,7 @@ jobs:
           npx jest --runTestsByPath src/__tests__/workload.test.ts --runInBand
 
       - name: Create own Kubernetes cluster and image registry
+        id: kind
         uses: helm/kind-action@ef37e7f390d99f746eb8b610417061a60e82a6cc
         with:
           cluster_name: php-final-error-qa
@@ -73,23 +74,26 @@ jobs:
           envsubst < current/.github/qa/services.yaml | kubectl apply -f -
 
       - name: Build actual workload
+        env:
+          LOCAL_REGISTRY: ${{ steps.kind.outputs.LOCAL_REGISTRY }}
         shell: bash
         run: |
           set -euo pipefail
-          docker build -t localhost:5000/ydb-app-current:latest -f current/slo-workload/Dockerfile current
-          docker push localhost:5000/ydb-app-current:latest
+          docker build -t "$LOCAL_REGISTRY/ydb-app-current:latest" -f current/slo-workload/Dockerfile current
+          docker push "$LOCAL_REGISTRY/ydb-app-current:latest"
 
       - name: Prepare actual workload schema
-        run: node current/.github/qa/php-process-gate.cjs ./harness create
+        run: node current/.github/qa/php-process-gate.cjs ./harness create '${{ steps.kind.outputs.LOCAL_REGISTRY }}/ydb-app-current'
 
       - name: Run actual workload process gate
-        run: node current/.github/qa/php-process-gate.cjs ./harness run
+        run: node current/.github/qa/php-process-gate.cjs ./harness run '${{ steps.kind.outputs.LOCAL_REGISTRY }}/ydb-app-current'
 
       - name: Collect own infrastructure diagnostics
         if: always()
         shell: bash
         run: |
           kubectl get jobs,pods -o wide
+          kubectl describe pods
           docker compose -f current/.github/qa/compose.yml logs --no-color
 
       - name: Upload actual workload logs
