@@ -26,4 +26,7 @@ $data = $commands[$argv[1]]->generateOptions(array_slice($argv, 4));
 
 $command = $commands[$argv[1]];
 
-$commands[$argv[1]]->execute($argv[2],$argv[3], $data);
+$result = $commands[$argv[1]]->execute($argv[2],$argv[3], $data);
+if (is_int($result)) {
+    exit($result);
+}

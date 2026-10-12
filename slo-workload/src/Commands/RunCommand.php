@@ -133,10 +133,31 @@ Options:
         }, Defaults::WRITE_FORKS);
         $pIds = array_merge($pIds, $writePIds);
 
-        foreach ($pIds as $pid) {
-            pcntl_waitpid($pid, $status);
-            unset($pIds[$pid]);
+        $remaining = array_fill_keys($pIds, true);
+        $operations = array_fill_keys(array_merge($readPIds, $writePIds), true);
+        $failed = false;
+        while (count($remaining) > 0) {
+            $pid = pcntl_wait($status);
+            if ($pid < 0) {
+                throw new \RuntimeException('Failed to wait for workload children');
+            }
+            unset($remaining[$pid], $operations[$pid]);
+            if (!pcntl_wifexited($status) || pcntl_wexitstatus($status) !== 0) {
+                if (!$failed) {
+                    $failed = true;
+                    foreach (array_keys($remaining) as $peer) {
+                        posix_kill($peer, SIGTERM);
+                    }
+                }
+            } elseif (!$failed && count($operations) === 0) {
+                foreach ($metricsPIds as $metricsPid) {
+                    if (isset($remaining[$metricsPid])) {
+                        Utils::reset($this->queueId);
+                    }
+                }
+            }
         }
+        msg_remove_queue(msg_get_queue($this->queueId));
 
         $curl = curl_init();
 
@@ -145,7 +166,7 @@ Options:
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_ENCODING => '',
             CURLOPT_MAXREDIRS => 10,
-            CURLOPT_TIMEOUT => 0,
+            CURLOPT_TIMEOUT => 5,
             CURLOPT_FOLLOWLOCATION => true,
             CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
             CURLOPT_CUSTOMREQUEST => 'DELETE',
@@ -154,6 +175,7 @@ Options:
         $response = curl_exec($curl);
 
         curl_close($curl);
+        return $failed ? 1 : 0;
     }
 
     function forkJob(Closure $function, int $count): array
@@ -167,8 +189,9 @@ Options:
             } elseif ($pid == 0) {
                 try {
                     $function($i);
-                } catch (\Exception $e) {
+                } catch (\Throwable $e) {
                     echo "Error on $i'th fork: " . $e->getMessage();
+                    exit(1);
                 }
                 exit(0);
             } else {
@@ -195,24 +218,21 @@ Options:
             try {
                 $table->retryTransaction(function (Session $session)
                 use ($id, $query, $dataGenerator, $tableName, &$attemps) {
-                    try {
-                        $session->query($query, [
-                            "\$id" => $id
-                        ]);
-                        $attemps++;
-                    } catch (\Exception $exception) {
-                        Utils::retriedError($this->queueId, 'read', get_class($exception));
-                    }
+                    $session->query($query, [
+                        "\$id" => $id
+                    ]);
+                    $attemps++;
                 }, true, null, [
                     'callback_on_error' => function (\Exception $e) use (&$attemps) {
                         $attemps++;
-                        Utils::retriedError($this->queueId, 'write', get_class($e));
+                        Utils::retriedError($this->queueId, 'read', get_class($e));
                     }
                 ]);
                 Utils::metricDone("read", $this->queueId, $attemps, $this->getLatencyMilliseconds($begin));
             } catch (\Exception $e) {
                 $table->getLogger()->error($e->getMessage());
                 Utils::metricFail("read", $this->queueId, $attemps, get_class($e), $this->getLatencyMilliseconds($begin));
+                throw $e;
             }
         }
     }
@@ -244,6 +264,7 @@ Options:
             } catch (\Exception $e) {
                 $table->getLogger()->error($e->getMessage());
                 Utils::metricFail("write", $this->queueId, $attemps, get_class($e), $this->getLatencyMilliseconds($begin));
+                throw $e;
             }
         }
     }
