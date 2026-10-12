@@ -1,0 +1,71 @@
+x-ydb: &ydb
+  image: cr.yandex/crpb3d0up7s6a7iuofo9/ydb-appteam-ci/local-ydb:stable-25-3
+  network_mode: host
+  hostname: ${QA_HOST_IP}
+  volumes:
+    - ./ydb-config.yaml:/ydb-config.yaml:ro
+  entrypoint: /ydbd
+
+services:
+  storage:
+    <<: *ydb
+    command:
+      - server
+      - --yaml-config
+      - /ydb-config.yaml
+      - --node
+      - '1'
+      - --grpc-port
+      - '2134'
+      - --mon-port
+      - '8765'
+      - --ic-port
+      - '19001'
+      - --grpc-public-address-v4
+      - ${QA_HOST_IP}
+    healthcheck:
+      test: ['CMD', 'bash', '-c', 'exec 6<>/dev/tcp/localhost/2134']
+      interval: 2s
+      timeout: 2s
+      retries: 30
+  storage-init:
+    <<: *ydb
+    command: ['-s', 'grpc://localhost:2134', 'admin', 'blobstorage', 'config', 'init', '--yaml-file', '/ydb-config.yaml']
+    depends_on:
+      storage:
+        condition: service_healthy
+  tenant-init:
+    <<: *ydb
+    command: ['-s', 'grpc://localhost:2134', 'admin', 'database', '/root/database-sample', 'create', 'ssd:1']
+    depends_on:
+      storage-init:
+        condition: service_completed_successfully
+  database:
+    <<: *ydb
+    command:
+      - server
+      - --yaml-config
+      - /ydb-config.yaml
+      - --node-broker
+      - grpc://localhost:2134
+      - --tenant
+      - /root/database-sample
+      - --grpc-port
+      - '2135'
+      - --mon-port
+      - '8766'
+      - --ic-port
+      - '19002'
+      - --grpc-public-address-v4
+      - ${QA_HOST_IP}
+    depends_on:
+      tenant-init:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ['CMD', '/ydb', '--endpoint', 'grpc://localhost:2135', '--database', '/root/database-sample', '--no-discovery', 'sql', '-s', 'SELECT 1;']
+      interval: 2s
+      timeout: 5s
+      retries: 60
+  pushgateway:
+    image: prom/pushgateway
+    network_mode: host

@@ -1,0 +1,102 @@
+name: SLO final-error QA
+
+on:
+  push:
+    branches: ['qa/slo-final-error-20261012/php-baseline']
+
+permissions:
+  contents: read
+
+jobs:
+  workload:
+    name: Gate (php)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      COMPOSE_PROJECT_NAME: php-final-error-qa
+    steps:
+      - name: Checkout actual SDK source
+        uses: actions/checkout@v5
+        with:
+          path: current
+
+      - name: Checkout pinned SLO harness
+        uses: actions/checkout@v5
+        with:
+          repository: ydb-platform/slo-tests
+          ref: a3e5c8098e2930726d5f283038cd2ed54bcbceeb
+          path: harness
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: '24'
+
+      - name: Build exact changed SLO harness
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git -C current rev-parse HEAD)" = "${{ github.sha }}"
+          test "$(git -C harness rev-parse HEAD)" = "a3e5c8098e2930726d5f283038cd2ed54bcbceeb"
+          node -p 'JSON.parse(require("node:fs").readFileSync("current/.github/qa/slo-tests-final-error.patch.json", "utf8")).join("\n")' |
+            git -C harness apply --index -
+          test "$(git -C harness hash-object src/main.ts)" = "7af7db82daaca40ce44cf07d6241249a76e41436"
+          test "$(git -C harness hash-object src/workload.ts)" = "95890d85ebfc99a37a023edfee6e23f275a14e29"
+          test "$(git -C harness hash-object src/__tests__/workload.test.ts)" = "a05062527523e4f6ffe9192e85cfad92c94c0d32"
+          git -C current log -1 --format='SDK source %H'
+          git -C harness diff --cached --stat
+          cd harness
+          npm ci
+          npm run build
+          npx jest --runTestsByPath src/__tests__/workload.test.ts --runInBand
+
+      - name: Create own Kubernetes cluster and image registry
+        uses: helm/kind-action@ef37e7f390d99f746eb8b610417061a60e82a6cc
+        with:
+          cluster_name: php-final-error-qa
+          registry: true
+          registry_name: php-final-error-registry
+          registry_port: 5000
+          wait: 120s
+
+      - name: Start own YDB and metrics infrastructure
+        shell: bash
+        run: |
+          set -euo pipefail
+          export QA_HOST_IP="$(docker network inspect kind --format '{{(index .IPAM.Config 0).Gateway}}')"
+          echo "QA_HOST_IP=$QA_HOST_IP" >> "$GITHUB_ENV"
+          docker compose -f current/.github/qa/compose.yml up --wait --wait-timeout 180
+          curl --fail http://localhost:9091/-/ready
+          envsubst < current/.github/qa/services.yaml | kubectl apply -f -
+
+      - name: Build actual workload
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker build -t localhost:5000/ydb-app-current:latest -f current/slo-workload/Dockerfile current
+          docker push localhost:5000/ydb-app-current:latest
+
+      - name: Prepare actual workload schema
+        run: node current/.github/qa/php-process-gate.cjs ./harness create
+
+      - name: Run actual workload process gate
+        run: node current/.github/qa/php-process-gate.cjs ./harness run
+
+      - name: Collect own infrastructure diagnostics
+        if: always()
+        shell: bash
+        run: |
+          kubectl get jobs,pods -o wide
+          docker compose -f current/.github/qa/compose.yml logs --no-color
+
+      - name: Upload actual workload logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: php-final-error-logs
+          path: logs/
+
+      - name: Remove own infrastructure
+        if: always()
+        shell: bash
+        run: docker compose -f current/.github/qa/compose.yml down --volumes
