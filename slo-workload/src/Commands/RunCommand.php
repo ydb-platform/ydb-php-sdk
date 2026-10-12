@@ -228,9 +228,6 @@ Options:
                         Utils::retriedError($this->queueId, 'read', get_class($e));
                     }
                 ]);
-                if (getenv('SLO_QA_FINAL_ERROR') === '1') {
-                    throw new \RuntimeException('SLO_QA_PHP_FINAL_OPERATION');
-                }
                 Utils::metricDone("read", $this->queueId, $attemps, $this->getLatencyMilliseconds($begin));
             } catch (\Exception $e) {
                 $table->getLogger()->error($e->getMessage());
