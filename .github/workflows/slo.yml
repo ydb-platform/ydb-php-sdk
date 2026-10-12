@@ -36,8 +36,34 @@ jobs:
         env:
           DOCKER_REPO: ${{ secrets.SLO_DOCKER_REPO }}
 
+      - name: Checkout SLO harness
+        uses: actions/checkout@v4
+        if: env.DOCKER_REPO != null
+        env:
+          DOCKER_REPO: ${{ secrets.SLO_DOCKER_REPO }}
+        with:
+          repository: ydb-platform/slo-tests
+          ref: a3e5c8098e2930726d5f283038cd2ed54bcbceeb
+          path: .slo-harness
+
+      - name: Build final-error SLO harness
+        if: env.DOCKER_REPO != null
+        env:
+          DOCKER_REPO: ${{ secrets.SLO_DOCKER_REPO }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          node -p 'JSON.parse(require("node:fs").readFileSync(".github/qa/slo-tests-final-error.patch.json", "utf8")).join("\n")' |
+            git -C .slo-harness apply --index -
+          test "$(git -C .slo-harness hash-object src/main.ts)" = "7af7db82daaca40ce44cf07d6241249a76e41436"
+          test "$(git -C .slo-harness hash-object src/workload.ts)" = "95890d85ebfc99a37a023edfee6e23f275a14e29"
+          test "$(git -C .slo-harness hash-object src/__tests__/workload.test.ts)" = "a05062527523e4f6ffe9192e85cfad92c94c0d32"
+          cd .slo-harness
+          npm ci
+          npm run package
+
       - name: Run SLO
-        uses: ydb-platform/slo-tests@main
+        uses: ./.slo-harness
         if: env.DOCKER_REPO != null # check permissions
         env:
           DOCKER_REPO: ${{ secrets.SLO_DOCKER_REPO }}
