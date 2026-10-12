@@ -43,6 +43,7 @@ jobs:
           test "$(git -C harness hash-object src/main.ts)" = "7af7db82daaca40ce44cf07d6241249a76e41436"
           test "$(git -C harness hash-object src/workload.ts)" = "95890d85ebfc99a37a023edfee6e23f275a14e29"
           test "$(git -C harness hash-object src/__tests__/workload.test.ts)" = "a05062527523e4f6ffe9192e85cfad92c94c0d32"
+          test "$(git -C harness hash-object package-lock.json)" = "06e57e7f9863d5cb54c4ccd89e53c8fbd2b30580"
           git -C current log -1 --format='SDK source %H'
           git -C harness diff --cached --stat
           cd harness
