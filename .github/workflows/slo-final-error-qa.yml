@@ -64,7 +64,9 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          export QA_HOST_IP="$(docker network inspect kind --format '{{(index .IPAM.Config 0).Gateway}}')"
+          export QA_HOST_IP="$(docker inspect php-final-error-qa-control-plane --format '{{.NetworkSettings.Networks.kind.Gateway}}')"
+          test -n "$QA_HOST_IP"
+          printf 'QA gateway %s\n' "$QA_HOST_IP"
           echo "QA_HOST_IP=$QA_HOST_IP" >> "$GITHUB_ENV"
           docker compose -f current/.github/qa/compose.yml up --wait --wait-timeout 180
           curl --fail http://localhost:9091/-/ready
