@@ -14,6 +14,10 @@ Both builds use the current `slo-workload` harness so older SDK revisions can
 participate without changing their SDK sources. A failed baseline build fails
 the job; the current image is never substituted for it.
 
+Same-repository PRs publish their report directly; fork PRs use the privileged
+`workflow_run` publisher without checking out PR code. Action v3 removes the
+`SLO` label after reporting, including when report generation fails.
+
 ## Usage
 
 ```
