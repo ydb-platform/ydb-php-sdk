@@ -8,6 +8,12 @@ deploys a YDB cluster with Prometheus and a chaos monkey, starts the workload im
 revision side by side, and builds a comparison report out of the metrics both of them push. See
 [.github/workflows/slo.yml](../.github/workflows/slo.yml) and [.github/workflows/slo-report.yml](../.github/workflows/slo-report.yml).
 
+The workflow uses Action v3 with `metrics_schema: legacy_table`, retaining the
+existing `sdk.*` metrics. A baseline SDK checkout is always built independently.
+Both builds use the current `slo-workload` harness so older SDK revisions can
+participate without changing their SDK sources. A failed baseline build fails
+the job; the current image is never substituted for it.
+
 ## Usage
 
 ```

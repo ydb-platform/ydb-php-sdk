@@ -110,28 +110,24 @@ jobs:
           path: baseline
           fetch-depth: 1
 
-      - name: Check baseline workload availability
-        id: baseline-workload
+      - name: Stage shared workload harness
         run: |
-          # Revisions older than the migration to ydb-slo-action cannot report the
-          # metrics the report is built from, so they are not used as a baseline.
-          if [[ -f "$GITHUB_WORKSPACE/baseline/slo-workload/src/Metrics.php" ]]; then
-            echo "available=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "available=false" >> "$GITHUB_OUTPUT"
-          fi
+          set -euxo pipefail
+          # Share the checker, not the SDK sources or the built image.
+          rm -rf "$GITHUB_WORKSPACE/baseline/slo-workload"
+          cp -a "$GITHUB_WORKSPACE/current/slo-workload" "$GITHUB_WORKSPACE/baseline/slo-workload"
 
       - name: Build current workload image
         working-directory: current
         run: docker build --platform linux/amd64 -f slo-workload/Dockerfile -t ydb-app-current .
 
       - name: Build baseline workload image
-        if: steps.baseline-workload.outputs.available == 'true'
         working-directory: baseline
         run: docker build --platform linux/amd64 -f slo-workload/Dockerfile -t ydb-app-baseline .
 
       - name: Run SLO Tests
-        uses: ydb-platform/ydb-slo-action/init@v2
+        # Pin legacy telemetry fixes until ydb-slo-action#81 is merged.
+        uses: ydb-platform/ydb-slo-action/init@e136720bca3783a0bd2d14e78ac591275573c0b3
         timeout-minutes: 30
         with:
           github_issue: ${{ github.event.inputs.github_issue }}
@@ -144,67 +140,37 @@ jobs:
           workload_current_command: >-
             -read-rps ${{ inputs.slo_workload_read_max_rps || '1000' }}
             -write-rps ${{ inputs.slo_workload_write_max_rps || '100' }}
-          workload_baseline_ref: ${{ steps.baseline-workload.outputs.available == 'true' && steps.baseline.outputs.ref || '' }}
-          workload_baseline_image: ${{ steps.baseline-workload.outputs.available == 'true' && 'ydb-app-baseline' || '' }}
+          workload_baseline_ref: ${{ steps.baseline.outputs.ref }}
+          workload_baseline_image: ydb-app-baseline
           workload_baseline_command: >-
             -read-rps ${{ inputs.slo_workload_read_max_rps || '1000' }}
             -write-rps ${{ inputs.slo_workload_write_max_rps || '100' }}
-          disable_compose_profiles: ${{ steps.baseline-workload.outputs.available != 'true' && 'workload-baseline' || '' }}
+          metrics_schema: legacy_table
 
-  # Pull requests from forks get their report from slo-report.yml: their token is
-  # read-only and cannot publish anything.
+  # Build graph artifacts for every run. Same-repository PRs report directly;
+  # fork PR comments belong to the privileged workflow_run publisher.
   publish-slo-report:
     needs: ydb-slo-action
     if: >-
-      !cancelled() && needs.ydb-slo-action.result != 'skipped' &&
-      (github.event_name != 'pull_request' ||
-       github.event.pull_request.head.repo.full_name == github.repository)
+      !cancelled() && needs.ydb-slo-action.result != 'skipped'
 
     name: Publish YDB SLO Report
     runs-on: ubuntu-latest
     permissions:
+      actions: read
       checks: write
       contents: read
       pull-requests: write
 
     steps:
       - name: Publish YDB SLO Report
-        uses: ydb-platform/ydb-slo-action/report@v2
+        uses: ydb-platform/ydb-slo-action/report@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           github_run_id: ${{ github.run_id }}
-
-  # Pull requests from forks get the label removed by slo-report.yml: their token is
-  # read-only and cannot edit the labels.
-  remove-slo-label:
-    needs: [ydb-slo-action, publish-slo-report]
-    if: >-
-      always() && needs.ydb-slo-action.result != 'skipped' &&
-      github.event_name == 'pull_request' &&
-      github.event.pull_request.head.repo.full_name == github.repository
-
-    name: Remove SLO Label
-    runs-on: ubuntu-latest
-    permissions:
-      pull-requests: write
-
-    steps:
-      - name: Remove SLO label from PR
-        uses: actions/github-script@v7
-        with:
-          script: |
-            try {
-              await github.rest.issues.removeLabel({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: context.issue.number,
-                name: 'SLO'
-              });
-              console.log(`Removed SLO label from PR #${context.issue.number}`);
-            } catch (error) {
-              if (error.status === 404) {
-                console.log(`SLO label not found on PR #${context.issue.number}, skipping`);
-              } else {
-                throw error;
-              }
-            }
+          post_comment: >-
+            ${{ github.event_name == 'workflow_dispatch' ||
+                github.event.pull_request.head.repo.full_name == github.repository }}
+          remove_label: >-
+            ${{ github.event_name == 'pull_request' &&
+                github.event.pull_request.head.repo.full_name == github.repository && 'SLO' || '' }}
